@@ -1,0 +1,205 @@
+# ============================================
+# DEPENDENCIES
+# ============================================
+node_modules/
+/.pnp
+.pnp.js
+package-lock.json
+yarn.lock
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+.env.pr
+
+# ============================================
+# LOGS
+# ============================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ============================================
+# IDE & EDITOR
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode-test
+.history/
+.ionide/
+
+# ============================================
+# BUILD & DIST
+# ============================================
+build/
+dist/
+out/
+.next/
+.nextjs/
+.vercel/
+.nuxt/
+coverage/
+.cache/
+.eslintcache
+.sass-cache/
+
+# ============================================
+# REACT & FRONTEND
+# ============================================
+/build
+/dist
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.cache/
+.eslintcache
+
+# ============================================
+# BACKEND & NODE
+# ============================================
+/dist
+/build
+.pm2/
+.forever/
+.nodemon.json
+.pm2rc.json
+
+# ============================================
+# DATABASE
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.mongodb
+.mongorc.js
+data/
+.mongoDB/
+
+# ============================================
+# TESTING
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+.mocha_output/
+/test/coverage
+jest.config.js
+.testcache
+
+# ============================================
+# TEMPORARY FILES
+# ============================================
+temp/
+tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+*.swp
+*.swo
+.grunt/
+.vuepress/dist/
+
+# ============================================
+# OS SPECIFIC
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.env.*.swp
+.AppleDouble
+.LSOverride
+
+# ============================================
+# DOCKER
+# ============================================
+.docker/
+docker-compose.override.yml
+
+# ============================================
+# CI/CD
+# ============================================
+.github/workflows/*.log
+.circleci/cache/
+.travis/
+travis_cache/
+
+# ============================================
+# MISCELLANEOUS
+# ============================================
+*.pem
+*.key
+*.crt
+*.p8
+*.p12
+.vscode-test/
+out/
+dist/
+*.vsix
+*.tar.gz
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity
+.env.*.swp
+.env.*.swo
+*~.swp
+*~.swo
+backup/
+backups/
+dumps/
+archives/
+.ignore
+
+# ============================================
+# PROJECT SPECIFIC
+# ============================================
+# Add any project-specific files below
+/uploads/
+/public/uploads/
+/media/
+*.pdf
+*.xlsx
+*.csv
+coverage/
+.nyc_output/
+
+# Excel files
+*.xlsx
+*.xls
+
+# Public uploads
+public/uploads/
