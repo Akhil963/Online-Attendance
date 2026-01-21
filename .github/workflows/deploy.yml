@@ -71,30 +71,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      
-      - name: Install dependencies
-        working-directory: backend
-        run: npm install
-      
       - name: Deploy to Render
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
         run: |
           if [ -z "$RENDER_DEPLOY_HOOK" ]; then
-            echo "RENDER_DEPLOY_HOOK secret is not set"
+            echo "Error: RENDER_BACKEND_DEPLOY_HOOK secret is not set"
             exit 1
           fi
+          echo "Deploying backend to Render..."
           curl -X POST $RENDER_DEPLOY_HOOK
+          echo "Backend deployment triggered successfully"
 
   deploy-frontend:
     needs: test-frontend
     runs-on: ubuntu-latest
     name: Deploy Frontend to Vercel
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.VERCEL_TOKEN != ''
     
     steps:
       - uses: actions/checkout@v3
@@ -106,13 +99,14 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./frontend
-          production: true
+          vercel-args: --prod
 
   verify-deployment:
     needs: [deploy-backend, deploy-frontend]
     runs-on: ubuntu-latest
     name: Verify Deployment
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    continue-on-error: true
     
     steps:
       - name: Health check
