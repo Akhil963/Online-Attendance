@@ -50,7 +50,7 @@ const HolidayManagementPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.date) {
       toast.error('Holiday name and date are required');
       return;
@@ -72,7 +72,7 @@ const HolidayManagementPage = () => {
         );
         toast.success('Holiday created successfully');
       }
-      
+
       setFormData({ name: '', date: '', description: '', type: 'national' });
       setEditingId(null);
       setShowForm(false);
@@ -135,65 +135,71 @@ const HolidayManagementPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading holidays...</p>
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400 font-bold animate-pulse uppercase tracking-widest text-xs">Loading calendar...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-transparent">
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        {/* Header - Elite Aesthetic */}
+        <div className="flex justify-between items-end mb-12">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Holiday Management</h1>
-            <p className="text-gray-600 mt-1">Manage company holidays and special days</p>
+            <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">Holidays</h1>
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage Company Holidays</p>
+            </div>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-6 py-2 text-sm md:text-base rounded-lg font-medium flex items-center gap-2 transition-colors"
+            className="h-14 bg-gray-900 hover:bg-gray-800 text-white px-8 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95 flex items-center gap-3 border-none"
           >
-            <Plus size={20} />
-            <span className="hidden sm:inline">New Holiday</span>
-            <span className="sm:hidden">Add</span>
+            <Plus size={18} strokeWidth={2} />
+            Add Holiday
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600 text-sm">Total Holidays</p>
-            <p className="text-4xl font-bold text-blue-600">
+        {/* Stats - Vibrant Operational Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-8 group hover:shadow-lg transition-all">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Total Holidays</p>
+            <p className="text-5xl font-bold text-gray-900 tracking-tight">
               {Array.isArray(holidays) ? holidays.filter(h => h && h.date).length : 0}
             </p>
+            <div className="mt-4 h-1 w-12 bg-blue-500 rounded-full group-hover:w-20 transition-all"></div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600 text-sm">National Holidays</p>
-            <p className="text-4xl font-bold text-green-600">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-8 group hover:shadow-lg transition-all">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">National Holidays</p>
+            <p className="text-5xl font-bold text-emerald-600 tracking-tight">
               {Array.isArray(holidays) ? holidays.filter(h => h && h.type === 'national' && h.date).length : 0}
             </p>
+            <div className="mt-4 h-1 w-12 bg-emerald-500 rounded-full group-hover:w-20 transition-all"></div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600 text-sm">This Year ({filterYear})</p>
-            <p className="text-4xl font-bold text-purple-600">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-8 group hover:shadow-lg transition-all">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Holidays in {filterYear}</p>
+            <p className="text-5xl font-bold text-blue-600 tracking-tight">
               {Array.isArray(holidays) ? holidays.filter(h => h && h.date && moment(h.date).format('YYYY') === filterYear).length : 0}
             </p>
+            <div className="mt-4 h-1 w-12 bg-blue-500 rounded-full group-hover:w-20 transition-all"></div>
           </div>
         </div>
 
-        {/* Add/Edit Form */}
+        {/* Add/Edit Form - Integrated Console */}
         {showForm && (
-          <div className="bg-white rounded-lg shadow p-4 md:p-6 mb-6 md:mb-8">
-            <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">
-              {editingId ? 'Edit Holiday' : 'Add New Holiday'}
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-10 mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 tracking-tight flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+              {editingId ? 'Update Holiday' : 'Add New Holiday'}
             </h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-              <div>
-                <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="group/field">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
                   Holiday Name *
                 </label>
                 <input
@@ -201,13 +207,13 @@ const HolidayManagementPage = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="e.g., Republic Day, Diwali"
-                  className="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Diwali, Independence Day"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-gray-700"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
+              <div className="group/field">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
                   Date *
                 </label>
                 <input
@@ -215,142 +221,160 @@ const HolidayManagementPage = () => {
                   name="date"
                   value={formData.date}
                   onChange={handleInputChange}
-                  className="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-gray-700"
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
+              <div className="md:col-span-2 group/field">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
                   Description
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Holiday description"
+                  placeholder="Add description..."
                   rows="3"
-                  className="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-gray-700"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
-                  Type
-                </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleInputChange}
-                  className="w-full px-3 md:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="national">National</option>
-                  <option value="state">State</option>
-                  <option value="company">Company</option>
-                  <option value="special">Special</option>
-                </select>
+              <div className="group/field text-gray-700">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Type</label>
+                <div className="relative">
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold appearance-none"
+                  >
+                    <option value="national">National Standard</option>
+                    <option value="state">Provincial/State</option>
+                    <option value="company">Corporate Internal</option>
+                    <option value="special">Executive/Special</option>
+                  </select>
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
               </div>
 
-              <div className="md:col-span-2 flex flex-wrap gap-2 md:gap-4">
+              <div className="md:col-span-2 flex gap-4 pt-4">
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-6 py-2 text-sm md:text-base rounded-lg font-medium transition-colors"
+                  className="h-14 bg-blue-600 hover:bg-blue-700 text-white px-10 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95 border-none"
                 >
-                  {editingId ? 'Update' : 'Add'}
+                  {editingId ? 'Commit Changes' : 'Execute Creation'}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 md:px-6 py-2 text-sm md:text-base rounded-lg font-medium transition-colors"
+                  className="h-14 bg-gray-100 hover:bg-gray-200 text-gray-500 px-10 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all active:scale-95 border-none"
                 >
-                  Cancel
+                  Intercept
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-3 text-gray-400" size={20} />
+        {/* Filters - Search and Selection Nodes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="relative group">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} strokeWidth={2} />
             <input
               type="text"
-              placeholder="Search holidays..."
+              placeholder="Search Observances..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-16 pr-8 py-5 bg-white/70 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-gray-700"
             />
           </div>
-          <select
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {years.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
+          <div className="relative group text-gray-700">
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="w-full pl-8 pr-12 py-5 bg-white/70 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold appearance-none"
+            >
+              {years.map(year => (
+                <option key={year} value={year}>Cycle Year: {year}</option>
+              ))}
+            </select>
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
         </div>
 
-        {/* Holidays List */}
+        {/* Holidays List - Elite Data Grid */}
         {filteredHolidays.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-6 md:p-12 text-center">
-            <Calendar className="mx-auto text-gray-400 mb-4" size={48} />
-            <p className="text-gray-600 text-sm md:text-lg">
-              {searchTerm ? 'No holidays match your search' : 'No holidays found for this year'}
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-24 text-center">
+            <div className="w-24 h-24 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-8">
+              <Calendar className="text-gray-300" size={48} strokeWidth={2.5} />
+            </div>
+            <p className="font-bold text-gray-500 uppercase text-xs">
+              {searchTerm ? 'No holidays found' : 'No holidays found for this period'}
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs md:text-sm">
-                <thead className="bg-gray-100 border-b border-gray-300">
-                  <tr>
-                    <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-gray-900">Date</th>
-                    <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-gray-900 hidden sm:table-cell">Holiday</th>
-                    <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-gray-900 hidden md:table-cell">Type</th>
-                    <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-gray-900 hidden lg:table-cell">Description</th>
-                    <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-gray-900">Actions</th>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-900 text-white uppercase text-xs font-bold">
+                    <th className="px-10 py-6">Timeline</th>
+                    <th className="px-10 py-6 hidden sm:table-cell">Name</th>
+                    <th className="px-10 py-6 hidden md:table-cell">Type</th>
+                    <th className="px-10 py-6 hidden lg:table-cell">Description</th>
+                    <th className="px-10 py-6 text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100">
                   {filteredHolidays.map((holiday, index) => (
-                    <tr key={holiday._id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="px-2 md:px-4 py-2 md:py-4 text-xs md:text-sm font-medium text-gray-900">
-                        {holiday.date ? moment(holiday.date).format('MMM DD') : 'N/A'}
+                    <tr key={holiday._id || index} className="group hover:bg-blue-50/50 transition-all duration-300">
+                      <td className="px-10 py-6">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-gray-900 tracking-tight text-lg italic uppercase">
+                            {holiday.date ? moment(holiday.date).format('MMM DD') : 'N/A'}
+                          </span>
+                          <span className="text-xs font-bold text-gray-400 uppercase">Date</span>
+                        </div>
                       </td>
-                      <td className="px-2 md:px-4 py-2 md:py-4 text-xs md:text-sm text-gray-700 hidden sm:table-cell">{holiday.name || 'N/A'}</td>
-                      <td className="px-2 md:px-4 py-2 md:py-4 text-xs hidden md:table-cell">
-                        <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-semibold ${
-                          (holiday.type || 'other') === 'national'
-                            ? 'bg-red-100 text-red-800'
-                            : (holiday.type || 'other') === 'state'
-                            ? 'bg-blue-100 text-blue-800'
-                            : (holiday.type || 'other') === 'company'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {((holiday.type || 'other').charAt(0).toUpperCase() + (holiday.type || 'other').slice(1))}
+                      <td className="px-10 py-6">
+                        <span className="font-bold text-gray-900 tracking-tight block group-hover:text-blue-600 transition-colors uppercase text-sm">
+                          {holiday.name || 'Undefined'}
                         </span>
                       </td>
-                      <td className="px-2 md:px-4 py-2 md:py-4 text-xs text-gray-700 truncate max-w-xs hidden lg:table-cell">
-                        {holiday.description || '-'}
+                      <td className="px-10 py-6 hidden md:table-cell">
+                        <div className={`px-4 py-1.5 rounded-full inline-flex items-center text-xs font-bold uppercase border ${
+                          (holiday.type || 'other') === 'national' ? 'bg-red-50 text-red-600 border-red-100' :
+                            (holiday.type || 'other') === 'state' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                              (holiday.type || 'other') === 'company' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                'bg-amber-50 text-amber-600 border-amber-100'
+                          }`}>
+                          {holiday.type || 'Standard'}
+                        </div>
                       </td>
-                      <td className="px-2 md:px-4 py-2 md:py-4 text-center">
-                        <div className="flex items-center justify-center gap-1 md:gap-2">
+                      <td className="px-10 py-6 hidden lg:table-cell">
+                        <span className="text-gray-500 font-bold text-xs line-clamp-2 max-w-xs leading-relaxed">
+                          {holiday.description || '--'}
+                        </span>
+                      </td>
+                      <td className="px-10 py-6 text-center">
+                        <div className="flex items-center justify-center gap-4">
                           <button
                             onClick={() => handleEdit(holiday)}
-                            className="p-1 md:p-2 hover:bg-blue-50 text-blue-600 rounded transition-colors"
+                            className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-lg transition-all active:scale-90"
                             title="Edit"
                           >
-                            <Edit2 size={16} />
+                            <Edit2 size={16} strokeWidth={3} />
                           </button>
                           <button
                             onClick={() => handleDelete(holiday._id)}
-                            className="p-1 md:p-2 hover:bg-red-50 text-red-600 rounded transition-colors"
+                            className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-600 hover:border-red-200 hover:shadow-lg transition-all active:scale-90"
                             title="Delete"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={16} strokeWidth={3} />
                           </button>
                         </div>
                       </td>

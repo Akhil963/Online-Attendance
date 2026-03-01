@@ -129,70 +129,66 @@ const AdminEmployeeApprovalPage = () => {
     setShowDetailModal(true);
   };
 
-  const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-red-100 text-red-800';
-      case 'on_leave':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-8 bg-gray-50 font-outfit">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">Loading employees...</p>
+          <div className="relative w-24 h-24 mx-auto mb-8">
+            <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-blue-600 font-bold italic tracking-tighter text-xl">AS</div>
+          </div>
+          <p className="text-gray-400 font-bold uppercase text-xs animate-pulse">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+    <div className="min-h-screen bg-transparent font-outfit space-y-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            Employee Account Management
+        <div className="mb-10">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight">
+            Employee Accounts
           </h1>
-          <p className="text-gray-600">Approve, edit, or delete employee accounts</p>
+          <p className="text-gray-500 mt-3 text-lg">Approve, edit, or manage employee access and profiles</p>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 md:p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search
-              </label>
+        {/* Filters - High Precision Console */}
+        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-12 mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight flex items-center gap-5">
+            <div className="w-1 h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
+            Audit Console
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="group/field">
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-2.5 ml-1">Search Employees</label>
               <input
                 type="text"
-                placeholder="Search by name, ID, or email..."
+                placeholder="Identity, ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-sm text-gray-700 shadow-sm"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status Filter
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-              >
-                <option value="all">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="on_leave">On Leave</option>
-              </select>
+            <div className="group/field text-gray-700">
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-2.5 ml-1">Status</label>
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-sm appearance-none shadow-sm"
+                >
+                  <option value="all">All Channels</option>
+                  <option value="active">Operational</option>
+                  <option value="inactive">Standby</option>
+                  <option value="on_leave">External</option>
+                </select>
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500 group-hover/field:scale-110 transition-transform">
+                  <svg className="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
             </div>
             <div className="flex items-end">
               <button
@@ -200,104 +196,110 @@ const AdminEmployeeApprovalPage = () => {
                   setSearchTerm('');
                   setStatusFilter('all');
                 }}
-                className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
+                className="w-full bg-gray-900 hover:bg-black text-white px-6 py-4 rounded-2xl font-bold uppercase text-xs transition-all active:scale-95 shadow-lg shadow-gray-200"
               >
-                Reset Filters
+                Reset Matrix
               </button>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Showing {filteredEmployees.length} of {employees.length} employees
-          </p>
+          <div className="mt-8 flex items-center gap-3">
+            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase">
+              Identified <span className="text-blue-600 italic underline">{filteredEmployees.length}</span> Employees
+            </p>
+          </div>
         </div>
 
-        {/* Employees Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        {/* Employees Table - Elite Data Grid */}
+        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 overflow-hidden shadow-2xl shadow-gray-200/50">
           {filteredEmployees.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold text-gray-700">Employee</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700 hidden sm:table-cell">Email</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Phone</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700 hidden lg:table-cell">Designation</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">Approval</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
+                <thead>
+                  <tr className="bg-gray-900 text-white uppercase text-xs font-bold">
+                    <th className="px-10 py-8">Asset Profile</th>
+                    <th className="px-10 py-8 hidden sm:table-cell">Neural Hub</th>
+                    <th className="px-10 py-8 hidden md:table-cell">Comms</th>
+                    <th className="px-10 py-8 hidden lg:table-cell">Operation</th>
+                    <th className="px-10 py-8">Security</th>
+                    <th className="px-10 py-8 text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {filteredEmployees.map((emp, index) => (
-                    <tr key={emp._id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <div>
-                          <p className="font-medium text-gray-800">{emp.name}</p>
-                          <p className="text-xs text-gray-500">{emp.employeeId}</p>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredEmployees.map((emp) => (
+                    <tr key={emp._id} className="group hover:bg-blue-600/[0.03] transition-all duration-300">
+                      <td className="px-10 py-8">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner font-bold text-lg uppercase">
+                            {emp.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 tracking-tight leading-none">{emp.name}</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase mt-2">{emp.employeeId}</p>
+                          </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell break-all max-w-xs">
-                        {emp.email || '-'}
+                      <td className="px-10 py-8 text-xs text-gray-400 font-bold hidden sm:table-cell break-all max-w-xs">
+                        {emp.email || 'Not Provided'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">
-                        {emp.phone || '-'}
+                      <td className="px-10 py-8 text-xs text-gray-400 font-bold hidden md:table-cell">
+                        {emp.phone || 'DATA_VACUUM'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 hidden lg:table-cell">
-                        {emp.designation || '-'}
+                      <td className="px-10 py-8 text-xs text-gray-400 font-bold hidden lg:table-cell uppercase">
+                        {emp.designation || 'Specialist'}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          emp.isApproved 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {emp.isApproved ? '✓ Approved' : '⏳ Pending'}
-                        </span>
+                      <td className="px-10 py-8">
+                        <div className="flex flex-col gap-2">
+                          <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] w-fit shadow-sm border border-transparent ${emp.isApproved
+                            ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/10'
+                            : 'bg-amber-500/10 text-amber-600 border-amber-500/10'
+                            }`}>
+                            Sync: {emp.isApproved ? 'Verified' : 'Pending'}
+                          </span>
+                          <span className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest w-fit shadow-sm ${emp.status === 'active' ? 'bg-blue-500/10 text-blue-600' :
+                            emp.status === 'inactive' ? 'bg-slate-100 text-slate-400' :
+                              'bg-violet-500/10 text-violet-600'
+                            }`}>
+                            {emp.status || 'Active'}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(emp.status)}`}>
-                          {emp.status || 'active'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2 flex-wrap">
+                      <td className="px-10 py-8">
+                        <div className="flex items-center justify-center gap-3">
                           <button
                             onClick={() => handleViewDetails(emp)}
-                            title="View Details"
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
+                            className="p-3 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all active:scale-95 group/btn"
                           >
-                            <Eye size={18} />
+                            <Eye size={20} className="group-hover/btn:scale-110 transition-transform" />
                           </button>
                           <button
                             onClick={() => handleEditClick(emp)}
-                            title="Edit"
-                            className="p-2 text-green-600 hover:bg-green-50 rounded transition"
+                            className="p-3 text-gray-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all active:scale-95 group/btn"
                           >
-                            <Edit2 size={18} />
+                            <Edit2 size={20} className="group-hover/btn:scale-110 transition-transform" />
                           </button>
                           <button
                             onClick={() => handleDeleteClick(emp._id)}
-                            title="Delete"
-                            className="p-2 text-red-600 hover:bg-red-50 rounded transition"
+                            className="p-3 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all active:scale-95 group/btn"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={20} className="group-hover/btn:scale-110 transition-transform" />
                           </button>
-                          {!emp.isApproved && (
+                          {!emp.isApproved ? (
                             <button
                               onClick={() => handleApproveEmployee(emp._id)}
-                              title="Approve Account"
-                              className="p-2 text-green-600 hover:bg-green-50 rounded transition font-bold"
+                              className="group relative overflow-hidden bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-[0.2em] text-[9px] transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex items-center gap-2 border-none"
                             >
-                              <Check size={18} />
+                              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                              <Check size={14} className="relative z-10" />
+                              <span className="relative z-10">Grant Access</span>
                             </button>
-                          )}
-                          {emp.isApproved && (
+                          ) : (
                             <button
                               onClick={() => handleRejectEmployee(emp._id)}
-                              title="Revoke Approval"
-                              className="p-2 text-red-600 hover:bg-red-50 rounded transition"
+                              className="p-3 text-gray-300 hover:text-amber-600 hover:bg-amber-50 rounded-2xl transition-all active:scale-95 group/btn"
+                              title="Reject"
                             >
-                              <X size={18} />
+                              <X size={20} className="group-hover/btn:scale-110 transition-transform" />
                             </button>
                           )}
                         </div>
@@ -315,173 +317,167 @@ const AdminEmployeeApprovalPage = () => {
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Edit Modal - Glassmorphism */}
       {editingId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Edit Employee</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <div className="fixed inset-0 bg-gray-950/80 backdrop-blur-xl flex items-center justify-center p-6 z-[100] animate-in fade-in duration-500">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-2xl max-w-lg w-full p-12 border border-white/20 transform animate-in zoom-in-95 duration-500 font-outfit">
+            <h2 className="text-4xl font-bold text-gray-900 mb-10 tracking-tight">Edit Employee</h2>
+            <div className="space-y-8">
+              <div className="group/field">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-3 ml-1">Asset Identity</label>
                 <input
                   type="text"
                   name="name"
                   value={editFormData.name}
                   onChange={handleEditChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-sm text-gray-700 shadow-sm"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={editFormData.email}
-                  onChange={handleEditChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                />
+              <div className="grid grid-cols-2 gap-8">
+                <div className="group/field">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Neural Hub</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={editFormData.email}
+                    onChange={handleEditChange}
+                    className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-xs text-slate-700 shadow-sm"
+                  />
+                </div>
+                <div className="group/field">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Phone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={editFormData.phone}
+                    onChange={handleEditChange}
+                    className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-xs text-slate-700 shadow-sm"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={editFormData.phone}
-                  onChange={handleEditChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+              <div className="group/field">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Operational Title</label>
                 <input
                   type="text"
                   name="designation"
                   value={editFormData.designation}
                   onChange={handleEditChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-xs text-slate-700 shadow-sm"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                <select
-                  name="gender"
-                  value={editFormData.gender}
-                  onChange={handleEditChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  name="status"
-                  value={editFormData.status}
-                  onChange={handleEditChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="on_leave">On Leave</option>
-                </select>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="group/field">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Gender Node</label>
+                  <div className="relative">
+                    <select
+                      name="gender"
+                      value={editFormData.gender}
+                      onChange={handleEditChange}
+                      className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-xs appearance-none text-slate-700 shadow-sm"
+                    >
+                      <option value="">Select Protocol</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500">
+                      <svg className="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                </div>
+                <div className="group/field">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Operational State</label>
+                  <div className="relative">
+                    <select
+                      name="status"
+                      value={editFormData.status}
+                      onChange={handleEditChange}
+                      className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-xs appearance-none text-slate-700 shadow-sm"
+                    >
+                      <option value="active">Operational</option>
+                      <option value="inactive">Standby</option>
+                      <option value="on_leave">External Orbit</option>
+                    </select>
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500">
+                      <svg className="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-6 mt-12">
               <button
                 onClick={() => setEditingId(null)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition font-medium"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 px-8 py-5 rounded-2xl transition-all font-black uppercase tracking-widest text-[10px] active:scale-95"
               >
-                Cancel
+                Discard Matrix
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-8 py-5 rounded-2xl transition-all font-black uppercase tracking-widest text-[10px] active:scale-95 shadow-2xl shadow-blue-500/20"
               >
-                Save
+                Execute Logic
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* View Details Modal */}
+      {/* View Details Modal - Glassmorphism */}
       {showDetailModal && selectedEmployee && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">Employee Details</h2>
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-6 z-[100] animate-in fade-in duration-500">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-2xl max-w-lg w-full p-12 border border-white/20 transform animate-in zoom-in-95 duration-500 font-outfit">
+            <div className="flex justify-between items-center mb-10">
+              <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">Telemetric View</h2>
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="w-12 h-12 flex items-center justify-center bg-white/20 hover:bg-white/40 text-slate-900 rounded-full transition-all active:scale-90 border border-white/20"
               >
-                ×
+                <X size={20} />
               </button>
             </div>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Name</p>
-                <p className="text-gray-800">{selectedEmployee.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Employee ID</p>
-                <p className="text-gray-800">{selectedEmployee.employeeId}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Email</p>
-                <p className="text-gray-800 break-all">{selectedEmployee.email || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Phone</p>
-                <p className="text-gray-800">{selectedEmployee.phone || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Gender</p>
-                <p className="text-gray-800">{selectedEmployee.gender || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Designation</p>
-                <p className="text-gray-800">{selectedEmployee.designation || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Department</p>
-                <p className="text-gray-800">{selectedEmployee.department?.name || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Status</p>
-                <p>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(selectedEmployee.status)}`}>
-                    {selectedEmployee.status || 'active'}
-                  </span>
-                </p>
-              </div>
-              <div className="border-t pt-3">
-                <p className="text-sm font-medium text-gray-600">Account Approval</p>
-                <p>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedEmployee.isApproved 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {selectedEmployee.isApproved ? '✓ Approved' : '⏳ Pending Approval'}
-                  </span>
-                </p>
-              </div>
-              {selectedEmployee.approvalDate && (
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Approved On</p>
-                  <p className="text-gray-800">{new Date(selectedEmployee.approvalDate).toLocaleDateString()}</p>
+            <div className="space-y-8">
+              <div className="flex items-center gap-6 p-8 bg-white/40 backdrop-blur-3xl rounded-[2.5rem] border border-blue-100/50 shadow-inner">
+                <div className="w-20 h-20 rounded-2xl bg-slate-900 flex items-center justify-center text-white text-3xl font-black shadow-2xl uppercase">
+                  {selectedEmployee.name.charAt(0)}
                 </div>
-              )}
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 leading-none">{selectedEmployee.name}</h3>
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] mt-3">ID: {selectedEmployee.employeeId}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 px-4">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Neural Hub</p>
+                  <p className="text-xs font-black text-slate-900 break-all pl-6 text-right lowercase">{selectedEmployee.email || 'NODE_OFFLINE'}</p>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Comm Node</p>
+                  <p className="text-xs font-black text-slate-900">{selectedEmployee.phone || 'DATA_VACUUM'}</p>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Deployment</p>
+                  <p className="text-xs font-black text-blue-600 uppercase tracking-widest">{selectedEmployee.department?.name || 'CENTRAL'}</p>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Job Title</p>
+                  <p className="text-xs font-black text-slate-900 uppercase tracking-widest">{selectedEmployee.designation || 'SPECIALIST'}</p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Approval Status</p>
+                  <span className={`px-5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm border border-transparent ${selectedEmployee.isApproved ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/10' : 'bg-amber-500/10 text-amber-600 border-amber-500/10'}`}>
+                    {selectedEmployee.isApproved ? 'Verified' : 'Pending'}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2 mt-6">
+            <div className="flex gap-6 mt-12">
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium"
+                className="flex-1 bg-slate-900 text-white h-20 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-[10px] transition-all active:scale-95 shadow-2xl shadow-slate-900/40"
               >
-                Close
+                Terminate View
               </button>
               {!selectedEmployee.isApproved && (
                 <button
@@ -489,9 +485,9 @@ const AdminEmployeeApprovalPage = () => {
                     handleApproveEmployee(selectedEmployee._id);
                     setShowDetailModal(false);
                   }}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-medium"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white h-20 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-[10px] transition-all active:scale-95 shadow-2xl shadow-emerald-500/20"
                 >
-                  Approve
+                  Grant Clearance
                 </button>
               )}
             </div>
@@ -499,24 +495,27 @@ const AdminEmployeeApprovalPage = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Glassmorphism */}
       {confirmDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Delete Employee?</h2>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this employee account? This action cannot be undone.
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl max-w-sm w-full p-8 border border-white/20 transform animate-in slide-in-from-bottom-8 duration-500">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-100/50">
+              <Trash2 size={32} />
+            </div>
+            <h2 className="text-2xl font-extrabold text-slate-900 mb-2 text-center tracking-tight">Remove Account?</h2>
+            <p className="text-slate-500 mb-8 text-center font-medium leading-relaxed">
+              This will permanently delete the employee record. This action is <span className="text-rose-600 font-bold underline">irreversible</span>.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition font-medium"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 px-6 py-4 rounded-2xl transition-all font-bold active:scale-95"
               >
-                Cancel
+                Keep it
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-medium"
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white px-6 py-4 rounded-2xl transition-all font-bold active:scale-95 shadow-lg shadow-rose-200"
               >
                 Delete
               </button>

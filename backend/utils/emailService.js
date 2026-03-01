@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const schedule = require('node-schedule');
 const Attendance = require('../models/Attendance');
 const Employee = require('../models/Employee');
@@ -6,14 +6,39 @@ const moment = require('moment');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 
-// Configure email transporter
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
+// Configure SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL;
+
+// -------------------------------------------------------------------
+// Email Allowlist — restrict delivery to specific addresses only.
+// Set ALLOWED_EMAIL_RECIPIENTS in .env as a comma-separated list.
+// Leave it empty (or unset) to allow delivery to ALL addresses.
+// -------------------------------------------------------------------
+const getAllowedRecipients = (emails) => {
+  const envList = process.env.ALLOWED_EMAIL_RECIPIENTS;
+  if (!envList || envList.trim() === '') return emails; // no restriction
+
+  const allowed = envList.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+
+  if (Array.isArray(emails)) {
+    const filtered = emails.filter(e => allowed.includes(e.toLowerCase()));
+    return filtered.length > 0 ? filtered : null;
   }
-});
+  // single address
+  return allowed.includes(emails.toLowerCase()) ? emails : null;
+};
+
+// Wrapper around sgMail.send that applies the allowlist filter.
+const sendEmailSafe = async (msg) => {
+  const filteredTo = getAllowedRecipients(msg.to);
+  if (!filteredTo || (Array.isArray(filteredTo) && filteredTo.length === 0)) {
+    const original = Array.isArray(msg.to) ? msg.to.join(', ') : msg.to;
+    console.log(`[emailService] Skipped email to "${original}" — not in ALLOWED_EMAIL_RECIPIENTS`);
+    return;
+  }
+  await sgMail.send({ ...msg, to: filteredTo });
+};
 
 // Schedule daily report at 5:30 PM (weekdays only, excluding holidays)
 const scheduleEmailReport = () => {
@@ -92,7 +117,7 @@ const sendDailyAttendanceReport = async () => {
     await workbook.xlsx.writeFile(filePath);
 
     // Specific email configuration
-    const reportEmail = process.env.REPORT_EMAIL || 'zintech04@gmail.com';
+    const reportEmail = process.env.REPORT_EMAIL || 'admin@company.com';
 
     // Calculate statistics
     const stats = {
@@ -102,10 +127,14 @@ const sendDailyAttendanceReport = async () => {
       totalLeave: attendance.filter(a => a.status === 'leave').length
     };
 
+    // Read file and convert to base64
+    const fileContent = fs.readFileSync(filePath);
+    const base64Content = Buffer.from(fileContent).toString('base64');
+
     // Send email with attachment to specific email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const msg = {
       to: reportEmail,
+      from: FROM_EMAIL,
       subject: `Daily Attendance Report - ${moment().format('(dddd) MMMM DD, YYYY')}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -152,12 +181,15 @@ const sendDailyAttendanceReport = async () => {
       `,
       attachments: [
         {
-          path: filePath
+          content: base64Content,
+          filename: fileName,
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          disposition: 'attachment'
         }
       ]
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmailSafe(msg);
     console.log(`Daily attendance report sent to ${reportEmail}`);
 
     // Delete file after sending
@@ -170,14 +202,14 @@ const sendDailyAttendanceReport = async () => {
 // Send notification email
 const sendNotificationEmail = async (to, subject, html) => {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const msg = {
       to,
+      from: FROM_EMAIL,
       subject,
       html
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmailSafe(msg);
     console.log(`Email sent to ${to}`);
   } catch (error) {
     console.error('Error sending email:', error);
@@ -243,14 +275,14 @@ const sendNoticeEmail = async (recipients, notice) => {
       </div>
     `;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: recipients.join(','),
+    const msg = {
+      to: recipients,
+      from: FROM_EMAIL,
       subject: `📌 ${notice.title}${notice.isUrgent ? ' [URGENT]' : ''}`,
       html: html
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmailSafe(msg);
     console.log(`Notice email sent to ${recipients.length} recipients`);
     return { success: true, sentCount: recipients.length };
   } catch (error) {
@@ -347,9 +379,9 @@ const sendApprovalRequestToAdmin = async (employee, adminEmails) => {
       </div>
     `;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: adminEmails.join(', '),
+    const msg = {
+      to: adminEmails,
+      from: FROM_EMAIL,
       subject: `🔔 New Employee Registration - Approval Required`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -388,7 +420,7 @@ const sendApprovalRequestToAdmin = async (employee, adminEmails) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmailSafe(msg);
     console.log(`Approval request email sent to admin(s): ${adminEmails.join(', ')}`);
     return true;
   } catch (error) {
@@ -436,9 +468,9 @@ const sendApprovalConfirmationToEmployee = async (employee, admin) => {
       </div>
     `;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const msg = {
       to: employee.email,
+      from: FROM_EMAIL,
       subject: `✅ Account Approved - Welcome to ${process.env.COMPANY_NAME || 'Attendance System'}!`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -492,7 +524,7 @@ const sendApprovalConfirmationToEmployee = async (employee, admin) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmailSafe(msg);
     console.log(`Approval confirmation email sent to: ${employee.email}`);
     return true;
   } catch (error) {
@@ -504,10 +536,10 @@ const sendApprovalConfirmationToEmployee = async (employee, admin) => {
 // Send rejection email to employee
 const sendRejectionEmailToEmployee = async (employee, reason) => {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const msg = {
       to: employee.email,
-      subject: `❌ Account Registration Status - Action Required`,
+      from: FROM_EMAIL,
+      subject: `Registration Status Update`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -553,7 +585,7 @@ const sendRejectionEmailToEmployee = async (employee, reason) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmailSafe(msg);
     console.log(`Rejection email sent to: ${employee.email}`);
     return true;
   } catch (error) {
@@ -568,9 +600,8 @@ module.exports = {
   sendNotificationEmail,
   sendLeaveApprovalEmail,
   sendNoticeEmail,
-  sendWhatsAppNotification,
   sendApprovalRequestToAdmin,
   sendApprovalConfirmationToEmployee,
   sendRejectionEmailToEmployee,
-  transporter
+  sendEmailSafe
 };

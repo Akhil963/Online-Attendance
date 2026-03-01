@@ -3,7 +3,6 @@ const Employee = require('../models/Employee');
 const Attendance = require('../models/Attendance');
 const moment = require('moment');
 const ExcelJS = require('exceljs');
-const nodemailer = require('nodemailer');
 const { sendDailyAttendanceReport } = require('../utils/emailService');
 
 // Get dashboard data for employee
@@ -20,11 +19,21 @@ exports.getDashboardData = async (req, res) => {
       endDate = moment(`${year}-${month}`, 'YYYY-MM').endOf('month').toDate();
     }
 
+    console.log('📊 Dashboard Request:', {
+      employeeId,
+      month,
+      year,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    });
+
     // Get attendance data
     const attendance = await Attendance.find({
       employeeId,
       date: { $gte: startDate, $lte: endDate }
     });
+
+    console.log(`✓ Found ${attendance.length} attendance records`);
 
     const present = attendance.filter(a => a.status === 'present').length;
     const weeklyOff = attendance.filter(a => a.status === 'weekly_off').length;

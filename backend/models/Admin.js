@@ -46,6 +46,11 @@ const adminSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  designation: {
+    type: String,
+    enum: ['CEO', 'CTO', 'MD', 'COO', 'CFO', 'Director', 'Manager', 'Administrator', 'Other'],
+    default: 'Administrator'
+  },
   gender: {
     type: String,
     default: null
@@ -72,6 +77,10 @@ const adminSchema = new mongoose.Schema({
     default: true
   },
   lastLogin: {
+    type: Date,
+    default: null
+  },
+  passwordChangedAt: {
     type: Date,
     default: null
   },

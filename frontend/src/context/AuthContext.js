@@ -74,6 +74,19 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    if (!token) return null;
+    try {
+      const response = await authAPI.getCurrentUser();
+      const updatedUser = response.data.user || response.data.employee || response.data.admin;
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return null;
+    }
+  }, [token]);
+
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
@@ -81,7 +94,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, setUser, token, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

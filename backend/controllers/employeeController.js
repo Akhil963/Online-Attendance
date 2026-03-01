@@ -1,4 +1,5 @@
 const Employee = require('../models/Employee');
+const Admin = require('../models/Admin');
 const Department = require('../models/Department');
 const { sendApprovalConfirmationToEmployee, sendRejectionEmailToEmployee } = require('../utils/emailService');
 
@@ -45,17 +46,21 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// Upload profile picture
+// Upload profile picture (for both admin and employee)
 exports.uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    // Determine if user is admin or employee
+    const isAdmin = req.userRole === 'admin';
+    const Model = isAdmin ? Admin : Employee;
+
     // Delete old profile picture if it exists
-    const employee = await Employee.findById(req.userId);
-    if (employee && employee.profilePicture && employee.profilePicture.startsWith('/uploads/')) {
-      const oldImagePath = require('path').join(__dirname, '..', employee.profilePicture);
+    const user = await Model.findById(req.userId);
+    if (user && user.profilePicture && user.profilePicture.startsWith('/uploads/')) {
+      const oldImagePath = require('path').join(__dirname, '..', user.profilePicture);
       if (require('fs').existsSync(oldImagePath)) {
         require('fs').unlinkSync(oldImagePath);
       }
@@ -64,18 +69,30 @@ exports.uploadProfilePicture = async (req, res) => {
     // Store relative path to the uploaded file
     const profilePictureUrl = `/uploads/profile-pictures/${req.file.filename}`;
 
-    const updatedEmployee = await Employee.findByIdAndUpdate(
-      req.userId,
-      { profilePicture: profilePictureUrl, updatedAt: new Date() },
-      { new: true }
-    ).populate('department');
+    let updatedUser;
+    if (isAdmin) {
+      updatedUser = await Admin.findByIdAndUpdate(
+        req.userId,
+        { profilePicture: profilePictureUrl, updatedAt: new Date() },
+        { new: true }
+      ).select('-password');
+    } else {
+      updatedUser = await Employee.findByIdAndUpdate(
+        req.userId,
+        { profilePicture: profilePictureUrl, updatedAt: new Date() },
+        { new: true }
+      ).populate('department');
+    }
 
+    const responseKey = isAdmin ? 'admin' : 'employee';
     res.json({
       message: 'Profile picture updated successfully',
-      employee: updatedEmployee,
+      [responseKey]: updatedUser,
+      user: updatedUser,
       imageUrl: profilePictureUrl
     });
   } catch (error) {
+    console.error('Error uploading profile picture:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -175,6 +192,7 @@ exports.approveEmployee = async (req, res) => {
   try {
     const { employeeId } = req.params;
     const adminId = req.userId;
+    const io = req.app.get('io'); // Get Socket.io instance
 
     const employee = await Employee.findByIdAndUpdate(
       employeeId,
@@ -200,6 +218,26 @@ exports.approveEmployee = async (req, res) => {
       // Don't fail the approval if email fails
     }
 
+    // Emit real-time socket event for approval
+    if (io) {
+      // Notify the specific employee
+      io.to(`user-${employeeId}`).emit('employee:approved', {
+        employeeId: employee._id,
+        email: employee.email,
+        name: employee.name,
+        message: 'Your account has been approved! Please login to continue.'
+      });
+
+      // Broadcast to admin dashboard
+      io.to('admin').emit('employee:statusUpdated', {
+        type: 'approval',
+        employeeId: employee._id,
+        email: employee.email,
+        name: employee.name,
+        timestamp: new Date()
+      });
+    }
+
     res.json({
       message: 'Employee account approved successfully',
       employee
@@ -214,6 +252,7 @@ exports.rejectEmployee = async (req, res) => {
   try {
     const { employeeId } = req.params;
     const { reason } = req.body;
+    const io = req.app.get('io'); // Get Socket.io instance
 
     const employee = await Employee.findByIdAndUpdate(
       employeeId,
@@ -236,6 +275,27 @@ exports.rejectEmployee = async (req, res) => {
     } catch (emailError) {
       console.error('Failed to send rejection email:', emailError);
       // Don't fail the rejection if email fails
+    }
+
+    // Emit real-time socket event for rejection
+    if (io) {
+      // Notify the specific employee
+      io.to(`user-${employeeId}`).emit('employee:rejected', {
+        employeeId: employee._id,
+        email: employee.email,
+        name: employee.name,
+        reason: reason || 'Your account approval has been rejected.',
+        message: 'Your account approval has been rejected.'
+      });
+
+      // Broadcast to admin dashboard
+      io.to('admin').emit('employee:statusUpdated', {
+        type: 'rejection',
+        employeeId: employee._id,
+        email: employee.email,
+        name: employee.name,
+        timestamp: new Date()
+      });
     }
 
     res.json({

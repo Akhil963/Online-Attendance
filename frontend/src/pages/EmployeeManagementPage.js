@@ -119,194 +119,266 @@ const EmployeeManagementPage = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8 bg-gray-50 font-outfit">
+        <div className="text-center">
+          <div className="relative w-24 h-24 mx-auto mb-8">
+            <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-blue-600 font-bold italic tracking-tighter text-xl">AS</div>
+          </div>
+          <p className="text-gray-400 font-bold uppercase tracking-widest text-xs animate-pulse">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Employee Management</h1>
-          <p className="text-gray-600">Manage and view all employees</p>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-600 text-sm font-semibold">Total Employees</p>
-            <p className="text-3xl font-bold text-blue-600 mt-2">{employees.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-600 text-sm font-semibold">Filtered Results</p>
-            <p className="text-3xl font-bold text-green-600 mt-2">{filteredEmployees.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-600 text-sm font-semibold">Male Employees</p>
-            <p className="text-3xl font-bold text-blue-400 mt-2">
-              {employees.filter(e => e.gender === 'Male').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-gray-600 text-sm font-semibold">Female Employees</p>
-            <p className="text-3xl font-bold text-pink-600 mt-2">
-              {employees.filter(e => e.gender === 'Female').length}
-            </p>
+    <div className="min-h-screen bg-transparent font-outfit space-y-12">
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="mb-14">
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 tracking-tight uppercase leading-none mb-6">
+            Employees
+          </h1>
+          <div className="flex items-center gap-4">
+            <div className="w-1 h-6 bg-blue-600 rounded-full shadow-lg"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage Your Team</p>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 md:p-6 mb-6">
-          <h2 className="text-lg md:text-xl font-bold mb-4">Filters & Search</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-            <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Search</label>
+        {/* Summary Cards - Elite Dashboard Style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Total Workforce</p>
+            <p className="text-6xl font-bold text-gray-900 tracking-tight relative z-10 leading-none">{employees.length}</p>
+          </div>
+
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Active Search</p>
+            <p className="text-6xl font-bold text-emerald-600 tracking-tight relative z-10 leading-none">{filteredEmployees.length}</p>
+          </div>
+
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Male Employees</p>
+            <div className="flex items-baseline gap-3 relative z-10">
+              <p className="text-6xl font-bold text-blue-500 tracking-tight leading-none">
+                {employees.filter(e => e.gender === 'Male').length}
+              </p>
+              <span className="text-xs font-bold text-gray-300 tracking-widest">UNITS</span>
+            </div>
+          </div>
+
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-red-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Female Employees</p>
+            <div className="flex items-baseline gap-3 relative z-10">
+              <p className="text-6xl font-bold text-red-500 tracking-tight leading-none">
+                {employees.filter(e => e.gender === 'Female').length}
+              </p>
+              <span className="text-xs font-bold text-gray-300 tracking-widest">UNITS</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters - High Precision Console */}
+        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-12 mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight flex items-center gap-5 uppercase">
+            <div className="w-1 h-6 bg-blue-600 rounded-full shadow-lg"></div>
+            Filter Console
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+            <div className="group/field">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Search Employees</label>
               <input
                 type="text"
-                placeholder="Name, ID, Email..."
+                placeholder="Name, Email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-sm text-gray-700"
               />
             </div>
-            <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Department</label>
-              <select
-                value={departmentFilter}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
-                className="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
-              >
-                <option value="all">All Departments</option>
-                {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
+
+            <div className="group/field text-gray-700">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Unit Filter</label>
+              <div className="relative">
+                <select
+                  value={departmentFilter}
+                  onChange={(e) => setDepartmentFilter(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-sm appearance-none shadow-sm"
+                >
+                  <option value="all">All Units</option>
+                  {departments.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500 group-hover/field:scale-110 transition-transform">
+                  <svg className="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Gender</label>
-              <select
-                value={genderFilter}
-                onChange={(e) => setGenderFilter(e.target.value)}
-                className="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
-              >
-                <option value="all">All Genders</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
+
+            <div className="group/field text-gray-700">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Gender</label>
+              <div className="relative">
+                <select
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-sm appearance-none"
+                >
+                  <option value="all">Diversity</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Role</label>
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
-              >
-                <option value="all">All Roles</option>
-                <option value="employee">Employee</option>
-                <option value="manager">Manager</option>
-                <option value="director">Director</option>
-                <option value="admin">Admin</option>
-              </select>
+
+            <div className="group/field text-gray-700">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Authority Level</label>
+              <div className="relative">
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-sm appearance-none"
+                >
+                  <option value="all">All Clearances</option>
+                  <option value="employee">Employee</option>
+                  <option value="manager">Manager</option>
+                  <option value="director">Director</option>
+                  <option value="admin">Admin</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Sort By</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
-              >
-                <option value="name">Name</option>
-                <option value="employeeId">Employee ID</option>
-                <option value="email">Email</option>
-                <option value="department">Department</option>
-              </select>
+
+            <div className="group/field text-gray-700">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Sort Strategy</label>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-sm appearance-none"
+                >
+                  <option value="name">Full Identity</option>
+                  <option value="employeeId">Serial ID</option>
+                  <option value="email">Data Path</option>
+                  <option value="department">Asset Unit</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">Order</label>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                className="w-full px-2 md:px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
+
+            <div className="group/field text-gray-700">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Direction</label>
+              <div className="relative">
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3.5 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold text-sm appearance-none shadow-sm"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500 group-hover/field:scale-110 transition-transform">
+                  <svg className="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Export Buttons */}
-        <div className="flex flex-wrap gap-2 md:gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
           <button
             onClick={handleExportExcel}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 md:px-4 py-2 text-sm md:text-base rounded-lg font-medium transition"
+            className="group relative overflow-hidden bg-emerald-600 hover:bg-emerald-700 text-white h-20 rounded-2xl font-bold uppercase tracking-wide text-xs transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-4 border-none"
           >
-            📊 Export Excel
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+            <span className="relative z-10 text-lg">📊</span>
+            <span className="relative z-10">Spreadsheet Matrix</span>
           </button>
           <button
             onClick={handleExportCSV}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-4 py-2 text-sm md:text-base rounded-lg font-medium transition"
+            className="group relative overflow-hidden bg-blue-600 hover:bg-blue-700 text-white h-20 rounded-2xl font-bold uppercase tracking-wide text-xs transition-all shadow-lg shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-4 border-none"
           >
-            📄 Export CSV
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+            <span className="relative z-10 text-lg">📄</span>
+            <span className="relative z-10">Data Extraction</span>
           </button>
           <button
             onClick={handleExportPDF}
-            className="bg-red-600 hover:bg-red-700 text-white px-3 md:px-4 py-2 text-sm md:text-base rounded-lg font-medium transition"
+            className="group relative overflow-hidden bg-red-600 hover:bg-red-700 text-white h-20 rounded-2xl font-bold uppercase tracking-wide text-xs transition-all shadow-lg shadow-red-500/20 active:scale-95 flex items-center justify-center gap-4 border-none"
           >
-            📑 Export PDF
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+            <span className="relative z-10 text-lg">📑</span>
+            <span className="relative z-10">Intelligence Report</span>
           </button>
         </div>
 
-        {/* Employee Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs md:text-sm">
-              <thead className="bg-gray-100 border-b">
-                <tr>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700">ID</th>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700">Name</th>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700 hidden sm:table-cell">Email</th>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700 hidden md:table-cell">Phone</th>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700">Dept</th>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700 hidden lg:table-cell">Designation</th>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700 hidden md:table-cell">Gender</th>
-                  <th className="px-2 md:px-4 py-2 md:py-3 font-semibold text-gray-700">Role</th>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-900 text-white uppercase text-xs font-bold tracking-widest">
+                  <th className="px-10 py-8">Identity ID</th>
+                  <th className="px-10 py-8">Asset Profile</th>
+                  <th className="px-10 py-8 hidden sm:table-cell">Neural Hub</th>
+                    <th className="px-10 py-8 hidden md:table-cell">Phone</th>
+                    <th className="px-10 py-8">Department</th>
+                  <th className="px-10 py-8 hidden lg:table-cell">Asset Title</th>
+                  <th className="px-10 py-8">Clearance</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {filteredEmployees.length > 0 ? (
                   filteredEmployees.map(emp => (
-                    <tr key={emp._id} className="border-b hover:bg-gray-50">
-                      <td className="px-2 md:px-4 py-2 md:py-3 font-medium text-blue-600 text-xs md:text-sm">{emp.employeeId}</td>
-                      <td className="px-2 md:px-4 py-2 md:py-3 font-medium text-gray-800 text-xs md:text-sm">{emp.name}</td>
-                      <td className="px-2 md:px-4 py-2 md:py-3 text-gray-600 text-xs hidden sm:table-cell break-all max-w-48 md:max-w-xs">{emp.email}</td>
-                      <td className="px-2 md:px-4 py-2 md:py-3 text-gray-600 text-xs hidden md:table-cell">{emp.phone || '-'}</td>
-                      <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                          {emp.department?.name || '-'}
-                        </span>
+                    <tr key={emp._id} className="group hover:bg-blue-600/[0.03] transition-all duration-300">
+                      <td className="px-10 py-8 font-bold text-blue-600 italic tracking-widest text-sm">{emp.employeeId}</td>
+                      <td className="px-10 py-8">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner uppercase">
+                            {emp.name?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 tracking-tight leading-none">{emp.name}</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2 opacity-50 group-hover:opacity-100 transition-opacity">Asset Identity Verified</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-2 md:px-4 py-2 md:py-3 text-gray-600 text-xs hidden lg:table-cell">{emp.designation || '-'}</td>
-                      <td className="px-2 md:px-4 py-2 md:py-3 text-xs hidden md:table-cell">
-                        <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
-                          emp.gender === 'Male' ? 'bg-blue-500' : emp.gender === 'Female' ? 'bg-pink-500' : 'bg-gray-500'
-                        }`}>
-                          {emp.gender || '-'}
-                        </span>
+                      <td className="px-10 py-8 text-gray-400 font-bold text-xs hidden sm:table-cell lowercase tracking-wider">{emp.email}</td>
+                      <td className="px-10 py-8 text-gray-400 font-bold text-xs hidden md:table-cell tracking-widest">{emp.phone || 'Not Provided'}</td>
+                      <td className="px-10 py-8">
+                        <div className="px-5 py-2 bg-blue-600/5 text-blue-600 rounded-full inline-flex items-center text-xs font-bold uppercase tracking-widest border border-blue-600/10 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                          {emp.department?.name || 'Central Unit'}
+                        </div>
                       </td>
-                      <td className="px-2 md:px-4 py-2 md:py-3 text-xs">
-                        <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
-                          emp.role === 'admin' ? 'bg-red-500' : emp.role === 'manager' ? 'bg-orange-500' : 'bg-green-500'
-                        }`}>
-                          {emp.role}
-                        </span>
+                      <td className="px-10 py-8 text-gray-500 font-bold text-xs hidden lg:table-cell uppercase tracking-widest">{emp.designation || 'Specialist'}</td>
+                      <td className="px-10 py-8">
+                        <div className={`px-5 py-2 rounded-full inline-flex items-center text-xs font-bold uppercase tracking-widest shadow-sm ${emp.role === 'admin' ? 'bg-red-500/10 text-red-600 border border-red-500/10' :
+                          emp.role === 'manager' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/10' :
+                            'bg-emerald-500/10 text-emerald-600 border border-emerald-500/10'
+                          }`}>
+                          Lvl: {emp.role}
+                        </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                      No employees found
+                    <td colSpan="7" className="px-8 py-20 text-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 text-2xl font-bold italic">!</div>
+                        <p className="font-bold text-gray-400 uppercase tracking-widest text-xs animate-pulse">No employees found</p>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -316,9 +388,13 @@ const EmployeeManagementPage = () => {
         </div>
 
         {filteredEmployees.length > 0 && (
-          <p className="text-sm text-gray-600 mt-4 text-center">
-            Showing {filteredEmployees.length} of {employees.length} employees
-          </p>
+          <div className="mt-10 flex justify-center">
+            <div className="px-6 py-2 bg-gray-900 rounded-full shadow-lg">
+              <p className="text-xs font-bold text-white uppercase tracking-widest">
+                Verified Deployment: {filteredEmployees.length} Units Active
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </div>

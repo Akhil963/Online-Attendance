@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { FiLogOut, FiMenu, FiX, FiArrowLeft, FiSettings, FiChevronDown, FiAlertCircle } from 'react-icons/fi';
+import { LogOut, Menu, X, ArrowLeft, Settings, ChevronDown, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const AdminHeader = () => {
@@ -18,7 +18,7 @@ const AdminHeader = () => {
   const confirmLogout = () => {
     logout();
     setShowLogoutModal(false);
-    toast.info('You have been logged out successfully');
+    toast.info('Session terminated successfully');
     navigate('/');
   };
 
@@ -27,42 +27,39 @@ const AdminHeader = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl border-b-2 border-blue-600">
-      <div className="max-w-full px-6 py-4">
+    <header className="bg-white/70 backdrop-blur-3xl border-b border-gray-200/60 sticky top-0 z-40 transition-all font-outfit">
+      <div className="max-w-full px-10 py-5">
         <div className="flex justify-between items-center">
-          {/* Logo Section */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center font-bold text-white shadow-lg transform hover:scale-105 transition-transform">
-              ⚙️
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Admin Panel
+          {/* Dashboard Context Section */}
+          <div className="flex items-center gap-6">
+            <div className="hidden lg:flex flex-col">
+              <h1 className="text-xl font-semibold text-gray-900 tracking-tight leading-none">
+                Admin Dashboard
               </h1>
-              <p className="text-xs text-gray-400">Management Dashboard</p>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide leading-none">System Management</p>
+              </div>
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-2">
+          <nav className="hidden md:flex gap-4">
             {user && (
               <>
-                {/* Back to Dashboard Button - New Design */}
                 <Link
                   to="/dashboard"
-                  className="group relative flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 rounded-lg font-semibold transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                  className="group relative flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95 border-none"
                 >
-                  <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" size={18} />
-                  <span>Back to Dashboard</span>
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-lg transition-opacity"></div>
+                  <ArrowLeft className="group-hover:-translate-x-1 transition-transform" size={14} />
+                  <span>Dashboard</span>
                 </Link>
 
-                {/* Profile & Settings */}
                 <Link
                   to="/profile"
-                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition-colors"
+                  className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-2xl font-medium text-sm transition-all shadow-sm active:scale-95"
                 >
-                  <FiSettings size={18} />
+                  <Settings size={14} className="text-gray-400" />
                   Profile
                 </Link>
               </>
@@ -70,46 +67,46 @@ const AdminHeader = () => {
           </nav>
 
           {/* Right Section - User Menu */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {user && (
               <div className="hidden md:block">
-                {/* User Dropdown Menu */}
                 <div className="relative group">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-3 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group"
+                    className="flex items-center gap-4 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all border border-gray-200 shadow-sm group"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-md">
                       {user.name?.charAt(0).toUpperCase()}
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-white">{user.name}</p>
-                      <p className="text-xs text-gray-400">{user.role}</p>
+                    <div className="text-left hidden lg:block">
+                      <p className="text-sm font-semibold text-gray-900 leading-none">{user.name}</p>
+                      <p className="text-xs font-medium text-blue-600 mt-1 opacity-80">{user.role}</p>
                     </div>
-                    <FiChevronDown className={`transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} size={16} />
+                    <ChevronDown className={`text-gray-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} size={14} />
                   </button>
 
                   {/* Dropdown Menu */}
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-slate-800 rounded-lg shadow-2xl border border-slate-700 py-2 z-50">
-                      <div className="px-4 py-2 border-b border-slate-700 mb-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide">Admin Menu</p>
+                    <div className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-xl rounded-3xl shadow-lg border border-gray-200 p-3 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+                      <div className="px-5 py-4 mb-2">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Account</p>
                       </div>
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 hover:bg-slate-700 transition-colors text-sm"
+                        className="flex items-center gap-4 px-4 py-4 hover:bg-blue-50 rounded-2xl transition-all text-sm font-medium text-gray-700"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        👤 My Profile
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">👤</div>
+                        Edit Profile
                       </Link>
                       <button
                         onClick={() => {
                           handleLogoutClick();
                           setIsUserMenuOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2 hover:bg-red-600/20 hover:text-red-400 transition-colors text-sm border-t border-slate-700 mt-2 pt-2 flex items-center gap-2"
+                        className="w-full flex items-center gap-4 px-4 py-4 hover:bg-red-50 text-red-600 rounded-2xl transition-all text-sm font-medium border-t border-gray-100 mt-2"
                       >
-                        <FiLogOut size={16} />
+                        <div className="w-8 h-8 rounded-lg bg-red-100/50 flex items-center justify-center text-red-600"><LogOut size={14} /></div>
                         Logout
                       </button>
                     </div>
@@ -120,33 +117,33 @@ const AdminHeader = () => {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              className="md:hidden p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all text-gray-600"
               onClick={() => setIsOpen(!isOpen)}
             >
-              {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+              {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
         {isOpen && user && (
-          <nav className="md:hidden mt-6 space-y-3 border-t border-slate-700 pt-4">
+          <nav className="md:hidden mt-6 space-y-3 border-t border-gray-200 pt-4">
             {/* Back to Dashboard - Mobile */}
             <Link
               to="/dashboard"
-              className="block w-full px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 rounded-lg font-semibold transition-all flex items-center gap-2 text-center justify-center"
+              className="block w-full px-5 py-3 bg-blue-600 text-white rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-center justify-center active:scale-95"
               onClick={() => setIsOpen(false)}
             >
-              <FiArrowLeft size={18} />
-              Back to Dashboard
+              <ArrowLeft size={16} />
+              Dashboard
             </Link>
 
             <Link
               to="/profile"
-              className="block px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition-colors flex items-center gap-2"
+              className="block px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors flex items-center gap-2 text-gray-700"
               onClick={() => setIsOpen(false)}
             >
-              <FiSettings size={18} />
+              <Settings size={18} />
               Profile
             </Link>
 
@@ -155,9 +152,9 @@ const AdminHeader = () => {
                 handleLogoutClick();
                 setIsOpen(false);
               }}
-              className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full px-4 py-3 bg-red-600 text-white rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 active:scale-95"
             >
-              <FiLogOut size={18} />
+              <LogOut size={16} />
               Logout
             </button>
           </nav>
@@ -165,28 +162,28 @@ const AdminHeader = () => {
 
         {/* Logout Confirmation Modal */}
         {showLogoutModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-slate-800 rounded-xl p-8 max-w-sm mx-4 border border-slate-600 shadow-2xl animate-in fade-in zoom-in duration-300">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-600/20 border border-red-500/30 mx-auto mb-4">
-                <FiAlertCircle className="text-red-400" size={24} />
+          <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-[100] p-6">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full border border-gray-200 shadow-xl animate-in fade-in zoom-in duration-300">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-50 border border-red-100 mx-auto mb-6">
+                <AlertCircle className="text-red-600" size={32} />
               </div>
-              <h3 className="text-xl font-bold text-white text-center mb-2">Confirm Logout</h3>
-              <p className="text-gray-400 text-center mb-6">
-                Are you sure you want to log out? You'll need to log in again to access the system.
+              <h3 className="text-xl font-semibold text-gray-900 text-center mb-3">Confirm Logout</h3>
+              <p className="text-gray-600 text-center mb-8 leading-relaxed">
+                Are you sure you want to logout? You'll need to sign in again.
               </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={cancelLogout}
-                  className="flex-1 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={confirmLogout}
-                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-semibold text-base rounded-lg transition-all shadow-lg shadow-red-600/20 active:scale-95 flex items-center justify-center gap-2"
                 >
-                  <FiLogOut size={18} />
+                  <LogOut size={16} />
                   Logout
+                </button>
+                <button
+                  onClick={cancelLogout}
+                  className="w-full h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-base rounded-lg transition-all active:scale-95"
+                >
+                  Cancel
                 </button>
               </div>
             </div>

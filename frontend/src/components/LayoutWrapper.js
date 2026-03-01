@@ -12,14 +12,14 @@ const LayoutWrapper = ({ children }) => {
     <div className="flex">
       {/* Admin Sidebar - Only for admin users */}
       {isAdmin && <AdminNavigation />}
-      
+
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col ${isAdmin ? 'md:ml-64' : ''}`}>
+      <div className={`flex-1 flex flex-col ${isAdmin ? 'md:ml-72' : ''}`}>
         {/* Header - Different based on role */}
         {isAdmin ? <AdminHeader /> : <ClientHeader />}
-        
+
         {/* Page Content */}
-        <main className="bg-gray-50 flex-1">
+        <main className="bg-gradient-to-br from-gray-50 via-white to-gray-100 flex-1 min-h-[calc(100vh-64px)] overflow-hidden">
           {children}
         </main>
       </div>

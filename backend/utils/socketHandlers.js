@@ -116,7 +116,12 @@ const initializeSocketHandlers = (io) => {
     socket.on('leave:statusChanged', async (data) => {
       try {
         const { leaveId, status } = data;
-        
+
+        const VALID_STATUSES = ['approved', 'rejected', 'pending'];
+        if (!leaveId || !VALID_STATUSES.includes(status)) {
+          return socket.emit('leave:error', { error: 'Invalid leave ID or status' });
+        }
+
         const leave = await Leave.findByIdAndUpdate(
           leaveId,
           { status },
@@ -141,6 +146,71 @@ const initializeSocketHandlers = (io) => {
         });
       } catch (error) {
         socket.emit('leave:error', { error: error.message });
+      }
+    });
+
+    // Handle employee approval notifications
+    socket.on('employee:approve', async (data) => {
+      try {
+        const { employeeId } = data;
+        
+        const employee = await Employee.findById(employeeId).populate('department');
+
+        if (!employee) {
+          return socket.emit('employee:approveError', { error: 'Employee not found' });
+        }
+
+        // Notify the employee by their email (or user ID if they're connected)
+        io.to(`user-${employeeId}`).emit('employee:approved', {
+          employeeId,
+          email: employee.email,
+          name: employee.name,
+          message: 'Your account has been approved! Please login to continue.'
+        });
+
+        // Broadcast to admin
+        io.to('admin').emit('employee:approved', {
+          type: 'approval',
+          employeeId,
+          email: employee.email,
+          name: employee.name,
+          timestamp: new Date()
+        });
+      } catch (error) {
+        socket.emit('employee:approveError', { error: error.message });
+      }
+    });
+
+    // Handle employee rejection notifications
+    socket.on('employee:reject', async (data) => {
+      try {
+        const { employeeId, reason } = data;
+        
+        const employee = await Employee.findById(employeeId);
+
+        if (!employee) {
+          return socket.emit('employee:rejectError', { error: 'Employee not found' });
+        }
+
+        // Notify the employee by their email (or user ID if they're connected)
+        io.to(`user-${employeeId}`).emit('employee:rejected', {
+          employeeId,
+          email: employee.email,
+          name: employee.name,
+          reason: reason || 'Your account has been rejected.',
+          message: 'Your account approval has been rejected.'
+        });
+
+        // Broadcast to admin
+        io.to('admin').emit('employee:rejected', {
+          type: 'rejection',
+          employeeId,
+          email: employee.email,
+          name: employee.name,
+          timestamp: new Date()
+        });
+      } catch (error) {
+        socket.emit('employee:rejectError', { error: error.message });
       }
     });
 
@@ -197,7 +267,7 @@ const updateRealtimeStats = async (io, socket = null) => {
       timestamp: new Date()
     };
 
-    realtimeStats = stats;
+    Object.assign(realtimeStats, stats);
 
     // Send to specific socket or broadcast
     if (socket) {

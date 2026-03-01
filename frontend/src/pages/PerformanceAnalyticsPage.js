@@ -19,7 +19,7 @@ const PerformanceAnalyticsPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      
+
       const [attendanceRes, employeesRes, leavesRes] = await Promise.all([
         axios.get('http://localhost:5000/api/attendance/all', {
           headers: { Authorization: `Bearer ${token}` }
@@ -46,7 +46,7 @@ const PerformanceAnalyticsPage = () => {
   const calculateMetrics = () => {
     const monthStart = moment(selectedMonth, 'YYYY-MM').startOf('month');
     const monthEnd = moment(selectedMonth, 'YYYY-MM').endOf('month');
-    
+
     const monthAttendance = attendanceData.filter(a => {
       const date = moment(a.date);
       return date.isBetween(monthStart, monthEnd, null, '[]');
@@ -72,16 +72,16 @@ const PerformanceAnalyticsPage = () => {
   const getEmployeePerformance = () => {
     const monthStart = moment(selectedMonth, 'YYYY-MM').startOf('month');
     const monthEnd = moment(selectedMonth, 'YYYY-MM').endOf('month');
-    
+
     return employees.map(emp => {
-      const empAttendance = attendanceData.filter(a => 
+      const empAttendance = attendanceData.filter(a =>
         a.employeeId?._id === emp._id &&
         moment(a.date).isBetween(monthStart, monthEnd, null, '[]')
       );
-      
+
       const present = empAttendance.filter(a => a.status === 'present').length;
       const total = empAttendance.length;
-      
+
       return {
         name: emp.name.split(' ')[0],
         fullName: emp.name,
@@ -97,31 +97,31 @@ const PerformanceAnalyticsPage = () => {
   const getDailyTrend = () => {
     const monthStart = moment(selectedMonth, 'YYYY-MM').startOf('month');
     const monthEnd = moment(selectedMonth, 'YYYY-MM').endOf('month');
-    
+
     const trend = [];
     let current = moment(monthStart);
-    
+
     while (current.isSameOrBefore(monthEnd)) {
-      const dayAttendance = attendanceData.filter(a => 
+      const dayAttendance = attendanceData.filter(a =>
         moment(a.date).format('YYYY-MM-DD') === current.format('YYYY-MM-DD')
       );
-      
+
       trend.push({
         date: current.format('DD'),
         present: dayAttendance.filter(a => a.status === 'present').length,
         absent: dayAttendance.filter(a => a.status === 'absent').length,
         leave: dayAttendance.filter(a => a.status === 'planned_leave').length
       });
-      
+
       current.add(1, 'day');
     }
-    
+
     return trend.slice(0, 15); // Last 15 days
   };
 
   // Get leave distribution
   const getLeaveDistribution = () => {
-    const monthLeaves = leaves.filter(l => 
+    const monthLeaves = leaves.filter(l =>
       l.status === 'approved' &&
       moment(l.startDate).format('YYYY-MM') === selectedMonth
     );
@@ -142,7 +142,7 @@ const PerformanceAnalyticsPage = () => {
   // Get department metrics
   const getDepartmentMetrics = () => {
     const deptMetrics = {};
-    
+
     employees.forEach(emp => {
       const deptName = emp.department?.name || 'Unassigned';
       if (!deptMetrics[deptName]) {
@@ -177,145 +177,180 @@ const PerformanceAnalyticsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading analytics...</p>
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500 font-bold animate-pulse">Loading data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-full p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Performance Analytics</h1>
-            <p className="text-gray-600 mt-1">Company-wide attendance and performance metrics</p>
+            <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
+              Performance Analytics
+            </h1>
+            <p className="text-gray-500 mt-2 text-lg">System-wide growth and efficiency metrics</p>
           </div>
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Total Records</p>
-                <p className="text-3xl font-bold text-blue-600">{metrics.totalRecords}</p>
-              </div>
-              <Calendar className="text-blue-300" size={32} />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Present</p>
-                <p className="text-3xl font-bold text-green-600">{metrics.presentCount}</p>
-              </div>
-              <Award className="text-green-300" size={32} />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Absent</p>
-                <p className="text-3xl font-bold text-red-600">{metrics.absentCount}</p>
-              </div>
-              <Users className="text-red-300" size={32} />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">On Leave</p>
-                <p className="text-3xl font-bold text-yellow-600">{metrics.onLeaveCount}</p>
-              </div>
-              <Calendar className="text-yellow-300" size={32} />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Attendance Rate</p>
-                <p className="text-3xl font-bold text-purple-600">{metrics.attendanceRate}%</p>
-              </div>
-              <TrendingUp className="text-purple-300" size={32} />
-            </div>
+          <div className="relative">
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-6 py-3.5 bg-white/70 backdrop-blur-xl border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 shadow-sm"
+            />
           </div>
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* Key Metrics - Premium Tiles */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                <Calendar size={24} />
+              </div>
+              <span className="text-xs font-bold text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-lg">Month</span>
+            </div>
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Total Logs</p>
+            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.totalRecords}</p>
+          </div>
+
+          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                <Award size={24} />
+              </div>
+              <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg">High</span>
+            </div>
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Presences</p>
+            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.presentCount}</p>
+          </div>
+
+          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center">
+                <Users size={24} />
+              </div>
+              <span className="text-xs font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-lg">Watch</span>
+            </div>
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Absences</p>
+            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.absentCount}</p>
+          </div>
+
+          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                <Calendar size={24} />
+              </div>
+              <span className="text-xs font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-lg">Leave</span>
+            </div>
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">On Leave</p>
+            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.onLeaveCount}</p>
+          </div>
+
+          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                <TrendingUp size={24} />
+              </div>
+              <span className="text-xs font-bold text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-lg">Rate</span>
+            </div>
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Efficiency</p>
+            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.attendanceRate}%</p>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Daily Attendance Trend */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Daily Attendance Trend (15 Days)</h2>
-            <ResponsiveContainer width="100%" height={300}>
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-xl font-extrabold text-gray-900 mb-8 tracking-tight flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+              Daily Attendance Pulse
+            </h2>
+            <ResponsiveContainer width="100%" height={320}>
               <BarChart data={dailyTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="present" fill="#10B981" name="Present" />
-                <Bar dataKey="absent" fill="#EF4444" name="Absent" />
-                <Bar dataKey="leave" fill="#F59E0B" name="Leave" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 700 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 700 }} dx={-10} />
+                <Tooltip
+                  cursor={{ fill: '#F1F5F9' }}
+                  contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '15px' }}
+                />
+                <Legend iconType="circle" />
+                <Bar dataKey="present" fill="url(#colorPresent)" radius={[4, 4, 0, 0]} name="Present" />
+                <Bar dataKey="absent" fill="url(#colorAbsent)" radius={[4, 4, 0, 0]} name="Absent" />
+                <defs>
+                  <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0.1} />
+                  </linearGradient>
+                  <linearGradient id="colorAbsent" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Leave Distribution */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Leave Distribution</h2>
-            <ResponsiveContainer width="100%" height={300}>
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-xl font-extrabold text-gray-900 mb-8 tracking-tight flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-amber-500 rounded-full"></div>
+              Leave Allocation
+            </h2>
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <Pie
                   data={leaveDistribution}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
+                  innerRadius={80}
+                  outerRadius={110}
+                  paddingAngle={8}
                   dataKey="value"
                 >
                   {leaveDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '15px' }}
+                />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Department Performance */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Department Attendance Rate</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Department Performance - Progress Style */}
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-10 mb-12">
+          <h2 className="text-2xl font-extrabold text-gray-900 mb-10 tracking-tight flex items-center gap-3">
+            <div className="w-1.5 h-8 bg-blue-500 rounded-full"></div>
+            Unit Performance Coverage
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {deptMetrics.map((dept, idx) => (
-              <div key={idx} className="p-4 border border-gray-200 rounded-lg">
-                <p className="font-medium text-gray-900 mb-2">{dept.dept}</p>
-                <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>{dept.present}/{dept.total}</span>
-                  <span className="font-medium text-gray-900">{dept.rate}%</span>
+              <div key={idx} className="group transition-all hover:translate-x-1">
+                <div className="flex justify-between items-end mb-3">
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{dept.dept}</p>
+                    <p className="text-sm font-bold text-gray-500 mt-1">{dept.present} Active / {dept.total} Total</p>
+                  </div>
+                  <span className="text-2xl font-bold text-gray-900">{dept.rate}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-100 rounded-full h-4 p-1 overflow-hidden">
                   <div
-                    className={`h-2 rounded-full ${
-                      dept.rate >= 80 ? 'bg-green-500' : dept.rate >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                    }`}
+                    className={`h-full rounded-full transition-all duration-1000 group-hover:brightness-110 shadow-sm ${dept.rate >= 80 ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' :
+                        dept.rate >= 60 ? 'bg-gradient-to-r from-amber-400 to-amber-500' :
+                          'bg-gradient-to-r from-rose-400 to-rose-500'
+                      }`}
                     style={{ width: `${dept.rate}%` }}
                   ></div>
                 </div>
@@ -324,39 +359,66 @@ const PerformanceAnalyticsPage = () => {
           </div>
         </div>
 
-        {/* Top Performers */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Employee Performance Ranking</h2>
+        {/* Ranking Table - Premium Style */}
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-8 border-b border-gray-100 bg-gray-50/50">
+            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+              <Award className="text-blue-600" size={28} />
+              Elite Performers
+            </h2>
+          </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-100 border-b border-gray-300">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Rank</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Employee Name</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Department</th>
-                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">Present Days</th>
-                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">Attendance %</th>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50/80 border-b border-gray-100">
+                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Global Rank</th>
+                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Employee Profile</th>
+                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Team</th>
+                  <th className="px-8 py-5 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Activity</th>
+                  <th className="px-8 py-5 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Success Rate</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {employeePerf.slice(0, 10).map((emp, idx) => (
-                  <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-900">#{idx + 1}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{emp.fullName}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{emp.department}</td>
-                    <td className="px-6 py-4 text-center text-sm font-medium text-gray-900">
-                      {emp.present}/{emp.total}
+                  <tr key={idx} className="hover:bg-gray-50/50 transition-colors group">
+                    <td className="px-8 py-6">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg ${idx === 0 ? 'bg-amber-100 text-amber-600 shadow-sm border border-amber-200' :
+                          idx === 1 ? 'bg-gray-200 text-gray-600 shadow-sm border border-gray-300' :
+                            idx === 2 ? 'bg-orange-100 text-orange-600 shadow-sm border border-orange-200' :
+                              'bg-gray-100 text-gray-400 shadow-sm border border-gray-200'
+                        }`}>
+                        {idx + 1}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        emp.attendance >= 80
-                          ? 'bg-green-100 text-green-800'
-                          : emp.attendance >= 60
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {emp.attendance}%
-                      </span>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-100">
+                          {emp.fullName.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-lg">{emp.fullName}</p>
+                          <p className="text-xs text-gray-400 font-medium">Verified Performer</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="px-4 py-1.5 bg-gray-100 rounded-xl w-fit text-sm font-bold text-gray-600 border border-gray-200">
+                        {emp.department}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-center">
+                      <p className="text-sm font-bold text-gray-900">{emp.present} / {emp.total}</p>
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Check-ins</p>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col items-center">
+                        <span className={`px-4 py-1.5 rounded-full text-sm font-black transition-all group-hover:scale-105 ${emp.attendance >= 80 ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' :
+                            emp.attendance >= 60 ? 'bg-amber-100 text-amber-600 border border-amber-200' :
+                              'bg-rose-100 text-rose-600 border border-rose-200'
+                          }`}>
+                          {emp.attendance}%
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -8,7 +8,7 @@ const authMiddleware = (req, res, next) => {
       return res.status(401).json({ error: 'No authentication token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.id;
     req.userRole = decoded.role;
     next();

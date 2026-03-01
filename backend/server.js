@@ -1,20 +1,26 @@
+// Load environment variables before all other imports
+require('dotenv').config();
+
+// Validate required environment variables at startup
+const REQUIRED_ENV = ['JWT_SECRET', 'MONGODB_URI'];
+const missingEnv = REQUIRED_ENV.filter(key => !process.env[key]);
+if (missingEnv.length > 0) {
+  console.error(`✗ Missing required environment variables: ${missingEnv.join(', ')}`);
+  process.exit(1);
+}
+
 require("./instrument.js");
 
 const express = require('express');
 const Sentry = require("@sentry/node");
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-
-Sentry.init({ dsn: process.env.SENTRY_DSN });
-
-// Load environment variables
-dotenv.config();
+const jwt = require('jsonwebtoken');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -47,6 +53,24 @@ const io = socketIo(server, {
   },
   transports: ['websocket', 'polling'],
   maxHttpBufferSize: 1e6
+});
+
+// Socket.io Authentication Middleware
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    
+    if (!token) {
+      return next(new Error('No authentication token provided'));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.handshake.auth.userId = decoded.id;
+    socket.handshake.auth.userRole = decoded.role;
+    next();
+  } catch (error) {
+    next(new Error('Invalid token'));
+  }
 });
 
 // Rate Limiting Configuration (disabled in development)

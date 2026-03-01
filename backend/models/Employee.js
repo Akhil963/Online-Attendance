@@ -92,6 +92,10 @@ const employeeSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  passwordChangedAt: {
+    type: Date,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now

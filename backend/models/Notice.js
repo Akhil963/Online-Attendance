@@ -34,8 +34,12 @@ const noticeSchema = new mongoose.Schema({
   }],
   postedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Employee',
     required: true
+  },
+  postedByModel: {
+    type: String,
+    enum: ['Admin', 'Employee'],
+    default: 'Admin'
   },
   attachments: [{
     name: String,

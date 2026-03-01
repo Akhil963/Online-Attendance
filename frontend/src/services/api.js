@@ -23,7 +23,13 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   verifyToken: () => api.get('/auth/verify-token'),
-  getCurrentUser: () => api.get('/auth/me')
+  getCurrentUser: () => api.get('/auth/me'),
+  updateAdminProfile: (data) => api.post('/auth/update-admin-profile', data),
+  forgotPassword: (email, userType) => api.post('/auth/forgot-password', { email, userType }),
+  verifyResetToken: (token) => api.get('/auth/verify-reset-token', { params: { token } }),
+  resetPassword: (token, password, confirmPassword, userType) =>
+    api.post('/auth/reset-password', { token, password, confirmPassword, userType }),
+  changePassword: (data) => api.post('/auth/change-password', data)
 };
 
 // Attendance APIs

@@ -115,27 +115,34 @@ const AdminNavigation = () => {
 
       {/* Admin Navigation Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-screen bg-gray-900 text-white transition-all duration-300 z-50 ${
-          isOpen ? 'w-64' : 'w-0 md:w-64'
-        } overflow-y-auto flex flex-col`}
+        className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-all duration-700 z-50 ${
+          isOpen ? 'w-80' : 'w-0 md:w-80'
+        } overflow-hidden flex flex-col font-outfit`}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-700">
-          <h2 className="text-xl font-bold">Admin Panel</h2>
-          <p className="text-xs text-gray-400 mt-1">Management & Analytics</p>
+        <div className="p-8 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/20">
+              <span className="text-white text-lg font-bold">AS</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg font-semibold text-gray-900">Attendance</span>
+              <span className="text-xs font-medium text-gray-500">Admin Panel</span>
+            </div>
+          </div>
         </div>
 
-        {/* Menu Items - Scrollable */}
-        <nav className="p-4 flex-1 overflow-y-auto">
+        {/* Menu Items */}
+        <nav className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-8">
           {adminMenuItems.map((category, idx) => (
-            <div key={idx} className="mb-6">
+            <div key={idx} className="mb-2">
               {/* Category Header */}
-              <h3 className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <h3 className="px-6 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
                 {category.category}
               </h3>
 
               {/* Category Items */}
-              <div className="space-y-2">
+              <div className="space-y-1 px-2">
                 {category.items.map((item, itemIdx) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -145,27 +152,29 @@ const AdminNavigation = () => {
                       key={itemIdx}
                       to={item.path}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-start gap-3 px-4 py-3 rounded-lg transition-colors group ${
+                      className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 group relative ${
                         active
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-300 hover:bg-gray-800'
+                          ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
-                      title={item.description}
                     >
-                      <Icon
-                        size={20}
-                        className={active ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.label}</p>
-                        <p className={`text-xs ${
-                          active ? 'text-blue-100' : 'text-gray-500'
-                        } hidden md:block`}>
+                      <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                        active
+                          ? 'bg-blue-100 text-blue-600'
+                          : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
+                      }`}>
+                        <Icon size={16} />
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <p className="font-medium text-sm truncate">{item.label}</p>
+                        <p className={`text-xs mt-0.5 truncate ${
+                          active ? 'text-blue-500/70' : 'text-gray-500'
+                        }`}>
                           {item.description}
                         </p>
                       </div>
                       {active && (
-                        <div className="w-2 h-2 rounded-full bg-white mt-1"></div>
+                        <div className="w-1 h-5 bg-blue-600 rounded-full absolute left-0 -ml-1"></div>
                       )}
                     </Link>
                   );
@@ -175,15 +184,14 @@ const AdminNavigation = () => {
           ))}
         </nav>
 
-        {/* Footer Info - Sticky at Bottom */}
-        <div className="p-5 bg-gradient-to-t from-blue-900 via-gray-800 to-gray-800 border-t-2 border-blue-600 text-white mt-auto flex-shrink-0">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-              <p className="font-bold text-sm text-blue-300">Admin Tools v1.0</p>
+        {/* Footer Status */}
+        <div className="p-6 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-gray-700">System Status</p>
+              <p className="text-xs text-gray-500">All systems operational</p>
             </div>
-            <div className="h-px bg-gradient-to-r from-blue-600 via-gray-700 to-transparent opacity-50"></div>
-            <p className="text-xs text-gray-300 font-medium pl-4">Multi-level analytics & management</p>
           </div>
         </div>
       </div>
@@ -197,11 +205,19 @@ const AdminNavigation = () => {
       )}
 
       {/* Desktop Push Content (Optional) */}
+      {/* Desktop Push Content Alignment */}
       <style>{`
         @media (min-width: 768px) {
           .main-content {
-            margin-left: 16rem; /* w-64 = 16rem */
+            margin-left: 20rem; /* w-80 = 20rem */
           }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 0px;
+        }
+        .custom-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </>

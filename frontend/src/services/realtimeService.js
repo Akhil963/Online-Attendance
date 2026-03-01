@@ -113,6 +113,10 @@ class RealtimeService {
     this.on('user:passwordChanged', callback);
   }
 
+  subscribeToApprovalStatus(callback) {
+    this.on('employee:approved', callback);
+  }
+
   emitCheckIn(data) {
     this.emit('attendance:checkIn', data);
   }

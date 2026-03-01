@@ -21,33 +21,33 @@ const AdminDashboardPage = () => {
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Fetch attendance data
       const attendanceResponse = await attendanceAPI.getAllAttendance();
-      
+
       // Fetch department data with employee counts
       const deptData = await departmentAPI.getDepartmentsWithCount();
-      
+
       // Fetch all employees for gender count
       const employeeResponse = await employeeAPI.getAllEmployees();
       const allEmployees = employeeResponse.data.employees || [];
-      
+
       const totalEmployees = allEmployees.length;
       const maleCount = allEmployees.filter(e => e.gender === 'Male').length;
       const femaleCount = allEmployees.filter(e => e.gender === 'Female').length;
-      
+
       // Count attendance today
       const today = moment().format('YYYY-MM-DD');
-      const todayAttendance = attendanceResponse.data.attendance.filter(a => 
+      const todayAttendance = attendanceResponse.data.attendance.filter(a =>
         moment(a.date).format('YYYY-MM-DD') === today
       );
-      
+
       const presentCount = todayAttendance.filter(a => a.status === 'present').length;
       const absentCount = todayAttendance.filter(a => a.status === 'absent').length;
-      const onLeaveCount = todayAttendance.filter(a => 
+      const onLeaveCount = todayAttendance.filter(a =>
         a.status === 'planned_leave'
       ).length;
-      
+
       setStatistics({
         departments: deptData.data.departments,
         totalEmployees: totalEmployees,
@@ -127,34 +127,34 @@ const AdminDashboardPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+
         {/* Header Section */}
         <div className="mb-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-slate-900">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
                 Admin Dashboard
               </h1>
-              <p className="text-slate-600 mt-2">Welcome back! Here's your system overview</p>
+              <p className="text-gray-600 mt-2">Welcome back! Here's your system overview</p>
             </div>
-            <div className="text-right text-slate-600">
+            <div className="text-left md:text-right text-gray-600">
               <p className="text-sm">{moment().format('dddd')}</p>
-              <p className="text-lg font-semibold text-slate-900">{moment().format('MMMM DD, YYYY')}</p>
+              <p className="text-lg font-semibold text-gray-900">{moment().format('MMMM DD, YYYY')}</p>
             </div>
           </div>
         </div>
 
         {/* Key Metrics - Professional Color Scheme */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
           {/* Total Employees - Primary Blue */}
           <div className="bg-white rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all hover:shadow-blue-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">Total Employees</p>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{Number(statistics.totalEmployees) || 0}</p>
-                <p className="text-xs text-slate-500 mt-2">👥 Active staff</p>
+                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Total Employees</p>
+                <p className="text-3xl font-bold text-blue-600 mt-2">{statistics.totalEmployees || 0}</p>
+                <p className="text-xs text-gray-500 mt-2">👥 Active staff</p>
               </div>
               <div className="text-4xl opacity-20 text-blue-600">👤</div>
             </div>
@@ -164,9 +164,9 @@ const AdminDashboardPage = () => {
           <div className="bg-white rounded-xl p-6 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all hover:shadow-emerald-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">Present Today</p>
-                <p className="text-3xl font-bold text-emerald-600 mt-2">{Number(statistics.presentCount) || 0}</p>
-                <p className="text-xs text-slate-500 mt-2">✓ {statistics.totalEmployees > 0 ? Math.round((statistics.presentCount / statistics.totalEmployees) * 100) : 0}% attendance</p>
+                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Present Today</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{statistics.presentCount || 0}</p>
+                <p className="text-xs text-gray-500 mt-2">✓ {statistics.totalEmployees > 0 ? Math.round((statistics.presentCount / statistics.totalEmployees) * 100) : 0}% attendance</p>
               </div>
               <div className="text-4xl opacity-20 text-emerald-600">✓</div>
             </div>
@@ -176,9 +176,9 @@ const AdminDashboardPage = () => {
           <div className="bg-white rounded-xl p-6 border-2 border-red-200 hover:border-red-400 hover:shadow-lg transition-all hover:shadow-red-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">Absent Today</p>
-                <p className="text-3xl font-bold text-red-600 mt-2">{Number(statistics.absentCount) || 0}</p>
-                <p className="text-xs text-slate-500 mt-2">✕ Not marked</p>
+                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Absent Today</p>
+                <p className="text-3xl font-bold text-red-600 mt-2">{statistics.absentCount || 0}</p>
+                <p className="text-xs text-gray-500 mt-2">✕ Not marked</p>
               </div>
               <div className="text-4xl opacity-20 text-red-600">✕</div>
             </div>
@@ -188,9 +188,9 @@ const AdminDashboardPage = () => {
           <div className="bg-white rounded-xl p-6 border-2 border-amber-200 hover:border-amber-400 hover:shadow-lg transition-all hover:shadow-amber-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">On Leave</p>
-                <p className="text-3xl font-bold text-amber-600 mt-2">{Number(statistics.onLeaveCount) || 0}</p>
-                <p className="text-xs text-slate-500 mt-2">📅 Approved</p>
+                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">On Leave</p>
+                <p className="text-3xl font-bold text-amber-600 mt-2">{statistics.onLeaveCount || 0}</p>
+                <p className="text-xs text-gray-500 mt-2">📅 Approved</p>
               </div>
               <div className="text-4xl opacity-20 text-amber-600">📅</div>
             </div>
@@ -200,20 +200,20 @@ const AdminDashboardPage = () => {
           <div className="bg-white rounded-xl p-6 border-2 border-cyan-200 hover:border-cyan-400 hover:shadow-lg transition-all hover:shadow-cyan-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">Departments</p>
-                <p className="text-3xl font-bold text-cyan-600 mt-2">{Number(statistics.totalDepartments) || 0}</p>
-                <p className="text-xs text-slate-500 mt-2">🏢 Active</p>
+                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Departments</p>
+                <p className="text-3xl font-bold text-purple-600 mt-2">{statistics.totalDepartments || 0}</p>
+                <p className="text-xs text-gray-500 mt-2">🏢 Active</p>
               </div>
               <div className="text-4xl opacity-20 text-cyan-600">🏢</div>
             </div>
           </div>
 
           {/* Pending Leaves - Indigo */}
-          <div className="bg-white rounded-xl p-6 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-lg transition-all hover:shadow-indigo-100">
+          <div className="bg-white rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all hover:shadow-blue-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">Pending Leaves</p>
-                <p className="text-3xl font-bold text-indigo-600 mt-2">{leaves.length || 0}</p>
+                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Pending Leaves</p>
+                <p className="text-3xl font-bold text-blue-600 mt-2">{leaves.length || 0}</p>
                 <p className="text-xs text-slate-500 mt-2">⏳ Awaiting</p>
               </div>
               <div className="text-4xl opacity-20 text-indigo-600">⏳</div>
@@ -230,7 +230,7 @@ const AdminDashboardPage = () => {
               '#f59e0b': { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', hover: 'hover:border-amber-400 hover:shadow-amber-100' }
             };
             const colors = colorClasses[item.color] || colorClasses['#10b981'];
-            
+
             return (
               <div
                 key={idx}
@@ -264,19 +264,19 @@ const AdminDashboardPage = () => {
             <p className="text-4xl font-bold text-slate-900 mt-3">{totalEmployees}</p>
             <p className="text-xs text-slate-500 mt-2">👥 Employees</p>
           </div>
-          
+
           <div className="bg-blue-50 rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 text-center hover:shadow-lg transition-all hover:shadow-blue-100">
             <p className="text-blue-600 text-sm font-semibold uppercase">Male</p>
             <p className="text-4xl font-bold text-blue-600 mt-3">{maleCount}</p>
             <p className="text-xs text-blue-500 mt-2">{totalEmployees > 0 ? Math.round((maleCount / totalEmployees) * 100) : 0}%</p>
           </div>
-          
+
           <div className="bg-pink-50 rounded-xl p-6 border-2 border-pink-200 hover:border-pink-400 text-center hover:shadow-lg transition-all hover:shadow-pink-100">
             <p className="text-pink-600 text-sm font-semibold uppercase">Female</p>
             <p className="text-4xl font-bold text-pink-600 mt-3">{femaleCount}</p>
             <p className="text-xs text-pink-500 mt-2">{totalEmployees > 0 ? Math.round((femaleCount / totalEmployees) * 100) : 0}%</p>
           </div>
-          
+
           <div className="bg-purple-50 rounded-xl p-6 border-2 border-purple-200 hover:border-purple-400 text-center hover:shadow-lg transition-all hover:shadow-purple-100">
             <p className="text-purple-600 text-sm font-semibold uppercase">Other</p>
             <p className="text-4xl font-bold text-purple-600 mt-3">{otherCount}</p>
@@ -292,7 +292,7 @@ const AdminDashboardPage = () => {
               <span className="text-2xl">📊</span> Employees by Department
             </h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData.length > 0 ? chartData : [{name: 'No Data', count: 0}]}>
+              <BarChart data={chartData.length > 0 ? chartData : [{ name: 'No Data', count: 0 }]}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} stroke="rgba(100, 116, 139, 0.8)" />
                 <YAxis stroke="rgba(100, 116, 139, 0.8)" />
@@ -310,7 +310,7 @@ const AdminDashboardPage = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={genderData.length > 0 ? genderData : [{name: 'No Data', value: 1, fill: '#e5e7eb'}]}
+                  data={genderData.length > 0 ? genderData : [{ name: 'No Data', value: 1, fill: '#e5e7eb' }]}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -319,7 +319,7 @@ const AdminDashboardPage = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {(genderData.length > 0 ? genderData : [{name: 'No Data', value: 1, fill: '#e5e7eb'}]).map((entry, index) => (
+                  {(genderData.length > 0 ? genderData : [{ name: 'No Data', value: 1, fill: '#e5e7eb' }]).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>

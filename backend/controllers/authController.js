@@ -1,13 +1,20 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const sgMail = require('@sendgrid/mail');
 const Admin = require('../models/Admin');
 const Employee = require('../models/Employee');
 const Department = require('../models/Department');
 const PasswordReset = require('../models/PasswordReset');
-const { transporter, sendApprovalRequestToAdmin } = require('../utils/emailService');
+const { sendApprovalRequestToAdmin, sendEmailSafe } = require('../utils/emailService');
+const { validatePasswordStrength } = require('../utils/passwordValidator');
+const { logSecurityEvent, logFailedAttempt, getRecentFailedAttempts } = require('../utils/auditLogger');
+
+// Configure SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL;
 
 const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'your_jwt_secret_key', {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '7d'
   });
 };
@@ -138,7 +145,8 @@ exports.register = async (req, res) => {
         name: employee.name,
         email: employee.email,
         role: employee.role,
-        department: employee.department
+        department: employee.department,
+        isApproved: false
       }
     });
   } catch (error) {
@@ -192,6 +200,7 @@ exports.login = async (req, res) => {
     // Employee login
     const employee = await Employee.findOne({
       $or: [
+        { email: identifier.toLowerCase() },
         { employeeId: identifier },
         { name: identifier }
       ],
@@ -225,8 +234,16 @@ exports.login = async (req, res) => {
         id: employee._id,
         employeeId: employee.employeeId,
         name: employee.name,
+        email: employee.email,
         role: employee.role,
-        department: employee.department
+        department: employee.department,
+        isApproved: employee.isApproved,
+        approvalDate: employee.approvalDate,
+        designation: employee.designation,
+        phone: employee.phone,
+        profilePicture: employee.profilePicture,
+        gender: employee.gender,
+        joiningDate: employee.joiningDate
       }
     });
   } catch (error) {
@@ -261,34 +278,68 @@ exports.verifyToken = (req, res) => {
 };
 
 // Forgot Password - Request Reset Link
+/**
+ * PRODUCTION-GRADE: Request Password Reset with Rate Limiting & Audit Logging
+ */
 exports.forgotPassword = async (req, res) => {
   try {
     const { email, userType } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress || 'UNKNOWN';
 
+    // Validate input
     if (!email || !userType) {
+      logFailedAttempt(email || 'UNKNOWN', userType || 'UNKNOWN', 'FORGOT_PASSWORD', ipAddress, 'Missing required fields');
       return res.status(400).json({ error: 'Email and user type are required' });
     }
 
     if (!['employee', 'admin'].includes(userType)) {
+      logFailedAttempt(email, userType, 'FORGOT_PASSWORD', ipAddress, 'Invalid user type');
       return res.status(400).json({ error: 'Invalid user type' });
     }
 
-    // Find user
-    const Model = userType === 'admin' ? Admin : Employee;
-    const user = await Model.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.toLowerCase().trim();
 
+    // ✅ RATE LIMITING: Check for excessive password reset requests (max 3 per 24 hours)
+    const recentFailedAttempts = getRecentFailedAttempts(normalizedEmail, userType, 1440); // 24 hours
+    const resetAttempts = recentFailedAttempts.filter(a => a.attemptType === 'FORGOT_PASSWORD');
+    
+    if (resetAttempts.length >= 3) {
+      logSecurityEvent(
+        'PASSWORD_RESET_RATE_LIMIT_EXCEEDED',
+        'UNKNOWN',
+        userType,
+        { email: normalizedEmail, attemptCount: resetAttempts.length },
+        ipAddress,
+        false
+      );
+      return res.status(429).json({ 
+        error: 'Too many password reset requests. Try again later.' 
+      });
+    }
+
+    // Find user (security: don't reveal if email exists)
+    const Model = userType === 'admin' ? Admin : Employee;
+    const user = await Model.findOne({ email: normalizedEmail });
+
+    // ✅ SECURITY: Return same response whether user exists or not (prevents account enumeration)
     if (!user) {
-      // Return generic message for security
+      logFailedAttempt(normalizedEmail, userType, 'FORGOT_PASSWORD', ipAddress, 'User not found');
       return res.status(200).json({
         message: 'If an account exists with this email, a reset link will be sent'
       });
     }
 
+    // ✅ SECURITY: Invalidate previous unused reset tokens
+    await PasswordReset.updateMany(
+      { userId: user._id, userType, used: false },
+      { used: true, usedAt: new Date() }
+    );
+
     // Generate reset token
     const { token, tokenHash, expiresAt } = PasswordReset.generateResetToken();
 
     // Save reset token to database
-    await PasswordReset.create({
+    const resetRecord = await PasswordReset.create({
       userId: user._id,
       userType,
       email: user.email,
@@ -300,76 +351,129 @@ exports.forgotPassword = async (req, res) => {
     // Create reset link
     const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}&type=${userType}`;
 
-    // Send email
+    // Log security event
+    logSecurityEvent(
+      'PASSWORD_RESET_REQUEST',
+      user._id.toString(),
+      userType,
+      { email: user.email, resetId: resetRecord._id.toString() },
+      ipAddress,
+      true
+    );
+
+    // Send email with proper content
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px;">Password Reset Request</h1>
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Password Reset Request</h1>
         </div>
         
-        <div style="margin-bottom: 20px;">
-          <p style="color: #333; font-size: 16px;">Hello ${user.name},</p>
-          <p style="color: #666; font-size: 14px; line-height: 1.6;">
-            We received a request to reset your password. Click the button below to reset it. This link will expire in 24 hours.
+        <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px;">
+          <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Hello ${user.name},</p>
+          <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+            We received a password reset request for your account. Click the button below to reset your password. This link will expire in 24 hours.
           </p>
+
+          <div style="text-align: center; margin-bottom: 20px;">
+            <a href="${resetLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 35px; border-radius: 4px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">
+              Reset Password
+            </a>
+          </div>
+
+          <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #667eea;">
+            <p style="margin: 0; font-size: 12px; color: #666; word-break: break-all;">
+              Or copy this link: <br/>
+              <code>${resetLink}</code>
+            </p>
+          </div>
+
+          <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 20px;">
+            <p style="margin: 0; font-size: 12px; color: #856404;">
+              <strong>Security Note:</strong> If you did not request this, please ignore this email. Your password will not change unless you click the link above.
+            </p>
+          </div>
+
+          <div style="background: #f0f0f0; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <p style="margin: 0; font-size: 11px; color: #888;">
+              <strong>Important:</strong> This link is only valid for 24 hours. Please act immediately.
+            </p>
+          </div>
         </div>
 
-        <div style="text-align: center; margin-bottom: 20px;">
-          <a href="${resetLink}" style="background: #667eea; color: white; padding: 12px 30px; border-radius: 4px; text-decoration: none; font-weight: bold; display: inline-block;">
-            Reset Password
-          </a>
+        <div style="text-align: center; padding: 20px; color: #999; font-size: 11px; border-top: 1px solid #eee;">
+          <p style="margin: 5px 0;">Attendance System - Password Reset</p>
         </div>
-
-        <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-          <p style="margin: 0; font-size: 12px; color: #666;">
-            Or copy and paste this link: <br/>
-            <code style="word-break: break-all;">${resetLink}</code>
-          </p>
-        </div>
-
-        <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 4px;">
-          <p style="margin: 0; font-size: 12px; color: #856404;">
-            <strong>Security Note:</strong> If you didn't request this, please ignore this email. Your password won't be changed unless you click the link above.
-          </p>
-        </div>
-
-        <p style="color: #999; font-size: 12px; margin-top: 20px; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
-          Attendance System - Password Reset
-        </p>
       </div>
     `;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: 'Password Reset Request',
-      html: html
-    });
+    try {
+      const msg = {
+        to: user.email,
+        from: FROM_EMAIL,
+        subject: 'Password Reset Request - Attendance System',
+        html: html
+      };
+      await sendEmailSafe(msg);
+      console.log(`Password reset email sent to: ${user.email}`);
+    } catch (emailError) {
+      console.error('Failed to send reset email:', emailError);
+      logSecurityEvent(
+        'PASSWORD_RESET_EMAIL_FAILED',
+        user._id.toString(),
+        userType,
+        { email: user.email, error: emailError.message },
+        ipAddress,
+        false
+      );
+      // Don't expose email error to client, but log it
+    }
 
+    // Return generic success message for security
     res.status(200).json({
       message: 'If an account exists with this email, a reset link will be sent'
     });
   } catch (error) {
     console.error('Error in forgotPassword:', error);
-    res.status(500).json({ error: error.message });
+    logSecurityEvent(
+      'PASSWORD_RESET_REQUEST_ERROR',
+      'UNKNOWN',
+      req.body.userType || 'UNKNOWN',
+      { error: error.message },
+      req.ip,
+      false
+    );
+    res.status(500).json({ error: 'An error occurred. Please try again later.' });
   }
 };
 
-// Reset Password - Verify Token and Update Password
+/**
+ * PRODUCTION-GRADE: Reset Password with Strength Validation & Comprehensive Security
+ */
 exports.resetPassword = async (req, res) => {
   try {
     const { token, password, confirmPassword, userType } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress || 'UNKNOWN';
 
-    if (!token || !password || !confirmPassword) {
-      return res.status(400).json({ error: 'Token, password, and confirm password are required' });
+    // Validate input
+    if (!token || !password || !confirmPassword || !userType) {
+      logFailedAttempt('UNKNOWN', userType || 'UNKNOWN', 'RESET_PASSWORD', ipAddress, 'Missing required fields');
+      return res.status(400).json({ error: 'Token, password, confirm password, and user type are required' });
     }
 
     if (password !== confirmPassword) {
+      logFailedAttempt('UNKNOWN', userType, 'RESET_PASSWORD', ipAddress, 'Passwords do not match');
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    // ✅ SECURITY: Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      logFailedAttempt('UNKNOWN', userType, 'WEAK_PASSWORD', ipAddress, passwordValidation.errors.join('; '));
+      return res.status(400).json({ 
+        error: 'Password is too weak',
+        details: passwordValidation.errors,
+        strength: passwordValidation.strength
+      });
     }
 
     // Hash the token to match database
@@ -383,98 +487,177 @@ exports.resetPassword = async (req, res) => {
     });
 
     if (!resetRecord) {
+      logFailedAttempt('UNKNOWN', userType, 'RESET_PASSWORD', ipAddress, 'Invalid or expired token');
       return res.status(400).json({ error: 'Invalid or expired reset link' });
     }
 
-    // Find user and update password
+    // Find user
     const Model = resetRecord.userType === 'admin' ? Admin : Employee;
     const user = await Model.findById(resetRecord.userId);
 
     if (!user) {
+      logSecurityEvent(
+        'PASSWORD_RESET_USER_NOT_FOUND',
+        resetRecord.userId.toString(),
+        resetRecord.userType,
+        { email: resetRecord.email },
+        ipAddress,
+        false
+      );
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Update password
-    user.password = password;
-    await user.save();
-
-    // Mark reset token as used
-    resetRecord.used = true;
-    resetRecord.usedAt = new Date();
-    await resetRecord.save();
-
-    // ✅ REAL-TIME UPDATES: Emit socket event for password change
-    const io = req.io;
-    if (io) {
-      // Notify all admin dashboards about password change
-      io.emit('user:passwordChanged', {
-        userId: user._id.toString(),
-        userType: resetRecord.userType,
-        userName: user.name,
-        email: user.email,
-        timestamp: new Date(),
-        message: `${user.name} (${resetRecord.userType}) has reset their password`
+    // ✅ SECURITY: Check if password is same as current password
+    const bcrypt = require('bcryptjs');
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      logFailedAttempt(resetRecord.email, resetRecord.userType, 'RESET_PASSWORD', ipAddress, 'New password same as old');
+      return res.status(400).json({ 
+        error: 'New password must be different from your current password' 
       });
-
-      // Disconnect all existing sockets for this user (forces re-login)
-      const sockets = await io.fetchSockets();
-      for (const socket of sockets) {
-        if (socket.handshake.auth.userId === user._id.toString()) {
-          socket.emit('auth:sessionInvalidated', {
-            reason: 'password_changed',
-            message: 'Your password was changed. Please log in again.'
-          });
-          socket.disconnect();
-        }
-      }
     }
 
-    // Send confirmation email
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px;">✓ Password Changed Successfully</h1>
+    try {
+      // Update password
+      user.password = password;
+      user.passwordChangedAt = new Date(); // Track when password was last changed
+      await user.save();
+
+      // Mark reset token as used
+      resetRecord.used = true;
+      resetRecord.usedAt = new Date();
+      await resetRecord.save();
+
+      // Log successful password reset
+      logSecurityEvent(
+        'PASSWORD_RESET_SUCCESS',
+        user._id.toString(),
+        resetRecord.userType,
+        { email: user.email, resetId: resetRecord._id.toString() },
+        ipAddress,
+        true
+      );
+
+      // ✅ REAL-TIME: Invalidate all user sessions
+      const io = req.io;
+      if (io) {
+        try {
+          // Notify admin dashboards
+          io.emit('user:passwordChanged', {
+            userId: user._id.toString(),
+            userType: resetRecord.userType,
+            userName: user.name,
+            email: user.email,
+            timestamp: new Date(),
+            message: `${user.name} (${resetRecord.userType}) has successfully reset their password`
+          });
+
+          // Disconnect all user sessions
+          const sockets = await io.fetchSockets();
+          for (const socket of sockets) {
+            if (socket.handshake.auth && socket.handshake.auth.userId === user._id.toString()) {
+              socket.emit('auth:sessionInvalidated', {
+                reason: 'password_changed',
+              message: 'Your password has been successfully reset. Please login with your new password.'
+              });
+              socket.disconnect(true);
+            }
+          }
+        } catch (socketError) {
+          console.error('Error invalidating sessions:', socketError);
+        }
+      }
+
+      // Send confirmation email
+      const html = `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+          <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 600;">✓ Password Reset Successfully</h1>
+          </div>
+          
+          <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px;">
+            <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Hello ${user.name},</p>
+            <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+              Your password has been successfully reset. You can now log in with your new password.
+            </p>
+
+            <div style="background: #d4edda; padding: 15px; border-left: 4px solid #28a745; border-radius: 4px; margin-bottom: 20px;">
+              <p style="margin: 0; font-size: 12px; color: #155724;">
+                <strong>Important:</strong> If you did not make this change, please contact support immediately.
+              </p>
+            </div>
+
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #007bff;">
+              <p style="margin: 0; font-size: 12px; color: #333;">
+                <strong>Password Changed Date & Time:</strong> ${new Date().toLocaleString()}
+              </p>
+            </div>
+
+            <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 4px;">
+              <p style="margin: 0; font-size: 12px; color: #856404;">
+                <strong>Security Tip:</strong> Do not share your password with anyone. Never disclose your account details.
+              </p>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 20px; color: #999; font-size: 11px; border-top: 1px solid #eee;">
+            <p style="margin: 5px 0;">Attendance System - Secure Account</p>
+          </div>
         </div>
-        
-        <div style="margin-bottom: 20px;">
-          <p style="color: #333; font-size: 16px;">Hello ${user.name},</p>
-          <p style="color: #666; font-size: 14px; line-height: 1.6;">
-            Your password has been successfully reset. You can now login with your new password.
-          </p>
-        </div>
+      `;
 
-        <div style="background: #d4edda; padding: 15px; border-left: 4px solid #28a745; border-radius: 4px; margin-bottom: 20px;">
-          <p style="margin: 0; font-size: 12px; color: #155724;">
-            If this wasn't you, please contact support immediately.
-          </p>
-        </div>
+      try {
+        const msg = {
+          to: user.email,
+          from: FROM_EMAIL,
+          subject: 'Password Reset Successful - Attendance System',
+          html: html
+        };
+        await sendEmailSafe(msg);
+        console.log(`Password reset confirmation email sent to: ${user.email}`);
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+        // Don't fail the reset if confirmation email fails
+      }
 
-        <p style="color: #999; font-size: 12px; margin-top: 20px; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
-          Attendance System - Password Reset Confirmation
-        </p>
-      </div>
-    `;
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: 'Password Reset Confirmation',
-      html: html
-    });
-
-    res.status(200).json({
-      message: 'Password has been reset successfully'
-    });
+      res.status(200).json({
+        message: 'Password has been successfully reset. Please login again.',
+        success: true,
+        redirectUrl: userType === 'admin' ? '/login/admin' : '/login/employee'
+      });
+    } catch (passwordError) {
+      console.error('Error updating password:', passwordError);
+      logSecurityEvent(
+        'PASSWORD_RESET_UPDATE_FAILED',
+        user._id.toString(),
+        resetRecord.userType,
+        { error: passwordError.message },
+        ipAddress,
+        false
+      );
+      throw passwordError;
+    }
   } catch (error) {
     console.error('Error in resetPassword:', error);
-    res.status(500).json({ error: error.message });
+    logSecurityEvent(
+      'PASSWORD_RESET_ERROR',
+      'UNKNOWN',
+      req.body.userType || 'UNKNOWN',
+      { error: error.message },
+      req.ip,
+      false
+    );
+    res.status(500).json({ error: 'An error occurred while resetting password. Please try again.' });
   }
 };
 
-// Verify Reset Token (check if token is valid)
+/**
+ * PRODUCTION-GRADE: Verify Password Reset Token
+ */
 exports.verifyResetToken = async (req, res) => {
   try {
     const { token } = req.query;
+    const ipAddress = req.ip || req.connection.remoteAddress || 'UNKNOWN';
 
     if (!token) {
       return res.status(400).json({ error: 'Token is required' });
@@ -491,19 +674,283 @@ exports.verifyResetToken = async (req, res) => {
     });
 
     if (!resetRecord) {
+      logFailedAttempt('UNKNOWN', 'UNKNOWN', 'VERIFY_TOKEN', ipAddress, 'Invalid or expired token');
       return res.status(400).json({ error: 'Invalid or expired reset link' });
     }
+
+    // Log token verification
+    logSecurityEvent(
+      'PASSWORD_RESET_TOKEN_VERIFIED',
+      resetRecord.userId.toString(),
+      resetRecord.userType,
+      { email: resetRecord.email },
+      ipAddress,
+      true
+    );
 
     res.status(200).json({
       valid: true,
       email: resetRecord.email,
-      userType: resetRecord.userType
+      userType: resetRecord.userType,
+      expiresAt: resetRecord.expiresAt
     });
   } catch (error) {
     console.error('Error in verifyResetToken:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An error occurred while verifying token.' });
   }
 };
+
+/**
+ * PRODUCTION-GRADE: Change Password (for authenticated users)
+ * Requires: JWT token authentication
+ */
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.userId; // From JWT auth middleware
+    const userType = req.userRole; // From JWT auth middleware
+    const ipAddress = req.ip || req.connection.remoteAddress || 'UNKNOWN';
+
+    // Validate input
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: 'All password fields are required' });
+    }
+
+    if (newPassword !== confirmPassword) {
+      logFailedAttempt('UNKNOWN', userType, 'CHANGE_PASSWORD', ipAddress, 'New passwords do not match');
+      return res.status(400).json({ error: 'New passwords do not match' });
+    }
+
+    if (oldPassword === newPassword) {
+      logFailedAttempt('UNKNOWN', userType, 'CHANGE_PASSWORD', ipAddress, 'New password same as old');
+      return res.status(400).json({ error: 'New password must be different from the current password' });
+    }
+
+    // ✅ SECURITY: Validate password strength for new password
+    const passwordValidation = validatePasswordStrength(newPassword);
+    if (!passwordValidation.isValid) {
+      logFailedAttempt('UNKNOWN', userType, 'WEAK_PASSWORD', ipAddress, passwordValidation.errors.join('; '));
+      return res.status(400).json({ 
+        error: 'New password is too weak',
+        details: passwordValidation.errors,
+        strength: passwordValidation.strength
+      });
+    }
+
+    // Find user
+    const Model = userType === 'admin' ? Admin : Employee;
+    const user = await Model.findById(userId);
+
+    if (!user) {
+      logSecurityEvent(
+        'CHANGE_PASSWORD_USER_NOT_FOUND',
+        userId,
+        userType,
+        {},
+        ipAddress,
+        false
+      );
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // ✅ SECURITY: Verify old password
+    const bcrypt = require('bcryptjs');
+    const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordCorrect) {
+      logFailedAttempt(user.email, userType, 'CHANGE_PASSWORD', ipAddress, 'Incorrect old password');
+      logSecurityEvent(
+        'CHANGE_PASSWORD_FAILED',
+        userId,
+        userType,
+        { email: user.email, reason: 'incorrect_password' },
+        ipAddress,
+        false
+      );
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    try {
+      // Update password
+      user.password = newPassword;
+      user.passwordChangedAt = new Date();
+      await user.save();
+
+      // Log successful password change
+      logSecurityEvent(
+        'CHANGE_PASSWORD_SUCCESS',
+        userId,
+        userType,
+        { email: user.email },
+        ipAddress,
+        true
+      );
+
+      // ✅ REAL-TIME: Optionally keep user logged in (don't invalidate session)
+      // Or invalidate all other sessions but keep current one
+      const io = req.io;
+      if (io) {
+        try {
+          // Notify admin dashboards
+          io.emit('user:passwordChanged', {
+            userId: user._id.toString(),
+            userType: userType,
+            userName: user.name,
+            email: user.email,
+            timestamp: new Date(),
+            message: `${user.name} (${userType}) has successfully changed their password`
+          });
+        } catch (socketError) {
+          console.error('Error emitting socket event:', socketError);
+        }
+      }
+
+      // Send confirmation email
+      const html = `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+          <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 600;">✓ Password Changed Successfully</h1>
+          </div>
+          
+          <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px;">
+            <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Hello ${user.name},</p>
+            <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+              Your password has been successfully changed.
+            </p>
+
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #007bff;">
+              <p style="margin: 0; font-size: 12px; color: #333;">
+                <strong>Date & Time:</strong> ${new Date().toLocaleString('en-US')}
+              </p>
+            </div>
+
+            <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 4px;">
+              <p style="margin: 0; font-size: 12px; color: #856404;">
+                <strong>Security Notice:</strong> If you did not make this change, please contact support immediately.
+              </p>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 20px; color: #999; font-size: 11px; border-top: 1px solid #eee;">
+            <p style="margin: 5px 0;">Attendance System - Secure Account</p>
+          </div>
+        </div>
+      `;
+
+      try {
+        const msg = {
+          to: user.email,
+          from: FROM_EMAIL,
+          subject: 'Password Change Confirmation - Attendance System',
+          html: html
+        };
+        await sendEmailSafe(msg);
+        console.log(`Password change confirmation email sent to: ${user.email}`);
+      } catch (emailError) {
+        console.error('Failed to send password change confirmation email:', emailError);
+      }
+
+      res.status(200).json({
+        message: 'Password has been successfully changed',
+        success: true
+      });
+    } catch (passwordError) {
+      console.error('Error updating password:', passwordError);
+      logSecurityEvent(
+        'CHANGE_PASSWORD_UPDATE_FAILED',
+        userId,
+        userType,
+        { error: passwordError.message },
+        ipAddress,
+        false
+      );
+      res.status(500).json({ error: 'Error updating password. Please try again.' });
+    }
+  } catch (error) {
+    console.error('Error in changePassword:', error);
+    logSecurityEvent(
+      'CHANGE_PASSWORD_ERROR',
+      req.userId || 'UNKNOWN',
+      req.userRole || 'UNKNOWN',
+      { error: error.message },
+      req.ip,
+      false
+    );
+    res.status(500).json({ error: 'Error changing password. Please try again later.' });
+  }
+};
+// Update Admin Profile
+exports.updateAdminProfile = async (req, res) => {
+  try {
+    const { name, phone, gender, address, designation } = req.body;
+    const adminId = req.userId;
+
+    if (!adminId) {
+      return res.status(401).json({ error: 'Admin not authenticated' });
+    }
+
+    // Validate input
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    // Valid designation values
+    const validDesignations = ['CEO', 'CTO', 'MD', 'COO', 'CFO', 'Director', 'Manager', 'Administrator', 'Other'];
+    if (designation && !validDesignations.includes(designation)) {
+      return res.status(400).json({ error: 'Invalid designation selected' });
+    }
+
+    // Build update object
+    const updateData = {
+      name: name.trim(),
+      phone: phone || '',
+      gender: gender || '',
+      address: address || ''
+    };
+
+    if (designation) {
+      updateData.designation = designation;
+    }
+
+    // Update admin in database
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      adminId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    // Log security event
+    logSecurityEvent(
+      'ADMIN_PROFILE_UPDATE',
+      adminId,
+      'admin',
+      { updatedFields: Object.keys(updateData) },
+      req.ip,
+      true
+    );
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: updatedAdmin
+    });
+  } catch (error) {
+    console.error('Error updating admin profile:', error);
+    logSecurityEvent(
+      'ADMIN_PROFILE_UPDATE_ERROR',
+      req.userId || 'UNKNOWN',
+      'admin',
+      { error: error.message },
+      req.ip,
+      false
+    );
+    res.status(500).json({ error: 'Failed to update profile. Please try again later.' });
+  }
+};
+
 // Check approval status (public endpoint - no auth required)
 exports.checkApprovalStatus = async (req, res) => {
   try {

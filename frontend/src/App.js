@@ -39,6 +39,7 @@ import AdminForgotPasswordPage from './pages/AdminForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminEmployeeApprovalPage from './pages/AdminEmployeeApprovalPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 
 function App() {
   return (
@@ -98,6 +99,14 @@ function App() {
                 <LayoutWrapper>
                   <ProfilePage />
                 </LayoutWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePasswordPage />
               </ProtectedRoute>
             }
           />
