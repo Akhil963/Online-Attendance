@@ -172,7 +172,7 @@ const EnhancedAdminDashboard = () => {
           <div className="relative w-24 h-24 mx-auto mb-8">
             <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center text-blue-600 font-black italic tracking-tighter text-xl">AS</div>
+            <div className="absolute inset-0 flex items-center justify-center text-blue-600 font-black italic tracking-tighter text-xl">OAS</div>
           </div>
           <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px] animate-pulse">Loading...</p>
         </div>

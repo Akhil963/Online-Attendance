@@ -99,7 +99,7 @@ const SignupPage = () => {
 
         <div className="text-center mb-12 relative z-10">
           <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/20 active:scale-95 transition-transform">
-            <span className="text-white text-2xl font-bold tracking-tight">AS</span>
+            <span className="text-white text-2xl font-bold tracking-tight">OAS</span>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-2">Employee Registration</h1>
           <div className="flex items-center justify-center gap-2">

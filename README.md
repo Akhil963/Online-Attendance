@@ -1,377 +1,1379 @@
-# Online Attendance System
+# Online Attendance System v1.0.0
 
-A comprehensive full-stack web application for managing employee attendance, leave requests, and notifications.
+> A comprehensive full-stack web application for managing employee attendance, leave requests, and organizational notifications with real-time updates and advanced analytics.
 
-## 🌟 Features
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green?logo=node.js)](https://nodejs.org)
+[![React](https://img.shields.io/badge/React-18+-blue?logo=react)](https://reactjs.org)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green?logo=mongodb)](https://www.mongodb.com)
+[![License](https://img.shields.io/badge/License-ISC-blue)](LICENSE)
 
-### Employee Side
-- **Real-time Attendance Marking**
-  - Check-in/Check-out with real-time clock
-  - Time cannot be manually changed on client-side
-  - Automatic timestamp recording
+## Table of Contents
 
-- **Dashboard Analytics**
-  - Monthly attendance statistics
-  - Attendance distribution pie charts
-  - Gender ratio analysis
-  - Department-wise employee distribution
-  - Attendance trend graphs
+- [Overview](#overview)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Installation & Setup](#installation--setup)
+- [Configuration](#configuration)
+- [Running the Application](#running-the-application)
+- [Docker Setup](#docker-setup)
+- [API Endpoints](#api-endpoints)
+- [Database Schema](#database-schema)
+- [Technology Stack](#technology-stack)
+- [User Roles & Permissions](#user-roles--permissions)
+- [Real-time Features](#real-time-features)
+- [Troubleshooting](#troubleshooting)
+- [Future Enhancements](#future-enhancements)
+- [License & Contributors](#license--contributors)
 
-- **Leave Management**
-  - Apply for planned/unplanned/medical/emergency leaves
-  - View leave history
-  - Track approval status
+---
 
-- **Department Information**
-  - View all departments
-  - See employee count per department
-  - Department details
+## Overview
 
-- **Notices Board**
-  - View company-wide notices
-  - Filter by category and department
-  - Check expiry dates
+The **Online Attendance System** is an enterprise-grade attendance management solution designed for organizations to streamline employee attendance tracking, leave management, and organizational communication. The system offers a responsive web interface with real-time updates, advanced analytics, and automated reporting capabilities.
 
-- **Profile Management**
-  - View personal details
-  - Update profile information
-  - Profile picture support
+**Key Highlights:**
+- ✅ Full-stack MERN application
+- ✅ Real-time attendance tracking with Socket.io
+- ✅ Role-based access control
+- ✅ Automated email reports
+- ✅ Excel export functionality
+- ✅ Mobile-responsive design
+- ✅ Production-ready architecture
 
-### Admin/Director Features
-- **Employee Management**
-  - Add/Edit/Delete employees
-  - View all employees
-  - Filter by department and status
+---
 
-- **Attendance Management**
-  - View all attendance records
-  - Filter by department and date
-  - Generate attendance reports
+## Features
 
-- **Leave Management**
-  - Review leave applications
-  - Approve/Reject leaves
-  - View leave history
+### 🎯 Employee Features
 
-- **Department Management**
-  - Create/Edit/Delete departments
-  - Manage department employees
+#### Attendance Management
+- ✓ Real-time check-in/check-out with live clock
+- ✓ Secure timestamp recording (client-side time manipulation protected)
+- ✓ Daily attendance status tracking
+- ✓ Attendance history with filtering options
+- ✓ Working hours calculation
 
-- **Notices Management**
-  - Post notices to specific departments
-  - Categorize notices
-  - Set expiry dates
+#### Dashboard Analytics
+- ✓ Monthly attendance statistics
+- ✓ Attendance distribution pie charts
+- ✓ Gender ratio analysis
+- ✓ Department-wise employee distribution
+- ✓ Attendance trend graphs and visual insights
+- ✓ Personal performance metrics
 
-- **Reports**
-  - Generate monthly attendance reports
-  - Export to Excel
-  - Daily email scheduling (7 PM)
+#### Leave Management
+- ✓ Multiple leave types (planned, unplanned, medical, emergency)
+- ✓ Leave balance tracking
+- ✓ Apply for leaves with reason
+- ✓ Track approval status in real-time
+- ✓ View complete leave history
+- ✓ Leave timeline visualization
 
-## 🏗️ Project Structure
+#### Department & Information
+- ✓ View all company departments
+- ✓ See department-wise employee distribution
+- ✓ Access department contact information
+- ✓ Department details and hierarchy
+
+#### Notices & Communication
+- ✓ View company-wide notices
+- ✓ Filter by category and department
+- ✓ Check notice expiry dates
+- ✓ Archive old notices
+- ✓ Attachment support
+
+#### Profile Management
+- ✓ View and update personal details
+- ✓ Profile picture with image cropping
+- ✓ Change password functionality
+- ✓ View employment history
+- ✓ Contact information management
+
+### 👨‍💼 Admin/Director Features
+
+#### Employee Management
+- ✓ Add/Edit/Delete employees
+- ✓ View all employees with advanced filtering
+- ✓ Filter by department, status, and role
+- ✓ Bulk employee operations
+- ✓ Employee status management (active/inactive)
+- ✓ Approve pending employee signups
+
+#### Attendance Management
+- ✓ View all attendance records with filters
+- ✓ Filter by department, date range, and status
+- ✓ Generate comprehensive attendance reports
+- ✓ Export to Excel with formatting
+- ✓ Identify attendance patterns and anomalies
+- ✓ Manual attendance adjustments (if needed)
+
+#### Leave Management
+- ✓ Review all leave applications
+- ✓ Approve/Reject leaves with comments
+- ✓ View leave history by employee/department
+- ✓ Leave balance management
+- ✓ Leave type configuration
+- ✓ Leave quota allocation
+
+#### Department Management
+- ✓ Create/Edit/Delete departments
+- ✓ Assign department managers
+- ✓ Manage department employees
+- ✓ Department hierarchy setup
+- ✓ Department information management
+
+#### Notices Management
+- ✓ Post notices to specific departments/roles
+- ✓ Categorize notices
+- ✓ Set notice expiry dates
+- ✓ Attachment upload support
+- ✓ Notice archival
+- ✓ Recipient tracking
+
+#### Reports & Analytics
+- ✓ Generate monthly attendance reports
+- ✓ Export to Excel with multiple formats
+- ✓ Automated daily email scheduling (7 PM)
+- ✓ Custom report generation
+- ✓ Department-wise analytics
+- ✓ Employee performance insights
+- ✓ Attendance trends and predictions
+
+---
+
+## Project Structure
 
 ```
 Online-Attendance/
-├── backend/                 # Node.js/Express server
-│   ├── models/             # MongoDB schemas
-│   ├── controllers/        # Business logic
-│   ├── routes/            # API endpoints
-│   ├── middleware/        # Auth and custom middleware
-│   ├── utils/            # Helper functions
-│   ├── server.js         # Main server file
-│   └── package.json
 │
-├── frontend/               # React application
+├── backend/                          # 🚀 Express.js Backend
+│   ├── controllers/                  # Business logic layer
+│   │   ├── attendanceController.js
+│   │   ├── authController.js
+│   │   ├── dashboardController.js
+│   │   ├── employeeController.js
+│   │   ├── leaveController.js
+│   │   └── noticeController.js
+│   │
+│   ├── models/                       # MongoDB schemas
+│   │   ├── Admin.js
+│   │   ├── Attendance.js
+│   │   ├── Department.js
+│   │   ├── Employee.js
+│   │   ├── Leave.js
+│   │   ├── Notice.js
+│   │   └── PasswordReset.js
+│   │
+│   ├── routes/                       # API endpoints
+│   │   ├── attendance.js
+│   │   ├── auth.js
+│   │   ├── dashboard.js
+│   │   ├── department.js
+│   │   ├── employee.js
+│   │   ├── holiday.js
+│   │   ├── leave.js
+│   │   └── notice.js
+│   │
+│   ├── middleware/                   # Authentication & custom middleware
+│   │   └── auth.js
+│   │
+│   ├── utils/                        # Utility functions
+│   │   ├── auditLogger.js
+│   │   ├── emailService.js
+│   │   ├── passwordValidator.js
+│   │   ├── seedDatabase.js
+│   │   ├── socketHandlers.js
+│   │   └── weeklyOffService.js
+│   │
+│   ├── server.js                     # Main server entry point
+│   ├── instrument.js                 # Monitoring/instrumentation
+│   ├── Dockerfile                    # Docker configuration
+│   ├── package.json                  # Dependencies
+│   └── logs/                         # Application logs
+│
+├── frontend/                         # ⚛️ React.js Frontend
 │   ├── src/
-│   │   ├── components/   # Reusable components
-│   │   ├── pages/       # Page components
-│   │   ├── services/    # API calls
-│   │   ├── context/     # React context
-│   │   ├── hooks/       # Custom hooks
-│   │   └── App.js
-│   ├── public/
-│   └── package.json
+│   │   ├── components/              # Reusable UI components
+│   │   │   ├── AdminHeader.js
+│   │   │   ├── AdminNavigation.js
+│   │   │   ├── AttendanceMarker.js
+│   │   │   ├── DashboardStatistics.js
+│   │   │   ├── Header.js
+│   │   │   ├── ImageCropModal.js
+│   │   │   ├── NotificationBadge.js
+│   │   │   └── ProtectedRoute.js
+│   │   │
+│   │   ├── pages/                   # Page components
+│   │   │   ├── AdminDashboardPage.js
+│   │   │   ├── AttendanceReportPage.js
+│   │   │   ├── DashboardPage.js
+│   │   │   ├── EmployeeManagementPage.js
+│   │   │   ├── HolidayManagementPage.js
+│   │   │   ├── LeaveBalancePage.js
+│   │   │   ├── LoginPage.js
+│   │   │   ├── NoticeManagementPage.js
+│   │   │   ├── ProfilePage.js
+│   │   │   └── SignupPage.js
+│   │   │
+│   │   ├── context/                 # React Context API
+│   │   │   └── AuthContext.js
+│   │   │
+│   │   ├── hooks/                   # Custom React hooks
+│   │   │   ├── useAuth.js
+│   │   │   └── useRealtime.js
+│   │   │
+│   │   ├── services/                # API calls & external services
+│   │   │   ├── api.js
+│   │   │   └── realtimeService.js
+│   │   │
+│   │   ├── utils/                   # Helper functions
+│   │   │   ├── dateNames.js
+│   │   │   └── exportUtils.js
+│   │   │
+│   │   ├── App.js                   # Main app component
+│   │   ├── index.js                 # React entry point
+│   │   └── index.css                # Global styles
+│   │
+│   ├── public/                       # Static assets
+│   │   └── index.html
+│   │
+│   ├── Dockerfile                    # Docker configuration
+│   ├── tailwind.config.js            # Tailwind CSS config
+│   ├── tsconfig.json                 # TypeScript config
+│   ├── postcss.config.js             # PostCSS config
+│   └── package.json                  # Dependencies
 │
-└── README.md
+├── docker-compose.yml                # Docker Compose orchestration
+├── setup.bat                         # Windows setup script
+├── setup.sh                          # Unix setup script
+├── package.json                      # Root package.json
+└── README.md                         # This file
 ```
 
-## 🚀 Getting Started
+---
 
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or Atlas)
-- npm or yarn
+## Prerequisites
 
-### Backend Setup
+Ensure you have the following installed on your system:
 
-1. **Navigate to backend directory**
+| Component | Version | Link |
+|-----------|---------|------|
+| **Node.js** | v16+ | [Download](https://nodejs.org/) |
+| **npm** | v7+ | Comes with Node.js |
+| **MongoDB** | v5.0+ | [Download](https://www.mongodb.com/try/download/community) |
+| **Git** | Latest | [Download](https://git-scm.com/) |
+
+**Optional:**
+- Docker & Docker Compose (for containerized setup)
+- MongoDB Atlas account (for cloud database)
+- SendGrid/Gmail account (for email functionality)
+
+---
+
+## Installation & Setup
+
+### Quick Start (Manual Setup)
+
+#### Step 1: Clone and Navigate to Project
+
 ```bash
+cd Online-Attendence
+```
+
+#### Step 2: Backend Setup
+
+```bash
+# Navigate to backend
 cd backend
-```
 
-2. **Install dependencies**
-```bash
+# Install dependencies
 npm install
-```
 
-3. **Create `.env` file**
-```bash
+# Create environment file
 cp .env.example .env
+
+# Configure environment variables (see Configuration section)
+# Edit .env with your settings
 ```
 
-4. **Configure environment variables**
-```env
-MONGODB_URI=mongodb://localhost:27017/attendance_system
-JWT_SECRET=your_jwt_secret_key
-PORT=5000
-CLIENT_URL=http://localhost:3000
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
-```
+#### Step 3: Frontend Setup
 
-5. **Start MongoDB**
 ```bash
-# On Windows
+# Navigate to frontend (from project root)
+cd frontend
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+
+# Configure environment variables
+# Edit .env with your settings
+```
+
+#### Step 4: Database Setup
+
+Ensure MongoDB is running:
+
+**Windows:**
+```bash
+# If installed as service
 mongod
 
-# On macOS
+# If using MongoDB Atlas, skip this step
+```
+
+**macOS:**
+```bash
 brew services start mongodb-community
 ```
 
-6. **Run the server**
+**Linux:**
 ```bash
-npm run dev
+sudo systemctl start mongod
 ```
 
-The backend will be running on `http://localhost:5000`
+#### Step 5: Run the Application
 
-### Frontend Setup
+In **separate terminals**, start both servers:
 
-1. **Navigate to frontend directory**
+**Terminal 1 - Backend:**
+```bash
+cd backend
+npm run dev
+# Server runs on http://localhost:5000
+```
+
+**Terminal 2 - Frontend:**
 ```bash
 cd frontend
+npm start
+# Application opens on http://localhost:3000
 ```
 
-2. **Install dependencies**
-```bash
-npm install
-```
+---
 
-3. **Create `.env` file**
-```bash
-cp .env.example .env
-```
+## Configuration
 
-4. **Configure environment variables**
+### Backend Environment Variables
+
+Create a `.env` file in the `backend` directory:
+
 ```env
-REACT_APP_API_URL=http://localhost:5000/api
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/attendance_system
+# OR for MongoDB Atlas:
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/attendance_system
+
+# JWT Configuration
+JWT_SECRET=your_super_secret_jwt_key_change_this
+JWT_EXPIRE=7d
+
+# Client Configuration
+CLIENT_URL=http://localhost:3000
+
+# Email Configuration (Gmail/SendGrid)
+EMAIL_SERVICE=gmail
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+
+# SendGrid Configuration (Alternative)
+# SENDGRID_API_KEY=your_sendgrid_api_key
+# SENDGRID_FROM_EMAIL=noreply@company.com
+
+# Twilio Configuration (Optional - for SMS)
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_PHONE_NUMBER=+1234567890
+
+# Sentry Configuration (Optional - Error Tracking)
+SENTRY_DSN=your_sentry_dsn
+
+# Application Settings
+DAILY_REPORT_TIME=19:00
+WORK_START_TIME=09:00
+WORK_END_TIME=18:00
 ```
 
-5. **Start the development server**
+### Frontend Environment Variables
+
+Create a `.env` file in the `frontend` directory:
+
+```env
+# API Configuration
+REACT_APP_API_URL=http://localhost:5000/api
+REACT_APP_SOCKET_URL=http://localhost:5000
+
+# Environment
+REACT_APP_ENV=development
+
+# Analytics (Optional)
+REACT_APP_SENTRY_DSN=your_sentry_dsn
+
+# Feature Flags
+REACT_APP_FEATURES_DARK_MODE=true
+REACT_APP_FEATURES_NOTIFICATIONS=true
+```
+
+---
+
+## Running the Application
+
+### Development Mode
+
 ```bash
+# Terminal 1 - Backend (with hot reload)
+cd backend
+npm run dev
+
+# Terminal 2 - Frontend (with hot reload)
+cd frontend
 npm start
 ```
 
-The frontend will be running on `http://localhost:3000`
+### Production Mode
 
-## 📚 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new employee
-- `POST /api/auth/login` - Employee login
-- `GET /api/auth/me` - Get current user
-- `GET /api/auth/verify-token` - Verify JWT token
-
-### Attendance
-- `POST /api/attendance/check-in` - Mark check-in
-- `POST /api/attendance/check-out` - Mark check-out
-- `GET /api/attendance/history` - Get attendance history
-- `GET /api/attendance/today` - Get today's attendance
-- `GET /api/attendance/all` - Get all attendance (Admin)
-
-### Leave
-- `POST /api/leave/apply` - Apply for leave
-- `GET /api/leave/my-leaves` - Get employee's leaves
-- `GET /api/leave/all` - Get all leaves (Admin)
-- `POST /api/leave/approve/:leaveId` - Approve leave
-- `POST /api/leave/reject/:leaveId` - Reject leave
-
-### Departments
-- `GET /api/department` - Get all departments
-- `GET /api/department/with-count` - Get departments with employee count
-- `POST /api/department` - Create department (Admin)
-- `PUT /api/department/:id` - Update department (Admin)
-- `DELETE /api/department/:id` - Delete department (Admin)
-
-### Employee
-- `GET /api/employee/profile` - Get user profile
-- `PUT /api/employee/profile` - Update profile
-- `GET /api/employee/all` - Get all employees (Admin)
-- `GET /api/employee/:id` - Get employee details
-- `PUT /api/employee/:id` - Update employee (Admin)
-- `DELETE /api/employee/:id` - Delete employee (Admin)
-
-### Dashboard
-- `GET /api/dashboard/employee` - Get employee dashboard
-- `GET /api/dashboard/admin` - Get admin dashboard
-- `POST /api/dashboard/report` - Generate report
-
-### Notices
-- `POST /api/notice` - Create notice (Admin)
-- `GET /api/notice` - Get notices
-- `GET /api/notice/all` - Get all notices (Admin)
-- `DELETE /api/notice/:id` - Delete notice (Admin)
-
-## 🔐 User Roles
-
-1. **Employee**
-   - Can mark attendance
-   - Can apply for leaves
-   - Can view notices
-   - Can view own profile
-
-2. **Manager**
-   - All employee permissions
-   - Can approve/reject leaves
-   - Can view department attendance
-
-3. **Director**
-   - All manager permissions
-   - Can access admin dashboard
-   - Can view all attendance
-
-4. **Admin**
-   - Full system access
-   - Can manage all records
-   - Can post notices
-   - Can generate reports
-
-## 📊 Real-time Features
-
-- **Socket.io Integration**
-  - Real-time attendance updates
-  - Live dashboard updates
-  - Instant notifications
-
-## 💾 Database Models
-
-### Employee
-- employeeId (auto-generated)
-- name, email, password
-- department, role
-- phone, designation, gender, address
-- profilePicture
-- status, joiningDate
-
-### Attendance
-- employeeId
-- date, checkInTime, checkOutTime
-- status (present/absent/leave)
-- workingHours
-
-### Leave
-- employeeId
-- leaveType, startDate, endDate
-- reason, status
-- approvedBy, approvalDate
-- numberOfDays
-
-### Department
-- name, description
-- managerId
-
-### Notice
-- title, content, category
-- departments, roles
-- postedBy, attachments
-- isActive, expiryDate
-
-## 📧 Email Reports
-
-- Automated daily reports at 7 PM
-- Excel file generation
-- Email to admin/managers
-- Includes attendance summary
-
-## 🎨 UI/UX Features
-
-- **Responsive Design** - Works on all devices
-- **Modern Dashboard** - Interactive charts and statistics
-- **Dark/Light Mode Support** - User preference
-- **Intuitive Navigation** - Easy to use interface
-- **Real-time Clock** - Shows current time
-- **Mobile-Friendly** - Optimized for mobile devices
-
-## 🛠️ Technology Stack
-
-### Backend
-- Node.js & Express.js
-- MongoDB & Mongoose
-- Socket.io
-- JWT for authentication
-- Nodemailer for emails
-- ExcelJS for reports
-
-### Frontend
-- React 18
-- React Router v6
-- Axios for API calls
-- Chart.js & Recharts for visualizations
-- Tailwind CSS for styling
-- React Toastify for notifications
-
-## 📝 Testing
-
-To test the application:
-
-1. Create a department first (as admin)
-2. Sign up as a new employee
-3. Login and mark attendance
-4. Apply for leaves
-5. View dashboard analytics
-6. Check notices and update profile
-
-## 🐛 Troubleshooting
-
-### Port Already in Use
 ```bash
-# Kill process on port 5000 (backend)
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
+# Build frontend
+cd frontend
+npm run build
 
-# Kill process on port 3000 (frontend)
-netstat -ano | findstr :3000
+# Start backend in production
+cd backend
+NODE_ENV=production npm start
+```
+
+### Using Setup Scripts
+
+**Windows:**
+```bash
+./setup.bat
+```
+
+**Linux/macOS:**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+---
+
+## Docker Setup
+
+### Build and Run with Docker Compose
+
+```bash
+# (From project root) Build images
+docker-compose build
+
+# Start all services
+docker-compose up
+
+# Run in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Individual Docker Commands
+
+**Backend:**
+```bash
+cd backend
+docker build -t attendance-backend .
+docker run -p 5000:5000 --env-file .env attendance-backend
+```
+
+**Frontend:**
+```bash
+cd frontend
+docker build -t attendance-frontend .
+docker run -p 3000:3000 attendance-frontend
+```
+
+---
+
+## API Endpoints
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/register` | Register new employee | ❌ |
+| POST | `/api/auth/login` | Employee/Admin login | ❌ |
+| GET | `/api/auth/me` | Get current user info | ✅ |
+| GET | `/api/auth/verify-token` | Verify JWT token | ✅ |
+| POST | `/api/auth/refresh-token` | Refresh access token | ✅ |
+| POST | `/api/auth/logout` | Logout user | ✅ |
+
+### Attendance Endpoints
+
+| Method | Endpoint | Description | Auth | Role |
+|--------|----------|-------------|------|------|
+| POST | `/api/attendance/check-in` | Mark check-in | ✅ | Employee+ |
+| POST | `/api/attendance/check-out` | Mark check-out | ✅ | Employee+ |
+| GET | `/api/attendance/history` | Get user's attendance | ✅ | Employee+ |
+| GET | `/api/attendance/today` | Get today's attendance | ✅ | Employee+ |
+| GET | `/api/attendance/all` | Get all attendance records | ✅ | Admin |
+| GET | `/api/attendance/:employeeId` | Get employee's attendance | ✅ | Manager+ |
+| PUT | `/api/attendance/:id` | Update attendance record | ✅ | Admin |
+| DELETE | `/api/attendance/:id` | Delete attendance record | ✅ | Admin |
+
+### Leave Endpoints
+
+| Method | Endpoint | Description | Auth | Role |
+|--------|----------|-------------|------|------|
+| POST | `/api/leave/apply` | Apply for leave | ✅ | Employee+ |
+| GET | `/api/leave/my-leaves` | Get user's leave records | ✅ | Employee+ |
+| GET | `/api/leave/all` | Get all leave records | ✅ | Admin |
+| POST | `/api/leave/approve/:leaveId` | Approve leave | ✅ | Manager+ |
+| POST | `/api/leave/reject/:leaveId` | Reject leave | ✅ | Manager+ |
+| GET | `/api/leave/balance` | Get leave balance | ✅ | Employee+ |
+| PUT | `/api/leave/:id` | Update leave record | ✅ | Admin |
+| DELETE | `/api/leave/:id` | Delete leave record | ✅ | Admin |
+
+### Department Endpoints
+
+| Method | Endpoint | Description | Auth | Role |
+|--------|----------|-------------|------|------|
+| GET | `/api/department` | Get all departments | ✅ | Employee+ |
+| GET | `/api/department/with-count` | Get departments with employee count | ✅ | Employee+ |
+| GET | `/api/department/:id` | Get department details | ✅ | Employee+ |
+| POST | `/api/department` | Create department | ✅ | Admin |
+| PUT | `/api/department/:id` | Update department | ✅ | Admin |
+| DELETE | `/api/department/:id` | Delete department | ✅ | Admin |
+
+### Employee Endpoints
+
+| Method | Endpoint | Description | Auth | Role |
+|--------|----------|-------------|------|------|
+| GET | `/api/employee/profile` | Get user profile | ✅ | Employee+ |
+| PUT | `/api/employee/profile` | Update user profile | ✅ | Employee+ |
+| PUT | `/api/employee/change-password` | Change password | ✅ | Employee+ |
+| GET | `/api/employee/all` | Get all employees | ✅ | Admin |
+| GET | `/api/employee/:id` | Get employee details | ✅ | Manager+ |
+| POST | `/api/employee` | Create employee | ✅ | Admin |
+| PUT | `/api/employee/:id` | Update employee details | ✅ | Admin |
+| DELETE | `/api/employee/:id` | Delete employee | ✅ | Admin |
+| GET | `/api/employee/pending-approvals` | Get pending signups | ✅ | Admin |
+| POST | `/api/employee/:id/approve` | Approve employee signup | ✅ | Admin |
+| POST | `/api/employee/:id/reject` | Reject employee signup | ✅ | Admin |
+
+### Dashboard Endpoints
+
+| Method | Endpoint | Description | Auth | Role |
+|--------|----------|-------------|------|------|
+| GET | `/api/dashboard/employee` | Get employee dashboard | ✅ | Employee+ |
+| GET | `/api/dashboard/admin` | Get admin dashboard | ✅ | Admin |
+| POST | `/api/dashboard/report` | Generate report | ✅ | Admin |
+| GET | `/api/dashboard/statistics` | Get statistics | ✅ | Admin |
+| GET | `/api/dashboard/trends` | Get attendance trends | ✅ | Admin |
+
+### Notice Endpoints
+
+| Method | Endpoint | Description | Auth | Role |
+|--------|----------|-------------|------|------|
+| GET | `/api/notice` | Get notices (user's departments) | ✅ | Employee+ |
+| GET | `/api/notice/all` | Get all notices | ✅ | Admin |
+| GET | `/api/notice/:id` | Get notice details | ✅ | Employee+ |
+| POST | `/api/notice` | Create notice | ✅ | Admin |
+| PUT | `/api/notice/:id` | Update notice | ✅ | Admin |
+| DELETE | `/api/notice/:id` | Delete notice | ✅ | Admin |
+| POST | `/api/notice/:id/archive` | Archive notice | ✅ | Admin |
+
+### Holiday Endpoints
+
+| Method | Endpoint | Description | Auth | Role |
+|--------|----------|-------------|------|------|
+| GET | `/api/holiday` | Get all holidays | ✅ | Employee+ |
+| POST | `/api/holiday` | Create holiday | ✅ | Admin |
+| PUT | `/api/holiday/:id` | Update holiday | ✅ | Admin |
+| DELETE | `/api/holiday/:id` | Delete holiday | ✅ | Admin |
+
+---
+
+## Database Schema
+
+### Employee Model
+
+```javascript
+{
+  employeeId: String (auto-generated),
+  firstName: String,
+  lastName: String,
+  email: String (unique),
+  password: String (hashed),
+  phone: String,
+  department: ObjectId (ref: Department),
+  role: String (enum: ['employee', 'manager', 'director', 'admin']),
+  designation: String,
+  gender: String (enum: ['male', 'female', 'other']),
+  address: String,
+  profilePicture: String (URL),
+  status: String (enum: ['pending', 'active', 'inactive']),
+  joiningDate: Date,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Attendance Model
+
+```javascript
+{
+  employeeId: ObjectId (ref: Employee),
+  date: Date,
+  checkInTime: Date,
+  checkOutTime: Date,
+  status: String (enum: ['present', 'absent', 'leave']),
+  workingHours: Number,
+  remarks: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Leave Model
+
+```javascript
+{
+  employeeId: ObjectId (ref: Employee),
+  leaveType: String (enum: ['planned', 'unplanned', 'medical', 'emergency']),
+  startDate: Date,
+  endDate: Date,
+  numberOfDays: Number,
+  reason: String,
+  status: String (enum: ['pending', 'approved', 'rejected']),
+  approvedBy: ObjectId (ref: Employee),
+  approvalDate: Date,
+  comments: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Department Model
+
+```javascript
+{
+  name: String (unique),
+  description: String,
+  manager: ObjectId (ref: Employee),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Notice Model
+
+```javascript
+{
+  title: String,
+  content: String,
+  category: String,
+  departments: [ObjectId] (ref: Department),
+  postedBy: ObjectId (ref: Employee),
+  attachments: [String] (URLs),
+  isActive: Boolean,
+  expiryDate: Date,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Admin Model
+
+```javascript
+{
+  email: String (unique),
+  password: String (hashed),
+  name: String,
+  role: String (enum: ['admin', 'director']),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+---
+
+## Technology Stack
+
+### Backend Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Node.js** | Latest | JavaScript runtime |
+| **Express.js** | 4.18+ | Web framework |
+| **MongoDB** | 5.0+ | NoSQL database |
+| **Mongoose** | 7.0+ | MongoDB ODM |
+| **JWT** | 9.0+ | Authentication |
+| **bcryptjs** | 2.4+ | Password hashing |
+| **Socket.io** | 4.6+ | Real-time communication |
+| **Nodemailer** | Latest | Email sending |
+| **ExcelJS** | 4.4+ | Excel file generation |
+| **Helmet** | 7.0+ | Security headers |
+| **CORS** | 2.8+ | Cross-origin requests |
+| **Express Validator** | 7.0+ | Input validation |
+| **Multer** | 1.4+ | File uploads |
+| **Sentry** | 10.3+ | Error tracking |
+| **Node-Schedule** | 2.1+ | Task scheduling |
+
+### Frontend Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **React** | 18+ | UI library |
+| **React Router** | 6+ | Client-side routing |
+| **Axios** | 1.3+ | HTTP client |
+| **Chart.js** | 4.2+ | Charts & graphs |
+| **Recharts** | 3.6+ | Data visualization |
+| **TailwindCSS** | 3.2+ | Utility-first CSS |
+| **React Toastify** | 9.1+ | Notifications |
+| **Socket.io Client** | 4.8+ | Real-time client |
+| **jsPDF** | 4.0+ | PDF generation |
+| **XLSX** | 0.18+ | Excel handling |
+| **React Icons** | 4.7+ | Icon library |
+| **React Easy Crop** | 5.5+ | Image cropping |
+| **Lucide React** | 0.56+ | Modern icons |
+
+### DevOps & Infrastructure
+
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **Git** - Version control
+- **GitHub** - Repository hosting
+
+---
+
+## User Roles & Permissions
+
+### Role Hierarchy
+
+```
+Admin
+├── All permissions
+└── Can manage all system resources
+
+Director
+├── Admin permissions for organization
+├── Can manage all departments
+└── Full reporting access
+
+Manager
+├── Department-level permissions
+├── Can approve leaves for team
+├── Can view department attendance
+└── Limited reporting
+
+Employee
+├── Personal attendance tracking
+├── Apply for leaves
+├── View notices
+└── Update profile
+```
+
+### Permission Matrix
+
+| Action | Employee | Manager | Director | Admin |
+|--------|----------|---------|----------|-------|
+| Mark Attendance | ✅ | ✅ | ✅ | ✅ |
+| View Own Records | ✅ | ✅ | ✅ | ✅ |
+| Approve Leaves | ❌ | ✅ | ✅ | ✅ |
+| View Dept Records | ❌ | ✅ | ✅ | ✅ |
+| View All Records | ❌ | ❌ | ✅ | ✅ |
+| Manage Employees | ❌ | ❌ | ✅ | ✅ |
+| Manage Departments | ❌ | ❌ | ✅ | ✅ |
+| Post Notices | ❌ | ❌ | ✅ | ✅ |
+| System Settings | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+## Real-time Features
+
+### Socket.io Events
+
+**Client to Server:**
+- `attendance:checkin` - Employee checks in
+- `attendance:checkout` - Employee checks out
+- `leave:apply` - Employee applies for leave
+- `notice:new` - New notice posted
+
+**Server to Client:**
+- `attendance:updated` - Attendance record updated
+- `leave:status-changed` - Leave approval status changed
+- `notice:broadcast` - New notice broadcast
+- `dashboard:refresh` - Refresh dashboard data
+
+### Benefits
+- ✅ Real-time attendance updates
+- ✅ Live dashboard synchronization
+- ✅ Instant notifications
+- ✅ Multi-client awareness
+
+---
+
+## Troubleshooting
+
+### Common Issues & Solutions
+
+#### 🔴 MongoDB Connection Failed
+
+**Error:** `MongoError: connect ECONNREFUSED ...`
+
+**Solutions:**
+1. Ensure MongoDB service is running:
+   ```bash
+   # Windows
+   mongod
+   
+   # macOS
+   brew services start mongodb-community
+   
+   # Linux
+   sudo systemctl start mongod
+   ```
+
+2. Check connection string in `.env`:
+   ```env
+   MONGODB_URI=mongodb://localhost:27017/attendance_system
+   ```
+
+3. For MongoDB Atlas, verify credentials:
+   ```env
+   MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/dbname
+   ```
+
+#### 🔴 Port Already in Use
+
+**Error:** `Error: listen EADDRINUSE :::5000`
+
+**Solutions:**
+
+Windows:
+```bash
+# Find process on port 5000
+netstat -ano | findstr :5000
+
+# Kill the process
 taskkill /PID <PID> /F
 ```
 
-### MongoDB Connection Issues
-- Ensure MongoDB service is running
-- Check connection string in `.env`
-- Verify database name
+macOS/Linux:
+```bash
+# Find process
+lsof -i :5000
 
-### CORS Errors
-- Check `CLIENT_URL` in backend `.env`
-- Ensure frontend URL matches
+# Kill process
+kill -9 <PID>
+```
 
-## 📄 License
+#### 🔴 CORS Error
 
-This project is licensed under the ISC License.
+**Error:** `Access to XMLHttpRequest has been blocked by CORS policy`
 
-## 👥 Contributors
+**Solutions:**
+1. Verify backend `CLIENT_URL` in `.env`:
+   ```env
+   CLIENT_URL=http://localhost:3000
+   ```
 
-- Your Name
+2. Check `REACT_APP_API_URL` in frontend `.env`:
+   ```env
+   REACT_APP_API_URL=http://localhost:5000/api
+   ```
 
-## 📞 Support
+3. Verify Socket.io URL:
+   ```env
+   REACT_APP_SOCKET_URL=http://localhost:5000
+   ```
 
-For support, email your-email@example.com or create an issue in the repository.
+#### 🔴 Email Not Sending
 
-## 🔄 Future Enhancements
+**Error:** `Nodemailer error: Invalid login ...`
 
-- Biometric integration
-- Mobile app (React Native)
-- Advanced analytics and reporting
-- SMS notifications
-- WhatsApp integration
-- Geolocation for attendance
-- Annual leave balance tracking
-- Shift management
-- Overtime tracking
+**Solutions:**
+1. For Gmail, enable "Less secure app access"
+2. Use app-specific password instead of account password
+3. Verify credentials in `.env`:
+   ```env
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASSWORD=your_app_password
+   ```
+
+#### 🔴 JWT Token Expired
+
+**Error:** `JsonWebTokenError: jwt expired`
+
+**Solutions:**
+1. Clear browser localStorage
+2. Log out and log back in
+3. Adjust token expiry in backend `.env`:
+   ```env
+   JWT_EXPIRE=7d
+   ```
+
+#### 🔴 Image Upload Failed
+
+**Error:** `Multer error ...`
+
+**Solutions:**
+1. Check file size limits (default: 5MB)
+2. Verify file type is image
+3. Ensure `uploads/` directory exists
+
+#### 🔴 Dependencies Issue
+
+**Error:** `npm ERR! ...` or `peer dep missing`
+
+**Solutions:**
+```bash
+# Clean installation
+rm -rf node_modules package-lock.json
+npm install
+
+# Update npm
+npm install -g npm@latest
+
+# Install missing peer dependencies
+npm install --save-peer
+```
+
+### Debug Mode
+
+Enable detailed logging:
+
+**Backend:**
+```env
+LOG_LEVEL=debug
+SENTRY_ENABLED=true
+```
+
+**Frontend:**
+```env
+REACT_APP_DEBUG=true
+```
+
+---
+
+## Future Enhancements
+
+### Phase 2 Features
+- 🔄 **Biometric Integration** - Fingerprint/Facial recognition
+- 📱 **Mobile App** - React Native application
+- 🧠 **AI Analytics** - Predictive attendance analysis
+- 📞 **SMS Notifications** - Twilio SMS alerts
+- 💬 **WhatsApp Integration** - WhatsApp notifications
+- 📍 **Geolocation** - GPS-based attendance tracking
+- 🗓️ **Advanced Shift Management** - Multi-shift support
+- ⏱️ **Overtime Tracking** - OT calculation and reports
+- 🔔 **Smart Notifications** - Context-aware alerts
+- 📊 **Advanced Analytics** - Predictive insights
+
+### Phase 3 Features
+- 🌍 **Multi-language Support** - i18n integration
+- 🎨 **Customizable Themes** - White-label option
+- 🔗 **Third-party Integrations** - Slack, Teams, etc.
+- 📡 **API Documentation** - Swagger/OpenAPI
+- 🧪 **Automated Testing** - Jest, Cypress
+- ♿ **Accessibility** - WCAG 2.1 compliance
+- 🔐 **Two-Factor Authentication** - 2FA support
+- 📈 **Performance Optimization** - CDN, caching
+- 🌐 **Horizontal Scaling** - Microservices architecture
+
+---
+
+## License & Contributors
+
+### License
+
+This project is licensed under the **ISC License** - an open-source license that is simple and permissive, allowing commercial and private use.
+
+#### ISC License Text
+
+```
+ISC License (ISC)
+
+Copyright (c) 2026, Online Attendance System Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+#### License Summary
+
+| Feature | Allowed | Prohibited |
+|---------|---------|-----------|
+| Commercial Use | ✅ | ❌ |
+| Modification | ✅ | ❌ |
+| Distribution | ✅ | ❌ |
+| Private Use | ✅ | ❌ |
+| Liability | ❌ | ✅ |
+| Warranty | ❌ | ✅ |
+
+For more information about the ISC License, visit: https://opensource.org/licenses/ISC
+
+### Contributors
+
+#### Core Team
+- 👨‍💻 **Akhilesh Bhandakkar** - Founder & Lead Developer
+- 🎨 **UI/UX Designer** - Frontend Design & User Experience
+- 🗄️ **Database Architect** - Schema & Data Design
+- 🧪 **QA Engineer** - Testing & Quality Assurance
+
+#### Contributing
+We appreciate all contributions! Want to see your name here? [Contribute now](#contributing)
+
+### Acknowledgments
+
+Special thanks to:
+- 🙏 Open source community
+- 💪 All testers and early adopters
+- 🤝 Contributors and collaborators
+- 📚 Stack Overflow community
+- 🛠️ Third-party libraries and frameworks
+
+---
+
+## Contributing
+
+We welcome contributions from the community! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
+
+### Ways to Contribute
+
+#### Code Contributions
+- 🐛 Fix bugs and issues
+- ✨ Implement new features
+- ⚡ Improve performance
+- 📚 Update documentation
+- 🧪 Add tests and improve coverage
+
+#### Non-Code Contributions
+- 📝 Write documentation and tutorials
+- 🐛 Report bugs and issues
+- 💬 Answer questions in discussions
+- 🎨 Provide design feedback
+- 📢 Share and promote the project
+- 🌐 Help with translations
+
+### Contribution Process
+
+1. **Fork the Repository**
+   ```bash
+   git clone https://github.com/yourusername/Online-Attendance.git
+   cd Online-Attendance
+   ```
+
+2. **Create a Feature Branch**
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+
+3. **Make Your Changes**
+   - Write clean, readable code
+   - Follow existing code style
+   - Add comments for complex logic
+   - Test your changes thoroughly
+
+4. **Commit Your Changes**
+   ```bash
+   git commit -m 'feat(scope): Add AmazingFeature'
+   ```
+
+   **Commit Format:**
+   ```
+   <type>(<scope>): <subject>
+   
+   <body>
+   
+   <footer>
+   ```
+   
+   **Types:** feat, fix, docs, style, refactor, perf, test, chore
+
+5. **Push to Your Fork**
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+
+6. **Open a Pull Request**
+   - Clear description of changes
+   - Reference related issues
+   - Include screenshots for UI changes
+   - Ensure all tests pass
+
+### Code Quality Standards
+
+#### JavaScript/Node.js
+- Use ES6+ syntax
+- Follow AirBnB style guide
+- Maximum line length: 100 characters
+- Single quotes for strings
+- Meaningful variable names
+
+#### React Components
+- Use functional components with hooks
+- One component per file
+- PropTypes for prop validation
+- Meaningful component names
+- Keep components focused
+
+#### Documentation
+- Add JSDoc comments for functions
+- Document complex logic
+- Update README if needed
+- Add inline comments where necessary
+
+### Development Setup
+
+```bash
+# Clone and install
+git clone https://github.com/yourusername/Online-Attendance.git
+cd Online-Attendance
+
+# Install all dependencies
+cd backend && npm install && cd ../frontend && npm install && cd ..
+
+# Setup environment files
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+
+# Start development servers
+npm run dev
+```
+
+### Testing Requirements
+
+Before submitting a PR:
+- [ ] Code compiles without errors
+- [ ] No linting warnings
+- [ ] Tests pass locally
+- [ ] Tested on Chrome, Firefox, Safari
+- [ ] Mobile responsive design tested
+- [ ] Performance acceptable
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test
+npm test -- filename.test.js
+
+# Coverage report
+npm test -- --coverage
+```
+
+### Code Review Process
+
+1. **Automated Checks** - ESLint, TypeScript, Tests
+2. **Manual Review** - Code quality, architecture
+3. **Feedback** - Suggestions for improvement
+4. **Approval** - 2+ approvals required
+5. **Merge** - Squash and merge to main
+
+### Code of Conduct
+
+This project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to:
+
+- ✅ Be respectful and inclusive
+- ✅ Provide constructive feedback
+- ✅ Welcome diversity and different opinions
+- ✅ Focus on the code, not the person
+- ✅ Report inappropriate behavior
+- ❌ No discrimination or harassment
+- ❌ No trolling or spam
+
+---
+
+## License
+
+This project is licensed under the **ISC License** - a simple, permissive open-source license.
+
+### ISC License Text
+
+```
+ISC License (ISC)
+
+Copyright (c) 2026, Online Attendance System Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "OAS System" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+### What You Can Do
+
+| Action | Allowed |
+|--------|---------|
+| ✅ Use commercially | Yes |
+| ✅ Modify the code | Yes |
+| ✅ Distribute copies | Yes |
+| ✅ Use privately | Yes |
+| ✅ Place warranty | No |
+| ✅ Hold liable | No |
+
+**Read more:** https://opensource.org/licenses/ISC
+
+---
+
+## Support & Contact
+
+### Getting Help
+
+- 📖 **Documentation** - Check the [Wiki](wiki)
+- 🐛 **Report Bugs** - [Issue Tracker](issues)
+- 💡 **Feature Requests** - [Discussions](discussions)
+- 📧 **Email Support** - akhileshbhandakkar@gmail.com
+
+### Support Channels
+
+| Channel | Response Time | Best For |
+|---------|---------------|----------|
+| 📧 Email | 24-48 hours | General inquiries |
+| 🐛 GitHub Issues | 24-48 hours | Bug reports |
+| 💬 Discussions | 3-5 days | Feature requests |
+| 📞 Phone | By appointment | Enterprise support |
+
+### Community
+
+- 🤝 Join our community forum
+- 💬 Follow on social media
+- 🌟 Star this repository if helpful
+
+---
+
+## Changelog
+
+### Version 1.0.0 (March 2026)
+**Current Release** - Feature Complete & Production Ready
+
+#### Features
+- ✅ Full attendance tracking system
+- ✅ Comprehensive leave management
+- ✅ Real-time updates with Socket.io
+- ✅ Advanced analytics dashboard
+- ✅ Automated email reports
+- ✅ Role-based access control
+- ✅ Mobile-responsive design
+- ✅ Docker containerization
+
+#### Improvements
+- ✅ Security hardening
+- ✅ Performance optimization
+- ✅ Comprehensive API documentation
+- ✅ Error handling and logging
+- ✅ Input validation
+- ✅ Code quality improvements
+
+#### Fixes
+- Fixed JWT token expiration handling
+- Improved database connection pooling
+- Enhanced error messages
+- Fixed mobile layout issues
+
+### Version 0.9.0 (December 2025)
+**Beta Release** - Initial Feature Set
+
+- Initial beta release
+- Core features implementation
+- User testing and feedback
+- Community support setup
+
+### Roadmap
+
+#### Version 1.1.0 (Expected: Q2 2026)
+- 🔐 Biometric integration (fingerprint/facial)
+- 📱 Mobile app (iOS/Android)
+- 📞 SMS notifications support
+- 📍 Geolocation tracking
+
+#### Version 1.2.0 (Expected: Q3 2026)
+- 🧠 AI-powered analytics
+- 💬 WhatsApp integration
+- 🔗 Third-party integrations (Slack, Teams)
+- 📊 Advanced reporting
+
+#### Version 2.0.0 (Expected: Q4 2026)
+- 🌐 Microservices architecture
+- 🔄 Horizontal scaling support
+- 🌍 Multi-language support
+- ♿ Full accessibility (WCAG 2.1)
+- 🎨 White-label customization
+
+---
+
+## Getting Involved
+
+### Ways to Participate
+
+**💻 Developers**
+- Write code and fix bugs
+- Improve documentation
+- Add new features
+- Write tests
+
+**🎨 Designers**
+- UI/UX improvements
+- Design system updates
+- Accessibility enhancements
+
+**📝 Writers**
+- Create tutorials
+- Write documentation
+- Help with translations
+
+**🐛 Testers**
+- Report bugs
+- Test features
+- Provide feedback
+
+**📢 Advocates**
+- Share the project
+- Write blog posts
+- Give talks
+- Recommend to others
+
+### Sponsorship
+
+Help support the project's development:
+
+- ⭐ **Star the repo** - Shows appreciation
+- 🔗 **Share with others** - Spread the word
+- 💼 **Use in production** - Real-world validation
+- 💰 **Financial support** - Sponsor development
+
+<div align="center">
+
+**Made with ❤️ by the Akhilesh Bhandakkar**
+
+[⬆ back to top](#online-attendance-system-v100)
+
+</div>

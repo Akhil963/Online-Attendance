@@ -70,7 +70,7 @@ const EmployeeLoginPage = () => {
 
         <div className="text-center mb-10 relative z-10">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-600/20">
-            <span className="text-white text-xl font-bold tracking-tight">AS</span>
+            <span className="text-white text-xl font-bold tracking-tight">OAS</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">Employee Login</h1>
           <div className="flex items-center justify-center gap-2">
