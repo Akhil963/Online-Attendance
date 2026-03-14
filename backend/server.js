@@ -75,12 +75,18 @@ io.use((socket, next) => {
 
 // Rate Limiting Configuration (disabled in development)
 const isDevelopment = process.env.NODE_ENV === 'development';
+const keyGenerator = (req) => {
+  // Use X-Forwarded-For header if behind a proxy, otherwise use IP address
+  return req.ip;
+};
+
 const limiter = isDevelopment ? (req, res, next) => next() : rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // Limit to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: keyGenerator,
   skip: (req) => {
     // Skip rate limiting for health checks
     return req.path === '/api/health';
@@ -92,8 +98,13 @@ const authLimiter = isDevelopment ? (req, res, next) => next() : rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // Limit to 5 login attempts
   message: 'Too many login attempts, please try again later',
+  keyGenerator: keyGenerator,
   skipSuccessfulRequests: true // Don't count successful requests
 });
+
+// Trust proxy for rate limiting and X-Forwarded-For header
+// Required for deployment on Render, Heroku, or other reverse proxies
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet({
