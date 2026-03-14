@@ -1743,7 +1743,7 @@ The Online Attendance System is an enterprise-grade web application designed to 
 **Akhilesh Bhandakkar**
 - 📧 Email: akhileshbhandakkar@gmail.com
 - 💼 LinkedIn: https://linkedin.com/in/akhileshbhandakkar
-- 🐙 GitHub: https://github.com/akhileshbhandakkar
+- 🐙 GitHub: https://github.com/Akhil963
 - 🌐 Portfolio: https://akhileshbhandakkar.dev
 - 📱 Mobile: +91-XXXX-XXXX-XX (Available by appointment)
 
