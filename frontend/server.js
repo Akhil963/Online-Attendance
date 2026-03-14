@@ -18,17 +18,15 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(compression());
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'build'), {
+  maxAge: '1d',
+  etag: false
+}));
 
-// SPA routing - serve index.html for all routes
-// This ensures React Router handles client-side routing
+// SPA routing - serve index.html for all non-static routes
 app.get('*', (req, res) => {
-  // Don't redirect API calls or static assets
-  if (req.path.startsWith('/api') || req.path.includes('.')) {
-    return res.status(404).send('Not Found');
-  }
-  
-  // Serve index.html for all other routes
+  // Serve index.html for all routes
+  // React Router will handle the client-side routing
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
