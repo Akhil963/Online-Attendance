@@ -46,6 +46,62 @@ router.get('/with-count', authMiddleware, async (req, res) => {
   }
 });
 
+// Seed default departments (Public - for initial setup)
+router.post('/seed', async (req, res) => {
+  try {
+    const existingCount = await Department.countDocuments();
+    
+    if (existingCount > 0) {
+      return res.status(400).json({
+        error: 'Departments already exist',
+        message: `Database already has ${existingCount} departments`,
+        departments: await Department.find().select('name description')
+      });
+    }
+
+    const defaultDepartments = [
+      {
+        name: 'IT',
+        description: 'Information Technology Department'
+      },
+      {
+        name: 'HR',
+        description: 'Human Resources Department'
+      },
+      {
+        name: 'Web Developer',
+        description: 'Web Development Department'
+      },
+      {
+        name: 'Finance',
+        description: 'Finance Department'
+      },
+      {
+        name: 'Sales',
+        description: 'Sales Department'
+      },
+      {
+        name: 'Marketing',
+        description: 'Marketing Department'
+      },
+      {
+        name: 'Operations',
+        description: 'Operations Department'
+      }
+    ];
+
+    const result = await Department.insertMany(defaultDepartments);
+    
+    res.status(201).json({
+      message: 'Default departments seeded successfully',
+      count: result.length,
+      departments: result
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Create department (Admin only)
 router.post('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
   try {
