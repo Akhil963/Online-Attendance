@@ -139,7 +139,7 @@ const AttendanceReportPage = () => {
         </div>
 
         {/* Summary Cards - Premium accent style */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 border-b-4 border-b-gray-400">
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Audit Logs</p>
             <p className="text-4xl font-extrabold text-gray-900">{summary.total}</p>
@@ -163,7 +163,7 @@ const AttendanceReportPage = () => {
         </div>
 
         {/* Filters - Premium Glass */}
-        <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-xl border border-white p-8 mb-12">
+        <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-xl border border-white p-4 md:p-8 mb-12">
           <h2 className="text-lg font-bold text-gray-900 mb-6 uppercase tracking-widest flex items-center gap-2">
             <div className="w-1.5 h-4 bg-blue-500 rounded-full"></div>
             Filter Parameters

@@ -53,7 +53,7 @@ const DashboardPage = () => {
   if (validationError) {
     return (
       <div className="min-h-screen bg-transparent flex items-center justify-center p-6">
-        <div className="bg-white/70 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/40 p-12 text-center max-w-lg">
+        <div className="bg-white/70 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/40 p-6 md:p-12 text-center max-w-lg">
           <div className="mb-6">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">⚠️</span>
@@ -76,7 +76,7 @@ const DashboardPage = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-transparent flex items-center justify-center p-6">
-        <div className="bg-white/70 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/40 p-12 text-center max-w-lg">
+        <div className="bg-white/70 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/40 p-6 md:p-12 text-center max-w-lg">
           <div className="mb-6">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">⚠️</span>
@@ -112,10 +112,10 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
         {/* Welcome Section - Elite Aesthetic */}
         <div className="mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 tracking-tight mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">
             Welcome, <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">{user?.name || 'Employee'}</span>!
           </h1>
           <div className="flex items-center gap-4">

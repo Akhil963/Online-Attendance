@@ -330,7 +330,7 @@ const PerformanceAnalyticsPage = () => {
         </div>
 
         {/* Department Performance - Progress Style */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-10 mb-12">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-4 md:p-10 mb-12">
           <h2 className="text-2xl font-extrabold text-gray-900 mb-10 tracking-tight flex items-center gap-3">
             <div className="w-1.5 h-8 bg-blue-500 rounded-full"></div>
             Unit Performance Coverage

@@ -142,7 +142,7 @@ const DashboardStatistics = () => {
       {/* Statistics Boxes - Premium Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Attendance Distribution */}
-        <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-10 hover:shadow-2xl hover:shadow-blue-500/5 transition-all">
+        <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-4 md:p-10 hover:shadow-2xl hover:shadow-blue-500/5 transition-all">
           <h3 className="text-xl font-bold text-gray-900 mb-10 flex items-center gap-4">
             <div className="w-1 h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
             Status Mix
@@ -171,7 +171,7 @@ const DashboardStatistics = () => {
         </div>
 
         {/* Detailed Statistics - Premium Summary */}
-        <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-10 hover:shadow-2xl hover:shadow-blue-500/5 transition-all">
+        <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-4 md:p-10 hover:shadow-2xl hover:shadow-blue-500/5 transition-all">
           <h3 className="text-xl font-bold text-gray-900 mb-10 flex items-center gap-4">
             <div className="w-1 h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
             Vital Logs
@@ -249,7 +249,7 @@ const DashboardStatistics = () => {
 
       {/* Attendance Trend Graph */}
       {/* Attendance Trend Graph - Premium Slate Container */}
-      <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-12 hover:shadow-2xl hover:shadow-emerald-500/5 transition-all">
+      <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-6 md:p-12 hover:shadow-2xl hover:shadow-emerald-500/5 transition-all">
         <h3 className="text-2xl font-bold text-gray-900 mb-12 flex items-center gap-5">
           <div className="w-1 h-8 bg-emerald-600 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)]"></div>
           Daily Performance Velocity

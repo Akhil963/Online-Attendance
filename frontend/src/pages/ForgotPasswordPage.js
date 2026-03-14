@@ -36,7 +36,7 @@ const ForgotPasswordPage = () => {
     <div className="min-h-screen bg-transparent flex items-center justify-center p-6 py-12">
       <div className="w-full max-w-md">
         {!submitted ? (
-          <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-12 relative overflow-hidden group">
+          <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-12 relative overflow-hidden group">
             {/* Abstract Background Accents */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl -mr-32 -mt-32 transition-all duration-1000 group-hover:bg-blue-600/10"></div>
 
@@ -85,7 +85,7 @@ const ForgotPasswordPage = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-12 text-center relative overflow-hidden group">
+          <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-12 text-center relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse"></div>
 
             <div className="relative z-10">

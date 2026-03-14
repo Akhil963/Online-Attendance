@@ -156,12 +156,12 @@ const AdminEmployeeApprovalPage = () => {
         </div>
 
         {/* Filters - High Precision Console */}
-        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-12 mb-12">
+        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-6 md:p-12 mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight flex items-center gap-5">
             <div className="w-1 h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
             Audit Console
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             <div className="group/field">
               <label className="block text-xs font-bold text-gray-400 uppercase mb-2.5 ml-1">Search Employees</label>
               <input
@@ -217,18 +217,18 @@ const AdminEmployeeApprovalPage = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-gray-900 text-white uppercase text-xs font-bold">
-                    <th className="px-10 py-8">Asset Profile</th>
-                    <th className="px-10 py-8 hidden sm:table-cell">Neural Hub</th>
-                    <th className="px-10 py-8 hidden md:table-cell">Comms</th>
-                    <th className="px-10 py-8 hidden lg:table-cell">Operation</th>
-                    <th className="px-10 py-8">Security</th>
-                    <th className="px-10 py-8 text-center">Actions</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Asset Profile</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">Neural Hub</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">Comms</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Operation</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Security</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {filteredEmployees.map((emp) => (
                     <tr key={emp._id} className="group hover:bg-blue-600/[0.03] transition-all duration-300">
-                      <td className="px-10 py-8">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner font-bold text-lg uppercase">
                             {emp.name.charAt(0)}
@@ -239,16 +239,16 @@ const AdminEmployeeApprovalPage = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-8 text-xs text-gray-400 font-bold hidden sm:table-cell break-all max-w-xs">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-xs text-gray-400 font-bold hidden sm:table-cell break-all max-w-xs">
                         {emp.email || 'Not Provided'}
                       </td>
-                      <td className="px-10 py-8 text-xs text-gray-400 font-bold hidden md:table-cell">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-xs text-gray-400 font-bold hidden md:table-cell">
                         {emp.phone || 'DATA_VACUUM'}
                       </td>
-                      <td className="px-10 py-8 text-xs text-gray-400 font-bold hidden lg:table-cell uppercase">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-xs text-gray-400 font-bold hidden lg:table-cell uppercase">
                         {emp.designation || 'Specialist'}
                       </td>
-                      <td className="px-10 py-8">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
                         <div className="flex flex-col gap-2">
                           <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] w-fit shadow-sm border border-transparent ${emp.isApproved
                             ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/10'
@@ -264,7 +264,7 @@ const AdminEmployeeApprovalPage = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-10 py-8">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
                         <div className="flex items-center justify-center gap-3">
                           <button
                             onClick={() => handleViewDetails(emp)}
@@ -320,7 +320,7 @@ const AdminEmployeeApprovalPage = () => {
       {/* Edit Modal - Glassmorphism */}
       {editingId && (
         <div className="fixed inset-0 bg-gray-950/80 backdrop-blur-xl flex items-center justify-center p-6 z-[100] animate-in fade-in duration-500">
-          <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-2xl max-w-lg w-full p-12 border border-white/20 transform animate-in zoom-in-95 duration-500 font-outfit">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-2xl max-w-lg w-full p-6 md:p-12 border border-white/20 transform animate-in zoom-in-95 duration-500 font-outfit">
             <h2 className="text-4xl font-bold text-gray-900 mb-10 tracking-tight">Edit Employee</h2>
             <div className="space-y-8">
               <div className="group/field">
@@ -333,7 +333,7 @@ const AdminEmployeeApprovalPage = () => {
                   className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-sm text-gray-700 shadow-sm"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                 <div className="group/field">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Neural Hub</label>
                   <input
@@ -365,7 +365,7 @@ const AdminEmployeeApprovalPage = () => {
                   className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-xs text-slate-700 shadow-sm"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                 <div className="group/field">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Gender Node</label>
                   <div className="relative">
@@ -426,7 +426,7 @@ const AdminEmployeeApprovalPage = () => {
       {/* View Details Modal - Glassmorphism */}
       {showDetailModal && selectedEmployee && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-6 z-[100] animate-in fade-in duration-500">
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-2xl max-w-lg w-full p-12 border border-white/20 transform animate-in zoom-in-95 duration-500 font-outfit">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-2xl max-w-lg w-full p-6 md:p-12 border border-white/20 transform animate-in zoom-in-95 duration-500 font-outfit">
             <div className="flex justify-between items-center mb-10">
               <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">Telemetric View</h2>
               <button

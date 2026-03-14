@@ -135,9 +135,9 @@ const EmployeeManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-transparent font-outfit space-y-12">
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
         <div className="mb-14">
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 tracking-tight uppercase leading-none mb-6">
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-gray-900 tracking-tight uppercase leading-none mb-6">
             Employees
           </h1>
           <div className="flex items-center gap-4">
@@ -184,7 +184,7 @@ const EmployeeManagementPage = () => {
         </div>
 
         {/* Filters - High Precision Console */}
-        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-12 mb-12">
+        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-6 md:p-12 mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight flex items-center gap-5 uppercase">
             <div className="w-1 h-6 bg-blue-600 rounded-full shadow-lg"></div>
             Filter Console
@@ -329,21 +329,21 @@ const EmployeeManagementPage = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-gray-900 text-white uppercase text-xs font-bold tracking-widest">
-                  <th className="px-10 py-8">Identity ID</th>
-                  <th className="px-10 py-8">Asset Profile</th>
-                  <th className="px-10 py-8 hidden sm:table-cell">Neural Hub</th>
-                    <th className="px-10 py-8 hidden md:table-cell">Phone</th>
-                    <th className="px-10 py-8">Department</th>
-                  <th className="px-10 py-8 hidden lg:table-cell">Asset Title</th>
-                  <th className="px-10 py-8">Clearance</th>
+                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Identity ID</th>
+                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Asset Profile</th>
+                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">Neural Hub</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">Phone</th>
+                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Department</th>
+                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Asset Title</th>
+                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Clearance</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredEmployees.length > 0 ? (
                   filteredEmployees.map(emp => (
                     <tr key={emp._id} className="group hover:bg-blue-600/[0.03] transition-all duration-300">
-                      <td className="px-10 py-8 font-bold text-blue-600 italic tracking-widest text-sm">{emp.employeeId}</td>
-                      <td className="px-10 py-8">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 font-bold text-blue-600 italic tracking-widest text-sm">{emp.employeeId}</td>
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner uppercase">
                             {emp.name?.charAt(0)}
@@ -354,15 +354,15 @@ const EmployeeManagementPage = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-8 text-gray-400 font-bold text-xs hidden sm:table-cell lowercase tracking-wider">{emp.email}</td>
-                      <td className="px-10 py-8 text-gray-400 font-bold text-xs hidden md:table-cell tracking-widest">{emp.phone || 'Not Provided'}</td>
-                      <td className="px-10 py-8">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-gray-400 font-bold text-xs hidden sm:table-cell lowercase tracking-wider">{emp.email}</td>
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-gray-400 font-bold text-xs hidden md:table-cell tracking-widest">{emp.phone || 'Not Provided'}</td>
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
                         <div className="px-5 py-2 bg-blue-600/5 text-blue-600 rounded-full inline-flex items-center text-xs font-bold uppercase tracking-widest border border-blue-600/10 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
                           {emp.department?.name || 'Central Unit'}
                         </div>
                       </td>
-                      <td className="px-10 py-8 text-gray-500 font-bold text-xs hidden lg:table-cell uppercase tracking-widest">{emp.designation || 'Specialist'}</td>
-                      <td className="px-10 py-8">
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-gray-500 font-bold text-xs hidden lg:table-cell uppercase tracking-widest">{emp.designation || 'Specialist'}</td>
+                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
                         <div className={`px-5 py-2 rounded-full inline-flex items-center text-xs font-bold uppercase tracking-widest shadow-sm ${emp.role === 'admin' ? 'bg-red-500/10 text-red-600 border border-red-500/10' :
                           emp.role === 'manager' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/10' :
                             'bg-emerald-500/10 text-emerald-600 border border-emerald-500/10'

@@ -143,7 +143,7 @@ const PendingApprovalPage = () => {
   if (isRedirecting) {
     return (
       <div className="min-h-screen bg-transparent flex items-center justify-center p-6">
-        <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-16 text-center max-w-lg w-full relative overflow-hidden group">
+        <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-16 text-center max-w-lg w-full relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse"></div>
 
           <div className="relative z-10">
@@ -165,7 +165,7 @@ const PendingApprovalPage = () => {
     <div className="min-h-screen bg-transparent flex items-center justify-center p-6 py-12">
       <div className="max-w-xl w-full">
         {/* Main Card */}
-        <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-12 relative overflow-hidden group">
+        <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-12 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-80 h-80 bg-yellow-500/5 rounded-full blur-3xl -mr-40 -mt-40 transition-all duration-1000 group-hover:bg-yellow-500/10"></div>
 
           {/* Icon */}

@@ -36,7 +36,7 @@ const NoticesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Notices Board</h1>
 
         {/* Category Filter */}

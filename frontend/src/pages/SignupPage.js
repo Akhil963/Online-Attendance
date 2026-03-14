@@ -93,7 +93,7 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent py-12 px-6">
-      <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-12 w-full max-w-2xl relative overflow-hidden group">
+      <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-12 w-full max-w-2xl relative overflow-hidden group">
         {/* Abstract Background Accents */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl -mr-40 -mt-40 transition-all duration-1000 group-hover:bg-blue-600/10"></div>
 

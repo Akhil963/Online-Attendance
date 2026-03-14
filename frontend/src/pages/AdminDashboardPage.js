@@ -239,7 +239,7 @@ const AdminDashboardPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className={`${colors.text} text-sm font-semibold uppercase`}>{item.name}</p>
-                    <p className={`${colors.text} text-5xl font-bold mt-3`}>
+                    <p className={`${colors.text} text-3xl md:text-5xl font-bold mt-3`}>
                       {item.value}
                     </p>
                     <p className="text-xs text-slate-500 mt-2">

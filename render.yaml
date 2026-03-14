@@ -1,0 +1,123 @@
+services:
+  - type: web
+    name: attendance-backend
+    env: node
+    region: oregon
+    plan: free
+    
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    
+    # Auto-deploy on push
+    auto_deploy: true
+    branch: main
+    
+    # Health check
+    healthCheckPath: /api/health
+    healthCheckInterval: 30
+    
+    # Environment variables
+    envVars:
+      # Core Configuration
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: HOST
+        value: 0.0.0.0
+      
+      # Database (must be set manually in Render dashboard)
+      - key: MONGODB_URI
+        sync: false  # Must be set in Render UI
+      
+      # JWT & Security (must generate and set in Render dashboard)
+      - key: JWT_SECRET
+        sync: false  # Must be set in Render UI
+      - key: JWT_EXPIRE
+        value: 7d
+      
+      # Admin Code
+      - key: ADMIN_REGISTRATION_CODE
+        sync: false  # Must be set in Render UI
+      
+      # Frontend URL (update after frontend deployment)
+      - key: CLIENT_URL
+        value: https://attendance-front.onrender.com
+      
+      # SendGrid Email (must be set in Render dashboard)
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM_EMAIL
+        value: noreply@yourdomain.com
+      - key: REPORT_EMAIL
+        value: admin@yourdomain.com
+      
+      # Twilio SMS (optional, must be set in Render dashboard)
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      
+      # Sentry Error Tracking (optional)
+      - key: SENTRY_DSN
+        sync: false
+      
+      # Session & Security
+      - key: SESSION_SECRET
+        sync: false  # Must be set in Render UI
+      - key: SECURE_COOKIES
+        value: true
+      
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      
+      # Logging
+      - key: LOG_LEVEL
+        value: info
+      - key: API_VERSION
+        value: v1
+      
+      # Database Pool
+      - key: DB_POOL_SIZE
+        value: 10
+      - key: DB_TIMEOUT
+        value: 5000
+
+  - type: web
+    name: attendance-frontend
+    env: static
+    region: oregon
+    
+    buildCommand: cd frontend && npm run build
+    staticPublishPath: frontend/build
+    
+    auto_deploy: true
+    branch: main
+    
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://attendance-backend.onrender.com/api
+      - key: REACT_APP_SOCKET_URL
+        value: https://attendance-backend.onrender.com
+      - key: REACT_APP_SENTRY_DSN
+        sync: false
+      - key: REACT_APP_VERCEL_ANALYTICS_ID
+        sync: false
+
+  # Optional: Email Report Cron Job
+  # Uncomment to enable scheduled email reports
+  # - type: cron
+  #   name: attendance-email-cron
+  #   schedule: "0 9 * * MON"  # 9 AM every Monday
+  #   command: node backend/utils/emailService.js
+  #   env: node
+  #   envVars:
+  #     - key: MONGODB_URI
+  #       sync: false
+  #     - key: SENDGRID_API_KEY
+  #       sync: false

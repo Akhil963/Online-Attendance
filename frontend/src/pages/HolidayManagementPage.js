@@ -146,9 +146,9 @@ const HolidayManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
         {/* Header - Elite Aesthetic */}
-        <div className="flex justify-between items-end mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-12">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">Holidays</h1>
             <div className="flex items-center gap-3">
@@ -192,7 +192,7 @@ const HolidayManagementPage = () => {
 
         {/* Add/Edit Form - Integrated Console */}
         {showForm && (
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-10 mb-12">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-4 md:p-10 mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-8 tracking-tight flex items-center gap-3">
               <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
               {editingId ? 'Update Holiday' : 'Add New Holiday'}
@@ -308,7 +308,7 @@ const HolidayManagementPage = () => {
 
         {/* Holidays List - Elite Data Grid */}
         {filteredHolidays.length === 0 ? (
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-24 text-center">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-8 md:p-24 text-center">
             <div className="w-24 h-24 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-8">
               <Calendar className="text-gray-300" size={48} strokeWidth={2.5} />
             </div>
@@ -322,17 +322,17 @@ const HolidayManagementPage = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-gray-900 text-white uppercase text-xs font-bold">
-                    <th className="px-10 py-6">Timeline</th>
-                    <th className="px-10 py-6 hidden sm:table-cell">Name</th>
-                    <th className="px-10 py-6 hidden md:table-cell">Type</th>
-                    <th className="px-10 py-6 hidden lg:table-cell">Description</th>
-                    <th className="px-10 py-6 text-center">Actions</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">Timeline</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">Name</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">Type</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Description</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {filteredHolidays.map((holiday, index) => (
                     <tr key={holiday._id || index} className="group hover:bg-blue-50/50 transition-all duration-300">
-                      <td className="px-10 py-6">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">
                         <div className="flex flex-col">
                           <span className="font-bold text-gray-900 tracking-tight text-lg italic uppercase">
                             {holiday.date ? moment(holiday.date).format('MMM DD') : 'N/A'}
@@ -340,12 +340,12 @@ const HolidayManagementPage = () => {
                           <span className="text-xs font-bold text-gray-400 uppercase">Date</span>
                         </div>
                       </td>
-                      <td className="px-10 py-6">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">
                         <span className="font-bold text-gray-900 tracking-tight block group-hover:text-blue-600 transition-colors uppercase text-sm">
                           {holiday.name || 'Undefined'}
                         </span>
                       </td>
-                      <td className="px-10 py-6 hidden md:table-cell">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">
                         <div className={`px-4 py-1.5 rounded-full inline-flex items-center text-xs font-bold uppercase border ${
                           (holiday.type || 'other') === 'national' ? 'bg-red-50 text-red-600 border-red-100' :
                             (holiday.type || 'other') === 'state' ? 'bg-blue-50 text-blue-600 border-blue-100' :
@@ -355,12 +355,12 @@ const HolidayManagementPage = () => {
                           {holiday.type || 'Standard'}
                         </div>
                       </td>
-                      <td className="px-10 py-6 hidden lg:table-cell">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">
                         <span className="text-gray-500 font-bold text-xs line-clamp-2 max-w-xs leading-relaxed">
                           {holiday.description || '--'}
                         </span>
                       </td>
-                      <td className="px-10 py-6 text-center">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 text-center">
                         <div className="flex items-center justify-center gap-4">
                           <button
                             onClick={() => handleEdit(holiday)}

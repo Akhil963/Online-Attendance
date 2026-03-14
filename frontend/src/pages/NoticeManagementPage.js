@@ -167,7 +167,7 @@ const NoticeManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-gray-900 tracking-tighter mb-4">Notices</h1>
           <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ const NoticeManagementPage = () => {
 
         {/* Search and Broadcast Initiation */}
         <div className="flex gap-6 mb-8 flex-wrap">
-          <div className="flex-1 min-w-[300px] relative group">
+          <div className="flex-1 min-w-0 sm:min-w-[300px] relative group">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} strokeWidth={3} />
             <input
               type="text"
@@ -224,7 +224,7 @@ const NoticeManagementPage = () => {
 
         {/* Add/Edit Form - Integrated Command Station */}
         {showForm && (
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-10 mb-12 animate-in fade-in slide-in-from-top duration-500 relative overflow-hidden group">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-4 md:p-10 mb-12 animate-in fade-in slide-in-from-top duration-500 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
             <h2 className="text-2xl font-bold text-gray-900 mb-8 tracking-tighter flex items-center gap-3 relative z-10">
               <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
@@ -313,7 +313,7 @@ const NoticeManagementPage = () => {
               </div>
 
               {/* Advanced Transmission Channels */}
-              <div className="bg-gray-900 rounded-[2rem] p-8">
+              <div className="bg-gray-900 rounded-[2rem] p-4 md:p-8">
                 <label className="block text-xs font-bold text-blue-400 uppercase tracking-[0.3em] mb-6">Delivery Channels:</label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <button
@@ -369,7 +369,7 @@ const NoticeManagementPage = () => {
         {/* Signal Stream List - Elite Grid */}
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
           {filteredNotices.length === 0 ? (
-            <div className="p-24 text-center">
+            <div className="p-8 md:p-24 text-center">
               <div className="w-24 h-24 bg-gray-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8">
                 <MessageCircle className="text-gray-300" size={48} strokeWidth={2.5} />
               </div>
@@ -380,18 +380,18 @@ const NoticeManagementPage = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-gray-900 text-white uppercase text-xs font-bold tracking-[0.2em]">
-                    <th className="px-10 py-6">Title</th>
-                    <th className="px-10 py-6 hidden sm:table-cell">Category</th>
-                    <th className="px-10 py-6 hidden md:table-cell">Status</th>
-                    <th className="px-10 py-6 hidden lg:table-cell">Posted By</th>
-                    <th className="px-10 py-6 hidden lg:table-cell">Created On</th>
-                    <th className="px-10 py-6 text-center">Actions</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">Title</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">Category</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">Status</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Posted By</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Created On</th>
+                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {filteredNotices.map((notice, index) => (
                     <tr key={notice._id || index} className="group hover:bg-blue-50/50 transition-all duration-300">
-                      <td className="px-10 py-6">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">
                         <div className="flex items-center gap-4">
                           {notice.isUrgent && (
                             <div className="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping shrink-0" title="Urgent Signal"></div>
@@ -404,7 +404,7 @@ const NoticeManagementPage = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-6 hidden sm:table-cell">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">
                         <div className={`px-4 py-1.5 rounded-full inline-flex items-center text-xs font-bold uppercase tracking-widest border ${notice.category === 'announcement' ? 'bg-blue-50 text-blue-700 border-blue-100' :
                             notice.category === 'policy' ? 'bg-blue-50 text-blue-700 border-blue-100' :
                               notice.category === 'event' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
@@ -413,7 +413,7 @@ const NoticeManagementPage = () => {
                           {notice.category}
                         </div>
                       </td>
-                      <td className="px-10 py-6 hidden md:table-cell">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">
                         <div className="flex gap-2 flex-wrap">
                           {notice.notificationChannels?.map(channel => (
                             <div key={channel} className="px-3 py-1 bg-gray-900 text-gray-400 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-gray-700">
@@ -425,7 +425,7 @@ const NoticeManagementPage = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-10 py-6 hidden lg:table-cell">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">
                         <div className="flex flex-col">
                           <span className="font-bold text-gray-900 tracking-tighter text-sm italic uppercase">
                             {notice.postedBy?.name || 'Unknown'}
@@ -433,7 +433,7 @@ const NoticeManagementPage = () => {
                           <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Posted By</span>
                         </div>
                       </td>
-                      <td className="px-10 py-6 hidden lg:table-cell">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">
                         <div className="flex flex-col">
                           <span className="font-bold text-gray-900 tracking-tighter text-sm italic uppercase">
                             {notice.createdAt ? moment(notice.createdAt).format('MMM DD') : 'N/A'}
@@ -441,7 +441,7 @@ const NoticeManagementPage = () => {
                           <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Entry Cycle</span>
                         </div>
                       </td>
-                      <td className="px-10 py-6 text-center">
+                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 text-center">
                         <div className="flex items-center justify-center gap-4">
                           <button
                             onClick={() => handleEdit(notice)}

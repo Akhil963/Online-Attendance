@@ -5,10 +5,30 @@ const Employee = require('../models/Employee');
 const moment = require('moment');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Configure SendGrid
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL;
+const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Online Attendance System';
+const ADMIN_REPLY_EMAIL = process.env.ADMIN_REPLY_EMAIL || process.env.SENDGRID_FROM_EMAIL;
+
+// ===================================================================
+// Email Header Configuration for Deliverability
+// ===================================================================
+const generateMessageId = () => {
+  const timestamp = Date.now();
+  const random = crypto.randomBytes(8).toString('hex');
+  return `<${timestamp}.${random}@attendancesystem.com>`;
+};
+
+const getEmailHeaders = () => ({
+  'X-Priority': '3',
+  'X-MSMail-Priority': 'Normal',
+  'Importance': 'Normal',
+  'Precedence': 'bulk',
+  'X-Mailer': 'Online Attendance System v1.0.0'
+});
 
 // -------------------------------------------------------------------
 // Email Allowlist — restrict delivery to specific addresses only.
@@ -29,7 +49,7 @@ const getAllowedRecipients = (emails) => {
   return allowed.includes(emails.toLowerCase()) ? emails : null;
 };
 
-// Wrapper around sgMail.send that applies the allowlist filter.
+// Wrapper around sgMail.send that applies the allowlist filter and adds proper headers.
 const sendEmailSafe = async (msg) => {
   const filteredTo = getAllowedRecipients(msg.to);
   if (!filteredTo || (Array.isArray(filteredTo) && filteredTo.length === 0)) {
@@ -37,7 +57,35 @@ const sendEmailSafe = async (msg) => {
     console.log(`[emailService] Skipped email to "${original}" — not in ALLOWED_EMAIL_RECIPIENTS`);
     return;
   }
-  await sgMail.send({ ...msg, to: filteredTo });
+  
+  // Add proper email headers for deliverability
+  const enhancedMsg = {
+    ...msg,
+    to: filteredTo,
+    from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    replyTo: msg.replyTo || ADMIN_REPLY_EMAIL,
+    headers: {
+      'Message-ID': generateMessageId(),
+      ...getEmailHeaders(),
+      ...msg.headers
+    }
+  };
+  
+  // Ensure text version exists alongside HTML
+  if (enhancedMsg.html && !enhancedMsg.text) {
+    // Convert HTML to plain text
+    const plainText = enhancedMsg.html
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&')
+      .replace(/\n\s*\n/g, '\n\n');
+    enhancedMsg.text = plainText;
+  }
+  
+  await sgMail.send(enhancedMsg);
 };
 
 // Schedule daily report at 5:30 PM (weekdays only, excluding holidays)
@@ -135,6 +183,7 @@ const sendDailyAttendanceReport = async () => {
     const msg = {
       to: reportEmail,
       from: FROM_EMAIL,
+      replyTo: ADMIN_REPLY_EMAIL,
       subject: `Daily Attendance Report - ${moment().format('(dddd) MMMM DD, YYYY')}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -186,7 +235,11 @@ const sendDailyAttendanceReport = async () => {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           disposition: 'attachment'
         }
-      ]
+      ],
+      headers: {
+        'Message-ID': generateMessageId(),
+        ...getEmailHeaders()
+      }
     };
 
     await sendEmailSafe(msg);
@@ -205,8 +258,13 @@ const sendNotificationEmail = async (to, subject, html) => {
     const msg = {
       to,
       from: FROM_EMAIL,
+      replyTo: ADMIN_REPLY_EMAIL,
       subject,
-      html
+      html,
+      headers: {
+        'Message-ID': generateMessageId(),
+        ...getEmailHeaders()
+      }
     };
 
     await sendEmailSafe(msg);
@@ -278,8 +336,14 @@ const sendNoticeEmail = async (recipients, notice) => {
     const msg = {
       to: recipients,
       from: FROM_EMAIL,
+      replyTo: ADMIN_REPLY_EMAIL,
       subject: `📌 ${notice.title}${notice.isUrgent ? ' [URGENT]' : ''}`,
-      html: html
+      html: html,
+      headers: {
+        'Message-ID': generateMessageId(),
+        'List-Unsubscribe': `<mailto:${ADMIN_REPLY_EMAIL}?subject=unsubscribe>`,
+        ...getEmailHeaders()
+      }
     };
 
     await sendEmailSafe(msg);
@@ -382,6 +446,7 @@ const sendApprovalRequestToAdmin = async (employee, adminEmails) => {
     const msg = {
       to: adminEmails,
       from: FROM_EMAIL,
+      replyTo: ADMIN_REPLY_EMAIL,
       subject: `🔔 New Employee Registration - Approval Required`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -417,7 +482,11 @@ const sendApprovalRequestToAdmin = async (employee, adminEmails) => {
             <p>© ${new Date().getFullYear()} Attendance System. All rights reserved.</p>
           </div>
         </div>
-      `
+      `,
+      headers: {
+        'Message-ID': generateMessageId(),
+        ...getEmailHeaders()
+      }
     };
 
     await sendEmailSafe(msg);
@@ -471,6 +540,7 @@ const sendApprovalConfirmationToEmployee = async (employee, admin) => {
     const msg = {
       to: employee.email,
       from: FROM_EMAIL,
+      replyTo: ADMIN_REPLY_EMAIL,
       subject: `✅ Account Approved - Welcome to ${process.env.COMPANY_NAME || 'Attendance System'}!`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -521,7 +591,11 @@ const sendApprovalConfirmationToEmployee = async (employee, admin) => {
             <p>© ${new Date().getFullYear()} Attendance System. All rights reserved.</p>
           </div>
         </div>
-      `
+      `,
+      headers: {
+        'Message-ID': generateMessageId(),
+        ...getEmailHeaders()
+      }
     };
 
     await sendEmailSafe(msg);
@@ -539,6 +613,7 @@ const sendRejectionEmailToEmployee = async (employee, reason) => {
     const msg = {
       to: employee.email,
       from: FROM_EMAIL,
+      replyTo: ADMIN_REPLY_EMAIL,
       subject: `Registration Status Update`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -582,7 +657,11 @@ const sendRejectionEmailToEmployee = async (employee, reason) => {
             <p>© ${new Date().getFullYear()} Attendance System. All rights reserved.</p>
           </div>
         </div>
-      `
+      `,
+      headers: {
+        'Message-ID': generateMessageId(),
+        ...getEmailHeaders()
+      }
     };
 
     await sendEmailSafe(msg);

@@ -137,10 +137,10 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="max-w-5xl mx-auto px-8 py-12">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-12">
         <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 overflow-hidden group">
           {/* Profile Header - Elite Banner */}
-          <div className="bg-blue-600 p-12 relative overflow-hidden">
+          <div className="bg-blue-600 p-6 md:p-12 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl -mr-48 -mt-48 transition-colors group-hover:bg-blue-600/20"></div>
             <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
               <div className="relative group/avatar">
@@ -199,7 +199,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Profile Content - Precision Grid */}
-          <div className="p-12">
+          <div className="p-6 md:p-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Personal Information */}
               <div className="space-y-8">
@@ -351,7 +351,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4 mt-12 border-t border-gray-100 pt-10">
+            <div className="flex gap-4 mt-6 md:mt-12 border-t border-gray-100 pt-6 md:pt-10">
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}

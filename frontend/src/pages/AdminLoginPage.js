@@ -33,7 +33,7 @@ const AdminLoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent p-6">
-      <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-10 w-full max-w-md">
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 md:p-10 w-full max-w-md">
         {/* Decorative Element */}
         <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/5 rounded-full blur-3xl -mr-24 -mt-24"></div>
 

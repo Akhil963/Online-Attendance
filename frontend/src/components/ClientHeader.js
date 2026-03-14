@@ -27,7 +27,7 @@ const ClientHeader = () => {
 
   return (
     <header className="bg-white/70 backdrop-blur-3xl border-b border-slate-200/60 sticky top-0 z-40 font-outfit">
-      <div className="max-w-7xl mx-auto px-8 py-5">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-5">
         <div className="flex justify-between items-center">
           {/* Logo and Branding */}
           <div className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate('/')}>

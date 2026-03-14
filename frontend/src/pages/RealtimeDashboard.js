@@ -159,7 +159,7 @@ const RealtimeDashboard = () => {
         {/* Online Users & Notifications - Premium Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Online Users */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-slate-200 p-10">
+          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-slate-200 p-4 md:p-10">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Active Sessions</h2>
               <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">{onlineUsers.length} Online</span>
@@ -192,7 +192,7 @@ const RealtimeDashboard = () => {
           </div>
 
           {/* Real-time Notifications */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-slate-200 p-10">
+          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-slate-200 p-4 md:p-10">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">System Events</h2>
               <span className="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">{notifications.length} Unread</span>

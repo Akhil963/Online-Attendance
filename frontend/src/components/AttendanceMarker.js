@@ -78,7 +78,7 @@ const AttendanceMarker = () => {
           <p className="text-sm mt-1">{error}</p>
         </div>
       )}
-      <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-12 mb-12 overflow-hidden relative group font-outfit">
+      <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-4 md:p-12 mb-12 overflow-hidden relative group font-outfit">
       {/* Decorative accent */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 transition-colors group-hover:bg-blue-500/10"></div>
 
@@ -99,7 +99,7 @@ const AttendanceMarker = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Real-time Clock - Digital Command Center Style */}
-        <div className="flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-[2rem] p-10 text-white border border-gray-700/50 shadow-2xl relative overflow-hidden group/clock">
+        <div className="flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-[2rem] p-4 md:p-10 text-white border border-gray-700/50 shadow-2xl relative overflow-hidden group/clock">
           <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover/clock:opacity-100 transition-opacity"></div>
           <p className="text-blue-400 text-xs font-bold mb-6 relative z-10">Current Time</p>
           <div className="text-6xl md:text-7xl font-bold mb-4 relative z-10 leading-none">
@@ -120,7 +120,7 @@ const AttendanceMarker = () => {
         {!user?.role || (user?.role !== 'admin' && user?.role !== 'director') ? (
           <div className="flex flex-col justify-center gap-10 pl-0 md:pl-12">
             {weeklyOffInfo?.isWeeklyOff ? (
-              <div className="bg-gray-50/30 backdrop-blur-3xl border border-dashed border-gray-200/60 rounded-[2.5rem] p-12 text-center">
+              <div className="bg-gray-50/30 backdrop-blur-3xl border border-dashed border-gray-200/60 rounded-[2.5rem] p-6 md:p-12 text-center">
                 <div className="w-20 h-20 bg-white/50 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-gray-100 shadow-sm">
                   <span className="text-4xl">🌴</span>
                 </div>
@@ -129,7 +129,7 @@ const AttendanceMarker = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div className="bg-white/40 backdrop-blur-3xl p-8 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden group/log">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
                     <p className="text-xs font-bold text-gray-400 mb-4 relative z-10">Check-In Time</p>

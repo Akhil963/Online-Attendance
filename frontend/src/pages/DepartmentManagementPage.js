@@ -179,7 +179,7 @@ const DepartmentManagementPage = () => {
 
         {/* Add/Edit Form - Glassmorphism */}
         {showForm && (
-          <div className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-lg border border-white/20 p-8 mb-10">
+          <div className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-lg border border-white/20 p-4 md:p-8 mb-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-8 tracking-tight">
               {editingId ? 'Edit Department' : 'Create New Unit'}
             </h2>
@@ -289,7 +289,7 @@ const DepartmentManagementPage = () => {
 
         {/* Departments Grid - Premium Cards */}
         {filteredDepartments.length === 0 ? (
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl p-12 text-center border border-gray-200/60">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl p-6 md:p-12 text-center border border-gray-200/60">
             <p className="text-gray-500 text-lg font-bold">
               {searchTerm ? 'No results found' : 'No departments launched yet'}
             </p>
@@ -298,7 +298,7 @@ const DepartmentManagementPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredDepartments.map(dept => (
               <div key={dept._id} className="group bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm hover:shadow-lg border border-gray-200/60 transition-all overflow-hidden flex flex-col hover:-translate-y-2">
-                <div className="p-8 flex-1">
+                <div className="p-4 md:p-8 flex-1">
                   <div className="flex justify-between items-start mb-6">
                     <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-500">
                       <span className="text-xl font-black">{dept.name.charAt(0).toUpperCase()}</span>

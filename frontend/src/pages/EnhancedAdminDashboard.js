@@ -276,9 +276,9 @@ const EnhancedAdminDashboard = () => {
         </div>
 
         {/* Charts - Premium Containers */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-12 mb-12">
           {/* Attendance Trend */}
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-12 hover:shadow-2xl hover:shadow-blue-500/5 transition-all">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-6 md:p-12 hover:shadow-2xl hover:shadow-blue-500/5 transition-all">
             <h2 className="text-2xl font-bold text-gray-900 mb-12 tracking-tight flex items-center gap-5 uppercase">
               <div className="w-1 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
               Performance Velocity
@@ -300,7 +300,7 @@ const EnhancedAdminDashboard = () => {
           </div>
 
           {/* Attendance Distribution */}
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-12 hover:shadow-2xl hover:shadow-violet-500/5 transition-all">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/60 p-6 md:p-12 hover:shadow-2xl hover:shadow-violet-500/5 transition-all">
             <h2 className="text-2xl font-bold text-gray-900 mb-12 tracking-tight flex items-center gap-5 uppercase">
               <div className="w-1 h-8 bg-violet-600 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.5)]"></div>
               Distribution Audit
@@ -330,9 +330,9 @@ const EnhancedAdminDashboard = () => {
         </div>
 
         {/* Department Overview - Premium Style */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-12 mb-12">
           {/* Department Statistics - Bar Chart */}
-          <div className="lg:col-span-2 bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-slate-200/60 p-12 hover:shadow-2xl hover:shadow-indigo-500/5 transition-all">
+          <div className="md:col-span-2 bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-slate-200/60 p-6 md:p-12 hover:shadow-2xl hover:shadow-indigo-500/5 transition-all">
             <div className="flex items-center justify-between mb-12">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Units Allocation</h2>
@@ -384,7 +384,7 @@ const EnhancedAdminDashboard = () => {
           </div>
 
           {/* Department Cards - Distribution Focus */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-gray-200 p-10">
+          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-gray-200 p-4 md:p-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight">Key Metrics</h2>
 
             {deptStats.length > 0 ? (
@@ -499,7 +499,7 @@ const EnhancedAdminDashboard = () => {
         {/* Summary Stats & Intelligence Center */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Intelligence Alerts */}
-          <div className="md:col-span-3 bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-slate-200/60 p-12">
+          <div className="md:col-span-3 bg-white/40 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-slate-200/60 p-6 md:p-12">
             <h2 className="text-2xl font-black text-slate-900 mb-10 tracking-tighter flex items-center gap-5 uppercase">
               <div className="w-1 h-6 bg-rose-600 rounded-full shadow-[0_0_15px_rgba(225,29,72,0.5)]"></div>
               Status Alerts

@@ -20,7 +20,7 @@ const AuthSelectionPage = () => {
             </div>
           </div>
           
-          <h1 className="text-6xl font-black text-white mb-4 tracking-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 tracking-tight">
             Attendance Management
           </h1>
           <p className="text-xl font-medium text-slate-300 mb-2">
@@ -36,11 +36,11 @@ const AuthSelectionPage = () => {
           {/* Employee Login Card */}
           <div
             onClick={() => navigate('/login/employee')}
-            className="group relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-12 cursor-pointer hover:border-blue-500/50 hover:bg-white/10 transition-all duration-500 overflow-hidden"
+            className="group relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-12 cursor-pointer hover:border-blue-500/50 hover:bg-white/10 transition-all duration-500 overflow-hidden"
           >
             {/* Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
+
             {/* Content */}
             <div className="relative z-10">
               {/* Icon */}
@@ -103,11 +103,11 @@ const AuthSelectionPage = () => {
           {/* Admin Login Card */}
           <div
             onClick={() => navigate('/login/admin')}
-            className="group relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-12 cursor-pointer hover:border-blue-500/50 hover:bg-white/10 transition-all duration-500 overflow-hidden"
+            className="group relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-12 cursor-pointer hover:border-blue-500/50 hover:bg-white/10 transition-all duration-500 overflow-hidden"
           >
             {/* Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
+
             {/* Content */}
             <div className="relative z-10">
               {/* Icon */}

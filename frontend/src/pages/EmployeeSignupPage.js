@@ -96,7 +96,7 @@ const EmployeeSignupPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent py-12 px-6">
-      <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-12 w-full max-w-2xl relative overflow-hidden group">
+      <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-12 w-full max-w-2xl relative overflow-hidden group">
         {/* Abstract Background Accents */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl -mr-40 -mt-40 transition-all duration-1000 hover:bg-blue-600/10"></div>
 
@@ -104,7 +104,7 @@ const EmployeeSignupPage = () => {
           <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/20 active:scale-95 transition-transform">
             <span className="text-white text-2xl font-bold tracking-tight">OAS</span>
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 tracking-tight mb-3 uppercase">Employee Registration</h1>
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight mb-3 uppercase">Employee Registration</h1>
           <div className="flex items-center justify-center gap-2">
             <div className="w-1.5 h-4 bg-blue-600 rounded-full"></div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Create your account to get started</p>

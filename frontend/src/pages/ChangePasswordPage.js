@@ -131,7 +131,7 @@ const ChangePasswordPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       <Header />
       
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-8">
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-6 md:py-8">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-lg shadow-xl p-8">
             {/* Header */}
