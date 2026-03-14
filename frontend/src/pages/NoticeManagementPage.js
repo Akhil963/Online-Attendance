@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Trash2, Edit2, Plus, Search, Mail, MessageCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import moment from 'moment';
@@ -26,9 +26,7 @@ const NoticeManagementPage = () => {
   const fetchNotices = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/notice/all', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.get('/notice/all');
       // Handle both array and object responses
       const data = Array.isArray(response.data) ? response.data : response.data.notices || [];
       setNotices(data);
@@ -73,18 +71,10 @@ const NoticeManagementPage = () => {
 
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/notice/${editingId}`,
-          formData,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        );
+        await api.put(`/notice/${editingId}`, formData);
         toast.success('Notice updated successfully');
       } else {
-        await axios.post(
-          'http://localhost:5000/api/notice',
-          formData,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        );
+        await api.post('/notice', formData);
         toast.success('Notice created successfully');
       }
 
@@ -120,10 +110,7 @@ const NoticeManagementPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this notice?')) {
       try {
-        await axios.delete(
-          `http://localhost:5000/api/notice/${id}`,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        );
+        await api.delete(`/notice/${id}`);
         toast.success('Notice deleted successfully');
         fetchNotices();
       } catch (error) {

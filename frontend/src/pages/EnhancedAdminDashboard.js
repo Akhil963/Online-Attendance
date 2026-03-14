@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Users, Calendar, TrendingUp, AlertCircle, ArrowDownLeft, Building2, Clock, ShieldCheck } from 'lucide-react';
 import moment from 'moment';
@@ -30,21 +30,11 @@ const EnhancedAdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-
       const [empRes, attRes, leaveRes, deptRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/employee/all', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/attendance/all', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/leave/all', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/department', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        api.get('/employee/all'),
+        api.get('/attendance/all'),
+        api.get('/leave/all'),
+        api.get('/department')
       ]);
 
       setDashboardData({

@@ -1,6 +1,28 @@
 import io from 'socket.io-client';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+const isLocalhostUrl = (url = '') => /\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(url);
+
+const getSocketUrl = () => {
+  const configuredSocketUrl = (process.env.REACT_APP_SOCKET_URL || '').trim();
+  const isBrowser = typeof window !== 'undefined';
+  const browserHost = isBrowser ? window.location.hostname : '';
+  const isLocalBrowser = ['localhost', '127.0.0.1'].includes(browserHost);
+
+  if (configuredSocketUrl) {
+    const shouldIgnoreLocalhostConfig = isBrowser && !isLocalBrowser && isLocalhostUrl(configuredSocketUrl);
+    if (!shouldIgnoreLocalhostConfig) {
+      return configuredSocketUrl.replace(/\/+$/, '');
+    }
+  }
+
+  if (isBrowser && !isLocalBrowser) {
+    return window.location.origin;
+  }
+
+  return 'http://localhost:5000';
+};
+
+const SOCKET_URL = getSocketUrl();
 
 class RealtimeService {
   constructor() {

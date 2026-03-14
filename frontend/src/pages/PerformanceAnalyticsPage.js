@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, Calendar, Award } from 'lucide-react';
 import moment from 'moment';
@@ -18,18 +18,10 @@ const PerformanceAnalyticsPage = () => {
   const fetchAnalyticsData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-
       const [attendanceRes, employeesRes, leavesRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/attendance/all', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/employee/all', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/leave/all', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        api.get('/attendance/all'),
+        api.get('/employee/all'),
+        api.get('/leave/all')
       ]);
 
       setAttendanceData(attendanceRes.data?.attendance || attendanceRes.data || []);

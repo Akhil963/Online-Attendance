@@ -42,9 +42,14 @@ import PendingApprovalPage from './pages/PendingApprovalPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 
 function App() {
+  const isBrowser = typeof window !== 'undefined';
+  const isVercelHost = isBrowser && window.location.hostname.endsWith('.vercel.app');
+  const hasVercelAnalyticsId = Boolean((process.env.REACT_APP_VERCEL_ANALYTICS_ID || '').trim());
+  const shouldRenderVercelInsights =
+    process.env.REACT_APP_ENABLE_ANALYTICS === 'true' && (isVercelHost || hasVercelAnalyticsId);
+
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <SpeedInsights />
       <AuthProvider>
 
         <Routes>
@@ -257,8 +262,12 @@ function App() {
           draggable={false}
           pauseOnHover
         />
-        <SpeedInsights />
-        <Analytics />
+        {shouldRenderVercelInsights && (
+          <>
+            <SpeedInsights />
+            <Analytics />
+          </>
+        )}
       </AuthProvider>
     </Router>
   );

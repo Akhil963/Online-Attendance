@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Trash2, Edit2, Plus, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -25,9 +25,7 @@ const DepartmentManagementPage = () => {
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/department', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.get('/department');
       // Handle both array and object responses
       const data = Array.isArray(response.data) ? response.data : response.data.departments || [];
       setDepartments(data);
@@ -58,18 +56,10 @@ const DepartmentManagementPage = () => {
 
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/department/${editingId}`,
-          formData,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        );
+        await api.put(`/department/${editingId}`, formData);
         toast.success('Department updated successfully');
       } else {
-        await axios.post(
-          'http://localhost:5000/api/department',
-          formData,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        );
+        await api.post('/department', formData);
         toast.success('Department created successfully');
       }
 
@@ -101,10 +91,7 @@ const DepartmentManagementPage = () => {
 
   const executeDelete = async () => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/department/${confirmDeleteId}`,
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-      );
+      await api.delete(`/department/${confirmDeleteId}`);
       toast.success('Department deleted successfully');
       setConfirmDeleteId(null);
       fetchDepartments();

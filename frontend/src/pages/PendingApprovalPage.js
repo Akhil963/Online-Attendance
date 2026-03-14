@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Clock, LogOut, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../services/api';
 import realtimeService from '../services/realtimeService';
 
 const PendingApprovalPage = () => {
@@ -43,9 +43,7 @@ const PendingApprovalPage = () => {
         return;
       }
       // Call public endpoint to check approval status
-      const response = await axios.get(
-        `http://localhost:5000/api/auth/check-approval/${email}`
-      );
+      const response = await api.get(`/auth/check-approval/${email}`);
       const approvalData = response.data;
       setEmployeeData(approvalData);
       // If approved, refresh auth context and let useEffect handle navigation
