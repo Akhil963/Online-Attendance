@@ -58,7 +58,7 @@ exports.getAllLeaves = async (req, res) => {
 
     let query = {};
 
-    if (status) {
+    if (status && status !== 'all') {
       query.status = status;
     }
 

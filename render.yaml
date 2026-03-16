@@ -4,6 +4,7 @@ services:
     env: node
     region: oregon
     plan: free
+    # Free web services sleep on Render. Use Starter or higher for an always-on backend.
     
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
@@ -42,7 +43,7 @@ services:
       
       # Frontend URL (update after frontend deployment)
       - key: CLIENT_URL
-        value: https://attendance-front.onrender.com
+        value: https://attendance-frontend.onrender.com
       
       # SendGrid Email (must be set in Render dashboard)
       - key: SENDGRID_API_KEY
@@ -88,26 +89,22 @@ services:
       - key: DB_TIMEOUT
         value: 5000
 
-  - type: web
+  - type: static
     name: attendance-frontend
-    env: node
     region: oregon
-    plan: free
+    # Static sites do not sleep, so the Render wake-up page will not appear for the frontend.
     
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: node frontend/server.js
+    staticPublishPath: frontend/build
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     
     auto_deploy: true
     branch: main
     
-    healthCheckPath: /
-    healthCheckInterval: 30
-    
     envVars:
-      - key: PORT
-        value: 3000
-      - key: NODE_ENV
-        value: production
       - key: REACT_APP_API_URL
         value: https://attendance-backend.onrender.com/api
       - key: REACT_APP_SOCKET_URL

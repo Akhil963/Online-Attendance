@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -40,6 +40,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminEmployeeApprovalPage from './pages/AdminEmployeeApprovalPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
+import { api } from './services/api';
 
 function App() {
   const isBrowser = typeof window !== 'undefined';
@@ -47,6 +48,12 @@ function App() {
   const hasVercelAnalyticsId = Boolean((process.env.REACT_APP_VERCEL_ANALYTICS_ID || '').trim());
   const shouldRenderVercelInsights =
     process.env.REACT_APP_ENABLE_ANALYTICS === 'true' && (isVercelHost || hasVercelAnalyticsId);
+
+  useEffect(() => {
+    api.get('/health').catch(() => {
+      // The request is only used to wake sleeping backends in production.
+    });
+  }, []);
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
