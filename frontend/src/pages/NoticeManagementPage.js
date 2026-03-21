@@ -240,6 +240,7 @@ const NoticeManagementPage = () => {
                       className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold appearance-none"
                     >
                       <option value="announcement">Announcement</option>
+                      <option value="meeting">Meeting</option>
                       <option value="policy">Policy</option>
                       <option value="event">Event</option>
                       <option value="urgent">Urgent</option>
