@@ -25,7 +25,12 @@ const AdminForgotPasswordPage = () => {
       setSubmitted(true);
       toast.success('Reset link sent to your email');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to send reset link');
+      const errorMessage = error.response?.data?.error;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error('Failed to send reset link');
+      }
       console.error('Forgot password error:', error);
     } finally {
       setLoading(false);
@@ -76,12 +81,21 @@ const AdminForgotPasswordPage = () => {
             </form>
 
             <div className="mt-12 pt-8 border-t border-gray-100 relative z-10">
-              <Link
-                to="/login/admin"
-                className="flex items-center justify-center text-xs font-medium text-gray-400 hover:text-blue-600 uppercase tracking-wide gap-3 transition-colors">
-                <ArrowLeft size={16} strokeWidth={2.5} />
-                Back to Login
-              </Link>
+              <div className="flex flex-col gap-4">
+                <Link
+                  to="/login/admin"
+                  className="flex items-center justify-center text-xs font-medium text-gray-400 hover:text-blue-600 uppercase tracking-wide gap-3 transition-colors">
+                  <ArrowLeft size={16} strokeWidth={2.5} />
+                  Back to Login
+                </Link>
+                <div className="flex justify-between items-center px-4">
+                  <Link
+                    to="/forgot-email/admin"
+                    className="text-xs font-medium text-gray-400 hover:text-blue-600 uppercase tracking-wide transition-colors">
+                    Forgot Email?
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         ) : (

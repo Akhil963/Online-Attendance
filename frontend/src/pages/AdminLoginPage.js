@@ -114,9 +114,15 @@ const AdminLoginPage = () => {
           </p>
 
           <div className="flex flex-col gap-2">
-            <Link to="/forgot-password/admin" className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
-              Forgot Password
-            </Link>
+            <div className="flex gap-4 justify-center">
+              <Link to="/forgot-password/admin" className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                Forgot Password
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link to="/forgot-email/admin" className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                Forgot Email
+              </Link>
+            </div>
             <Link to="/" className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
               Back Home
             </Link>

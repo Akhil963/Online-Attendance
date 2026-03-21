@@ -25,6 +25,9 @@ router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 router.get('/verify-reset-token', authController.verifyResetToken);
 
+// Forgot Email - find email by name
+router.post('/forgot-email', authController.forgotEmail);
+
 // Change Password Route (for authenticated users)
 router.post('/change-password', authMiddleware, authController.changePassword);
 

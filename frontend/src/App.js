@@ -36,6 +36,8 @@ import PerformanceAnalyticsPage from './pages/PerformanceAnalyticsPage';
 import UnplannedLeaveManagementPage from './pages/UnplannedLeaveManagementPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AdminForgotPasswordPage from './pages/AdminForgotPasswordPage';
+import ForgotEmailPage from './pages/ForgotEmailPage';
+import AdminForgotEmailPage from './pages/AdminForgotEmailPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminEmployeeApprovalPage from './pages/AdminEmployeeApprovalPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
@@ -70,6 +72,8 @@ function App() {
           <Route path="/signup/admin" element={<AdminSignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/forgot-password/admin" element={<AdminForgotPasswordPage />} />
+          <Route path="/forgot-email" element={<ForgotEmailPage />} />
+          <Route path="/forgot-email/admin" element={<AdminForgotEmailPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/pending-approval" element={<PendingApprovalPage />} />
 

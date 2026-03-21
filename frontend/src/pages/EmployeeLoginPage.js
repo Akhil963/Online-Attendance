@@ -137,12 +137,12 @@ const EmployeeLoginPage = () => {
         </form>
 
         <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col gap-4 text-center relative z-10">
-          <p className="text-sm font-medium text-gray-600">
+          {/* <p className="text-sm font-medium text-gray-600">
             Don't have an account?{' '}
             <Link to="/signup/employee" className="text-blue-600 hover:text-blue-700 font-semibold">
               Sign Up
             </Link>
-          </p>
+          </p> */}
 
           <div className="flex justify-between items-center gap-4">
             <Link to="/forgot-password" className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">

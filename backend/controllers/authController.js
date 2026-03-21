@@ -317,15 +317,15 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
-    // Find user (security: don't reveal if email exists)
+    // Find user by email
     const Model = userType === 'admin' ? Admin : Employee;
     const user = await Model.findOne({ email: normalizedEmail });
 
-    // ✅ SECURITY: Return same response whether user exists or not (prevents account enumeration)
+    // Return error if user not found
     if (!user) {
       logFailedAttempt(normalizedEmail, userType, 'FORGOT_PASSWORD', ipAddress, 'User not found');
-      return res.status(200).json({
-        message: 'If an account exists with this email, a reset link will be sent'
+      return res.status(404).json({
+        error: 'No account found with this email address'
       });
     }
 
@@ -976,5 +976,55 @@ exports.checkApprovalStatus = async (req, res) => {
   } catch (error) {
     console.error('Error checking approval status:', error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Forgot Email - find email by name
+exports.forgotEmail = async (req, res) => {
+  try {
+    const { name, userType } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress || 'UNKNOWN';
+
+    // Validate input
+    if (!name || !userType) {
+      return res.status(400).json({ error: 'Name and user type are required' });
+    }
+
+    if (!['employee', 'admin'].includes(userType)) {
+      return res.status(400).json({ error: 'Invalid user type' });
+    }
+
+    const normalizedName = name.trim();
+
+    // Find user by name (case-insensitive)
+    const Model = userType === 'admin' ? Admin : Employee;
+    const user = await Model.findOne({ name: { $regex: new RegExp(`^${normalizedName}$`, 'i') } });
+
+    // Return email if found
+    if (user) {
+      logSecurityEvent(
+        'FORGOT_EMAIL_REQUEST',
+        user._id.toString(),
+        userType,
+        { email: user.email },
+        ipAddress,
+        true
+      );
+
+      return res.status(200).json({
+        email: user.email,
+        message: 'Email found'
+      });
+    }
+
+    // Return error if not found
+    logFailedAttempt(normalizedName, userType, 'FORGOT_EMAIL', ipAddress, 'User not found');
+    return res.status(404).json({
+      error: 'No account found with this name'
+    });
+
+  } catch (error) {
+    console.error('Error in forgotEmail:', error);
+    res.status(500).json({ error: 'An error occurred. Please try again later.' });
   }
 };

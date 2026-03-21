@@ -48,6 +48,7 @@ export const authAPI = {
   getCurrentUser: () => api.get('/auth/me'),
   updateAdminProfile: (data) => api.post('/auth/update-admin-profile', data),
   forgotPassword: (email, userType) => api.post('/auth/forgot-password', { email, userType }),
+  forgotEmail: (name, userType) => api.post('/auth/forgot-email', { name, userType }),
   verifyResetToken: (token) => api.get('/auth/verify-reset-token', { params: { token } }),
   resetPassword: (token, password, confirmPassword, userType) =>
     api.post('/auth/reset-password', { token, password, confirmPassword, userType }),

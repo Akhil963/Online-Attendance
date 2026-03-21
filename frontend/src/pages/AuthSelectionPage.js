@@ -23,12 +23,12 @@ const AuthSelectionPage = () => {
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 tracking-tight">
             Attendance Management
           </h1>
-          <p className="text-xl font-medium text-slate-300 mb-2">
+          {/* <p className="text-xl font-medium text-slate-300 mb-2">
             Smart tracking for modern workplaces
-          </p>
-          <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">
+          </p> */}
+          {/* <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">
             Real-time attendance • Leave management • Performance analytics
-          </p>
+          </p> */}
         </div>
 
         {/* Cards Grid */}
@@ -85,7 +85,7 @@ const AuthSelectionPage = () => {
               </button>
 
               {/* Register Link */}
-              <p className="text-center text-sm text-slate-400 mt-6">
+              {/* <p className="text-center text-sm text-slate-400 mt-6">
                 Don't have an account?{' '}
                 <span
                   onClick={(e) => {
@@ -96,7 +96,7 @@ const AuthSelectionPage = () => {
                 >
                   Create Account
                 </span>
-              </p>
+              </p> */}
             </div>
           </div>
 
@@ -140,8 +140,8 @@ const AuthSelectionPage = () => {
                   <span className="text-sm text-gray-300">Leave approval workflow</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-sm text-gray-300">Custom reports & exports</span>
+                  {/* <div className="w-2 h-2 bg-blue-400 rounded-full"></div> */}
+                  {/* <span className="text-sm text-gray-300">Custom reports & exports</span> */}
                 </div>
               </div>
 
@@ -169,7 +169,7 @@ const AuthSelectionPage = () => {
         </div>
 
         {/* Footer Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/10">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/10">
           <div className="text-center">
             <div className="text-2xl font-black text-blue-400 mb-2">Real-Time</div>
             <p className="text-sm text-gray-400">Instant attendance updates</p>
@@ -182,7 +182,7 @@ const AuthSelectionPage = () => {
             <div className="text-2xl font-black text-blue-400 mb-2">Smart</div>
             <p className="text-sm text-gray-400">Intelligent analytics & insights</p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
