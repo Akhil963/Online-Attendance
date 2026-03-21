@@ -9,7 +9,8 @@ import {
   AlertCircle,
   Menu,
   X,
-  Clock
+  Clock,
+  ShieldUser
 } from 'lucide-react';
 
 const AdminNavigation = () => {
@@ -37,6 +38,12 @@ const AdminNavigation = () => {
           path: "../signup/employee",
           icon: Users,
           description: 'Create profiles for employees'
+        },
+        {
+          label: 'Create Admin Profiles',
+          path: "../signup/admin",
+          icon: ShieldUser,
+          description: 'Create profiles for admins'
         }
       ]
     },

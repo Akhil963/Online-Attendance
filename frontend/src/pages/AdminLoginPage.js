@@ -32,25 +32,25 @@ const AdminLoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent p-6">
-      <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 md:p-10 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 sm:p-6">
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-4 sm:p-6 md:p-10 w-full max-w-md">
         {/* Decorative Element */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/5 rounded-full blur-3xl -mr-24 -mt-24"></div>
+        <div className="hidden sm:block absolute top-0 right-0 w-48 h-48 bg-blue-600/5 rounded-full blur-3xl -mr-24 -mt-24"></div>
 
-        <div className="text-center mb-10 relative z-10">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-600/20">
-            <span className="text-white text-xl font-bold tracking-tight">OAS</span>
+        <div className="text-center mb-8 sm:mb-10 relative z-10">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg shadow-blue-600/20">
+            <span className="text-white text-lg sm:text-xl font-bold tracking-tight">OAS</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">Admin Login</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mb-2">Admin Login</h1>
           <div className="flex items-center justify-center gap-2">
             <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Sign in to admin portal</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 md:space-y-8 relative z-10">
           <div className="group/field">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Email Address
             </label>
             <input
@@ -64,7 +64,7 @@ const AdminLoginPage = () => {
           </div>
 
           <div className="group/field">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
             <div className="relative">
@@ -105,8 +105,8 @@ const AdminLoginPage = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col gap-4 text-center relative z-10">
-          <p className="text-sm font-medium text-gray-600">
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 flex flex-col gap-3 sm:gap-4 text-center relative z-10">
+          <p className="text-xs sm:text-sm font-medium text-gray-600">
             New to admin panel?{' '}
             <Link to="/signup/admin" className="text-blue-600 hover:text-blue-700 font-semibold">
               Sign Up
@@ -114,16 +114,16 @@ const AdminLoginPage = () => {
           </p>
 
           <div className="flex flex-col gap-2">
-            <div className="flex gap-4 justify-center">
-              <Link to="/forgot-password/admin" className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center items-center">
+              <Link to="/forgot-password/admin" className="text-xs sm:text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
                 Forgot Password
               </Link>
-              <span className="text-gray-300">|</span>
-              <Link to="/forgot-email/admin" className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
+              <span className="hidden sm:inline text-gray-300">|</span>
+              <Link to="/forgot-email/admin" className="text-xs sm:text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
                 Forgot Email
               </Link>
             </div>
-            <Link to="/" className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
+            <Link to="/" className="text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
               Back Home
             </Link>
           </div>
