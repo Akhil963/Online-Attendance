@@ -31,6 +31,12 @@ const AdminNavigation = () => {
           path: '/admin/enhanced-dashboard',
           icon: BarChart3,
           description: 'Overview & key metrics'
+        },
+        {
+          label: 'Create Employee Profiles',
+          path: "../signup/employee",
+          icon: Users,
+          description: 'Create profiles for employees'
         }
       ]
     },
