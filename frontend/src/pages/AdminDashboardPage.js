@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cel
 import moment from 'moment';
 import { toast } from 'react-toastify';
 import useLiveDataSync from '../hooks/useLiveDataSync';
+import LeaveRejectionModal from '../components/LeaveRejectionModal';
 
 const AdminDashboardPage = () => {
   const [statistics, setStatistics] = useState({
@@ -18,6 +19,9 @@ const AdminDashboardPage = () => {
   });
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [selectedLeaveForRejection, setSelectedLeaveForRejection] = useState(null);
+  const [rejectingLeaveId, setRejectingLeaveId] = useState(null);
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -103,13 +107,23 @@ const AdminDashboardPage = () => {
     }
   };
 
-  const handleRejectLeave = async (leaveId) => {
+  const handleRejectLeave = (leave) => {
+    setSelectedLeaveForRejection(leave);
+    setRejectionModalOpen(true);
+  };
+
+  const handleConfirmReject = async (rejectionReason) => {
     try {
-      await leaveAPI.rejectLeave(leaveId, { rejectionReason: 'Rejected by admin' });
-      toast.success('Leave rejected!');
+      setRejectingLeaveId(selectedLeaveForRejection._id);
+      await leaveAPI.rejectLeave(selectedLeaveForRejection._id, { rejectionReason });
+      toast.success('Leave rejected with reason provided!');
+      setRejectionModalOpen(false);
+      setSelectedLeaveForRejection(null);
+      setRejectingLeaveId(null);
       fetchLeaves();
     } catch (error) {
       toast.error('Failed to reject leave');
+      setRejectingLeaveId(null);
     }
   };
 
@@ -385,7 +399,7 @@ const AdminDashboardPage = () => {
                           ✓ Approve
                         </button>
                         <button
-                          onClick={() => handleRejectLeave(leave._id)}
+                          onClick={() => handleRejectLeave(leave)}
                           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:shadow-lg hover:shadow-red-200 transform hover:scale-105"
                         >
                           ✕ Reject
@@ -403,6 +417,18 @@ const AdminDashboardPage = () => {
             </div>
           )}
         </div>
+
+        {/* Leave Rejection Modal */}
+        <LeaveRejectionModal
+          isOpen={rejectionModalOpen}
+          onClose={() => {
+            setRejectionModalOpen(false);
+            setSelectedLeaveForRejection(null);
+          }}
+          onConfirm={handleConfirmReject}
+          leave={selectedLeaveForRejection}
+          loading={rejectingLeaveId !== null}
+        />
 
       </div>
     </div>
