@@ -27,6 +27,23 @@ exports.applyLeave = async (req, res) => {
 
     await leave.save();
 
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${employeeId}`).emit('leave:statusChanged', {
+        leaveId: leave._id,
+        status: leave.status,
+        message: 'Your leave application has been submitted',
+        updatedAt: leave.updatedAt || leave.createdAt || new Date()
+      });
+      io.to('admin').emit('leave:updated', {
+        type: 'applied',
+        leaveId: leave._id,
+        employeeId,
+        status: leave.status,
+        updatedAt: leave.updatedAt || leave.createdAt || new Date()
+      });
+    }
+
     res.status(201).json({
       message: 'Leave application submitted',
       leave
@@ -99,6 +116,23 @@ exports.approveLeave = async (req, res) => {
       return res.status(404).json({ error: 'Leave not found' });
     }
 
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${leave.employeeId}`).emit('leave:statusChanged', {
+        leaveId: leave._id,
+        status: leave.status,
+        message: 'Your leave request has been approved',
+        updatedAt: leave.updatedAt || new Date()
+      });
+      io.to('admin').emit('leave:updated', {
+        type: 'statusChange',
+        leaveId: leave._id,
+        employeeId: leave.employeeId,
+        status: leave.status,
+        updatedAt: leave.updatedAt || new Date()
+      });
+    }
+
     res.json({
       message: 'Leave approved',
       leave
@@ -128,6 +162,23 @@ exports.rejectLeave = async (req, res) => {
 
     if (!leave) {
       return res.status(404).json({ error: 'Leave not found' });
+    }
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${leave.employeeId}`).emit('leave:statusChanged', {
+        leaveId: leave._id,
+        status: leave.status,
+        message: 'Your leave request has been rejected',
+        updatedAt: leave.updatedAt || new Date()
+      });
+      io.to('admin').emit('leave:updated', {
+        type: 'statusChange',
+        leaveId: leave._id,
+        employeeId: leave.employeeId,
+        status: leave.status,
+        updatedAt: leave.updatedAt || new Date()
+      });
     }
 
     res.json({
@@ -173,6 +224,23 @@ exports.createUnplannedLeave = async (req, res) => {
     });
 
     await leave.save();
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${employeeId}`).emit('leave:statusChanged', {
+        leaveId: leave._id,
+        status: leave.status,
+        message: 'A leave entry has been created for you by admin',
+        updatedAt: leave.updatedAt || leave.createdAt || new Date()
+      });
+      io.to('admin').emit('leave:updated', {
+        type: 'created',
+        leaveId: leave._id,
+        employeeId,
+        status: leave.status,
+        updatedAt: leave.updatedAt || leave.createdAt || new Date()
+      });
+    }
 
     res.status(201).json({
       message: 'Unplanned leave created and approved',

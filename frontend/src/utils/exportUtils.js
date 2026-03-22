@@ -1,7 +1,24 @@
-import * as XLSX from 'xlsx';
 import moment from 'moment';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+
+let excelJSImportPromise;
+let jsPDFImportPromise;
+
+const loadExcelJS = async () => {
+  if (!excelJSImportPromise) {
+    excelJSImportPromise = import('exceljs');
+  }
+  return excelJSImportPromise;
+};
+
+const loadPDFDeps = async () => {
+  if (!jsPDFImportPromise) {
+    jsPDFImportPromise = Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable')
+    ]);
+  }
+  return jsPDFImportPromise;
+};
 
 /**
  * Export data to Excel format
@@ -9,12 +26,55 @@ import 'jspdf-autotable';
  * @param {string} filename - Output filename
  * @param {string} sheetName - Sheet name
  */
-export const exportToExcel = (data, filename = 'export', sheetName = 'Sheet1') => {
+export const exportToExcel = async (data, filename = 'export', sheetName = 'Sheet1') => {
   try {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    XLSX.writeFile(workbook, `${filename}_${moment().format('YYYY-MM-DD')}.xlsx`);
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('No data to export');
+      return;
+    }
+
+    const { default: ExcelJS } = await loadExcelJS();
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(sheetName);
+    const headers = Object.keys(data[0]);
+
+    worksheet.addRow(headers);
+    data.forEach((row) => {
+      const rowValues = headers.map((header) => {
+        const value = row[header];
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'object') return JSON.stringify(value);
+        return value;
+      });
+      worksheet.addRow(rowValues);
+    });
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true };
+
+    headers.forEach((header, index) => {
+      const column = worksheet.getColumn(index + 1);
+      const maxDataLength = Math.max(
+        String(header).length,
+        ...data.map((row) => String(row[header] ?? '').length)
+      );
+      column.width = Math.min(Math.max(maxDataLength + 2, 12), 40);
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([
+      buffer
+    ], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${filename}_${moment().format('YYYY-MM-DD')}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error exporting to Excel:', error);
     throw error;
@@ -28,13 +88,16 @@ export const exportToExcel = (data, filename = 'export', sheetName = 'Sheet1') =
  * @param {string} title - PDF title
  * @param {Array} columns - Column configuration
  */
-export const exportToPDF = (data, filename = 'export', title = 'Report', columns = []) => {
+export const exportToPDF = async (data, filename = 'export', title = 'Report', columns = []) => {
   try {
     if (!data || data.length === 0) {
       console.warn('No data to export');
       return;
     }
 
+    const [jsPDFModule, autoTableModule] = await loadPDFDeps();
+    const jsPDF = jsPDFModule.default;
+    const autoTable = autoTableModule.default;
     const doc = new jsPDF();
     
     // Add title
@@ -58,8 +121,8 @@ export const exportToPDF = (data, filename = 'export', title = 'Report', columns
         })
       );
       
-      if (typeof doc.autoTable === 'function') {
-        doc.autoTable({
+      if (typeof autoTable === 'function') {
+        autoTable(doc, {
           head: [tableColumns],
           body: tableData,
           startY: 35,

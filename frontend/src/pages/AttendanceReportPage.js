@@ -4,6 +4,7 @@ import { exportToExcel } from '../utils/exportUtils';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const AttendanceReportPage = () => {
   const [attendance, setAttendance] = useState([]);
@@ -15,12 +16,6 @@ const AttendanceReportPage = () => {
   const [employeeFilter, setEmployeeFilter] = useState('all');
   const [employees, setEmployees] = useState([]);
   const [summary, setSummary] = useState({});
-
-  useEffect(() => {
-    fetchAttendance();
-    fetchEmployees();
-  }, []);
-
 
   const filterAttendance = useCallback(() => {
     let filtered = attendance.filter(record => {
@@ -46,7 +41,7 @@ const AttendanceReportPage = () => {
     filterAttendance();
   }, [filterAttendance]);
 
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       setLoading(true);
       const response = await attendanceAPI.getAllAttendance();
@@ -57,16 +52,33 @@ const AttendanceReportPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       const response = await employeeAPI.getAllEmployees();
       setEmployees(response.data.employees || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAttendance();
+    fetchEmployees();
+  }, [fetchAttendance, fetchEmployees]);
+
+  const refreshAttendanceData = useCallback(async () => {
+    await Promise.all([fetchAttendance(), fetchEmployees()]);
+  }, [fetchAttendance, fetchEmployees]);
+
+  const { isLive, lastSyncAt } = useLiveDataSync({
+    onRefresh: refreshAttendanceData,
+    events: ['attendance:updated', 'stats:updated', 'leave:updated'],
+    soundEvents: [],
+    pollMs: 30000,
+    enabled: true
+  });
 
 
   const getChartData = () => {
@@ -128,6 +140,13 @@ const AttendanceReportPage = () => {
               Attendance Intelligence
             </h1>
             <p className="text-gray-500 mt-2 text-lg">Detailed history and attendance logs</p>
+            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white/70">
+              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
+              {lastSyncAt && (
+                <span className="text-[10px] text-gray-400 font-semibold">{new Date(lastSyncAt).toLocaleTimeString()}</span>
+              )}
+            </div>
           </div>
           <button
             onClick={handleExportAttendance}

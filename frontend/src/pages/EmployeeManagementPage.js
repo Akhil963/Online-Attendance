@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { employeeAPI } from '../services/api';
 import { exportToExcel, exportToCSV, exportToPDF } from '../utils/exportUtils';
 import { toast } from 'react-toastify';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const EmployeeManagementPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -15,10 +16,33 @@ const EmployeeManagementPage = () => {
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
 
+  const fetchEmployees = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await employeeAPI.getAllEmployees();
+      setEmployees(response.data.employees || []);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      toast.error('Failed to load employees');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await employeeAPI.getAllEmployees();
+      const uniqueDepts = [...new Set(response.data.employees?.map(e => e.department?.name))].filter(Boolean);
+      setDepartments(uniqueDepts);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchEmployees();
     fetchDepartments();
-  }, []);
+  }, [fetchEmployees, fetchDepartments]);
 
   const filterAndSortEmployees = useCallback(() => {
     let filtered = employees.filter(emp => {
@@ -51,28 +75,17 @@ const EmployeeManagementPage = () => {
     filterAndSortEmployees();
   }, [filterAndSortEmployees]);
 
-  const fetchEmployees = async () => {
-    try {
-      setLoading(true);
-      const response = await employeeAPI.getAllEmployees();
-      setEmployees(response.data.employees || []);
-    } catch (error) {
-      console.error('Error fetching employees:', error);
-      toast.error('Failed to load employees');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const refreshEmployeesData = useCallback(async () => {
+    await Promise.all([fetchEmployees(), fetchDepartments()]);
+  }, [fetchEmployees, fetchDepartments]);
 
-  const fetchDepartments = async () => {
-    try {
-      const response = await employeeAPI.getAllEmployees();
-      const uniqueDepts = [...new Set(response.data.employees?.map(e => e.department?.name))].filter(Boolean);
-      setDepartments(uniqueDepts);
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-    }
-  };
+  const { isLive, lastSyncAt } = useLiveDataSync({
+    onRefresh: refreshEmployeesData,
+    events: ['employee:statusUpdated', 'notification:new'],
+    soundEvents: [],
+    pollMs: 30000,
+    enabled: true
+  });
 
 
   const handleExportExcel = () => {
@@ -143,6 +156,13 @@ const EmployeeManagementPage = () => {
           <div className="flex items-center gap-4">
             <div className="w-1 h-6 bg-blue-600 rounded-full shadow-lg"></div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage Your Team</p>
+          </div>
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white/70">
+            <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+            <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
+            {lastSyncAt && (
+              <span className="text-[10px] text-gray-400 font-semibold">{new Date(lastSyncAt).toLocaleTimeString()}</span>
+            )}
           </div>
         </div>
 

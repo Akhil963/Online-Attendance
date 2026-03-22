@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import api from '../services/api';
 import { Trash2, Edit2, Plus, Search, Mail, MessageCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import moment from 'moment';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const NoticeManagementPage = () => {
   const [notices, setNotices] = useState([]);
@@ -10,24 +11,80 @@ const NoticeManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [departmentSearchTerm, setDepartmentSearchTerm] = useState('');
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
+  const [departments, setDepartments] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     category: 'announcement',
     priority: 'normal',
     isUrgent: false,
-    notificationChannels: ['dashboard']
+    notificationChannels: ['dashboard'],
+    departments: [],
+    employees: []
   });
 
-  useEffect(() => {
-    fetchNotices();
-  }, []);
+  const availableEmployees = useMemo(() => {
+    const selectedDepartments = formData.departments || [];
+    if (selectedDepartments.length === 0) {
+      return employees;
+    }
 
-  const fetchNotices = async () => {
+    return employees.filter((employee) => {
+      const departmentId = String(employee?.department?._id || employee?.department || '');
+      return selectedDepartments.map(String).includes(departmentId);
+    });
+  }, [employees, formData.departments]);
+
+  const filteredDepartments = useMemo(() => {
+    const term = departmentSearchTerm.trim().toLowerCase();
+    if (!term) {
+      return departments;
+    }
+
+    return departments.filter((department) =>
+      (department?.name || '').toLowerCase().includes(term)
+    );
+  }, [departments, departmentSearchTerm]);
+
+  const filteredAvailableEmployees = useMemo(() => {
+    const term = employeeSearchTerm.trim().toLowerCase();
+    if (!term) {
+      return availableEmployees;
+    }
+
+    return availableEmployees.filter((employee) => {
+      const name = (employee?.name || '').toLowerCase();
+      const email = (employee?.email || '').toLowerCase();
+      return name.includes(term) || email.includes(term);
+    });
+  }, [availableEmployees, employeeSearchTerm]);
+
+  const audienceSummary = useMemo(() => {
+    const departmentCount = (formData.departments || []).length;
+    const employeeCount = (formData.employees || []).length;
+
+    if (departmentCount === 0 && employeeCount === 0) {
+      return 'This notice will be sent to all employees.';
+    }
+
+    if (departmentCount > 0 && employeeCount === 0) {
+      return `This notice will be sent only to selected departments (${departmentCount}).`;
+    }
+
+    if (departmentCount === 0 && employeeCount > 0) {
+      return `This notice will be sent only to selected employees (${employeeCount}).`;
+    }
+
+    return `This notice will be sent to selected departments (${departmentCount}) and selected employees (${employeeCount}) only.`;
+  }, [formData.departments, formData.employees]);
+
+  const fetchNotices = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/notice/all');
-      // Handle both array and object responses
       const data = Array.isArray(response.data) ? response.data : response.data.notices || [];
       setNotices(data);
     } catch (error) {
@@ -37,7 +94,41 @@ const NoticeManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await api.get('/department');
+      const depts = Array.isArray(response.data) ? response.data : response.data.departments || [];
+      setDepartments(depts);
+    } catch (error) {
+      console.error('Failed to fetch departments:', error);
+    }
+  }, []);
+
+  const fetchEmployees = useCallback(async () => {
+    try {
+      const response = await api.get('/employee/all');
+      const emps = Array.isArray(response.data) ? response.data : response.data.employees || [];
+      setEmployees(emps);
+    } catch (error) {
+      console.error('Failed to fetch employees:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotices();
+    fetchDepartments();
+    fetchEmployees();
+  }, [fetchNotices, fetchDepartments, fetchEmployees]);
+
+  useLiveDataSync({
+    onRefresh: fetchNotices,
+    events: ['notification:new'],
+    soundEvents: ['notification:new'],
+    pollMs: 30000,
+    enabled: true
+  });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,12 +139,52 @@ const NoticeManagementPage = () => {
   };
 
   const handleChannelChange = (channel) => {
-    setFormData(prev => ({
-      ...prev,
-      notificationChannels: (prev.notificationChannels || []).includes(channel)
-        ? (prev.notificationChannels || []).filter(c => c !== channel)
-        : [...(prev.notificationChannels || []), channel]
-    }));
+    setFormData(prev => {
+      const channels = prev.notificationChannels || [];
+      return {
+        ...prev,
+        notificationChannels: channels.includes(channel)
+          ? channels.filter(c => c !== channel)
+          : [...channels, channel]
+      };
+    });
+  };
+
+  const handleDepartmentChange = (deptId) => {
+    setFormData(prev => {
+      const depts = prev.departments || [];
+      const newDepts = depts.includes(deptId)
+        ? depts.filter(d => d !== deptId)
+        : [...depts, deptId];
+
+      const filteredEmployeeIds = employees
+        .filter((employee) => {
+          if (newDepts.length === 0) {
+            return true;
+          }
+          const departmentId = String(employee?.department?._id || employee?.department || '');
+          return newDepts.map(String).includes(departmentId);
+        })
+        .map((employee) => String(employee._id));
+
+      return {
+        ...prev,
+        departments: newDepts,
+        employees: prev.employees.filter((employeeId) => filteredEmployeeIds.includes(String(employeeId)))
+      };
+    });
+  };
+
+  const handleEmployeeChange = (empId) => {
+    setFormData(prev => {
+      const emps = prev.employees || [];
+      return {
+        ...prev,
+        employees: emps.includes(empId)
+          ? emps.filter(e => e !== empId)
+          : [...emps, empId]
+      };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -83,7 +214,10 @@ const NoticeManagementPage = () => {
         content: '',
         category: 'announcement',
         priority: 'normal',
-        isUrgent: false
+        isUrgent: false,
+        notificationChannels: ['dashboard'],
+        departments: [],
+        employees: []
       });
       setEditingId(null);
       setShowForm(false);
@@ -95,13 +229,18 @@ const NoticeManagementPage = () => {
   };
 
   const handleEdit = (notice) => {
+    const normalizedDepartments = (notice.departments || []).map((department) => String(department?._id || department));
+    const normalizedEmployees = (notice.employees || []).map((employee) => String(employee?._id || employee));
+
     setFormData({
       title: notice.title,
       content: notice.content,
       category: notice.category || 'announcement',
       priority: notice.priority || 'normal',
       isUrgent: notice.isUrgent || false,
-      notificationChannels: notice.notificationChannels || ['dashboard']
+      notificationChannels: notice.notificationChannels || ['dashboard'],
+      departments: normalizedDepartments,
+      employees: normalizedEmployees
     });
     setEditingId(notice._id);
     setShowForm(true);
@@ -127,9 +266,13 @@ const NoticeManagementPage = () => {
       category: 'announcement',
       priority: 'normal',
       isUrgent: false,
-      notificationChannels: ['dashboard']
+      notificationChannels: ['dashboard'],
+      departments: [],
+      employees: []
     });
     setEditingId(null);
+    setDepartmentSearchTerm('');
+    setEmployeeSearchTerm('');
     setShowForm(false);
   };
 
@@ -187,6 +330,70 @@ const NoticeManagementPage = () => {
             <div className="mt-4 h-1 w-12 bg-emerald-500 rounded-full group-hover:w-20 transition-all"></div>
           </div>
         </div>
+
+        {/* Meeting Announcements Section */}
+        {Array.isArray(notices) && notices.filter(n => n && n.category === 'meeting').length > 0 && (
+          <div className="mb-12">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tighter mb-3">📅 Meeting Announcements</h2>
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-orange-500 rounded-full"></div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Upcoming & Scheduled Meetings</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {notices
+                .filter(n => n && n.category === 'meeting')
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map((meeting, index) => (
+                  <div key={meeting._id || index} className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-orange-100 p-6 hover:shadow-lg hover:border-orange-300 transition-all group">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 tracking-tight text-lg mb-2 group-hover:text-orange-600 transition-colors">
+                          {meeting.title}
+                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-orange-200">
+                            Meeting
+                          </span>
+                          {meeting.isUrgent && (
+                            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-red-200 flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
+                              Urgent
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">
+                      {meeting.content}
+                    </p>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div className="text-xs text-gray-400 font-bold">
+                        {moment(meeting.createdAt).format('MMM DD, YYYY')}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(meeting)}
+                          className="w-8 h-8 bg-orange-50 border border-orange-200 rounded-lg flex items-center justify-center text-orange-600 hover:bg-orange-100 hover:border-orange-400 transition-all"
+                          title="Edit Meeting"
+                        >
+                          <Edit2 size={14} strokeWidth={2.5} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(meeting._id)}
+                          className="w-8 h-8 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center text-red-600 hover:bg-red-100 hover:border-red-400 transition-all"
+                          title="Delete Meeting"
+                        >
+                          <Trash2 size={14} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
 
         {/* Search and Broadcast Initiation */}
         <div className="flex gap-6 mb-8 flex-wrap">
@@ -300,6 +507,107 @@ const NoticeManagementPage = () => {
                 />
               </div>
 
+              {/* Department Selection */}
+              <div className="group/field">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Select Departments (Optional)</label>
+                <div className="relative mb-3">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <input
+                    type="text"
+                    value={departmentSearchTerm}
+                    onChange={(e) => setDepartmentSearchTerm(e.target.value)}
+                    placeholder="Search departments..."
+                    className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-semibold text-gray-700"
+                  />
+                </div>
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 max-h-48 overflow-y-auto">
+                  {departments.length === 0 ? (
+                    <p className="text-gray-400 text-sm font-bold">No departments available</p>
+                  ) : filteredDepartments.length === 0 ? (
+                    <p className="text-gray-400 text-sm font-bold">No matching departments</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredDepartments.map(dept => (
+                        <label key={dept._id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={(formData.departments || []).map(String).includes(String(dept._id))}
+                            onChange={() => handleDepartmentChange(dept._id)}
+                            className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                          />
+                          <span className="text-sm font-bold text-gray-700">{dept.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Employee Selection */}
+              <div className="group/field">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Select Employees (Optional)</label>
+                <div className="relative mb-3">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <input
+                    type="text"
+                    value={employeeSearchTerm}
+                    onChange={(e) => setEmployeeSearchTerm(e.target.value)}
+                    placeholder="Search employees by name or email..."
+                    className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-semibold text-gray-700"
+                  />
+                </div>
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 max-h-48 overflow-y-auto">
+                  {availableEmployees.length === 0 && employees.length === 0 ? (
+                    <p className="text-gray-400 text-sm font-bold">No employees available</p>
+                  ) : availableEmployees.length === 0 && (formData.departments || []).length > 0 ? (
+                    <p className="text-gray-400 text-sm font-bold">No employees in selected departments</p>
+                  ) : filteredAvailableEmployees.length === 0 ? (
+                    <p className="text-gray-400 text-sm font-bold">No matching employees</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredAvailableEmployees.map(emp => (
+                        <label key={emp._id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={(formData.employees || []).map(String).includes(String(emp._id))}
+                            onChange={() => handleEmployeeChange(emp._id)}
+                            className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                          />
+                          <div className="flex-1">
+                            <span className="text-sm font-bold text-gray-700 block">{emp.name}</span>
+                            <span className="text-xs text-gray-500">{emp.email}</span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Selected Details Summary */}
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                  <p className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-2">Target Logic</p>
+                  <p className="text-sm text-blue-900 font-semibold mb-3">{audienceSummary}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(formData.departments || []).map(deptId => {
+                      const dept = departments.find(d => String(d._id) === String(deptId));
+                      return dept ? (
+                        <span key={deptId} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+                          Department: {dept.name}
+                        </span>
+                      ) : null;
+                    })}
+                    {(formData.employees || []).map(empId => {
+                      const emp = employees.find(e => String(e._id) === String(empId));
+                      return emp ? (
+                        <span key={empId} className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                          Employee: {emp.name}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+              </div>
+
               {/* Advanced Transmission Channels */}
               <div className="bg-gray-900 rounded-[2rem] p-4 md:p-8">
                 <label className="block text-xs font-bold text-blue-400 uppercase tracking-[0.3em] mb-6">Delivery Channels:</label>
@@ -307,25 +615,25 @@ const NoticeManagementPage = () => {
                   <button
                     type="button"
                     onClick={() => handleChannelChange('dashboard')}
-                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${formData.notificationChannels.includes('dashboard') ? 'bg-blue-600/10 border-blue-500/50 text-blue-400' : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'}`}
+                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${(formData.notificationChannels || []).includes('dashboard') ? 'bg-blue-600/10 border-blue-500/50 text-blue-400' : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'}`}
                   >
-                    <CheckCircle size={20} className={formData.notificationChannels.includes('dashboard') ? 'text-blue-400' : 'text-gray-600'} />
+                    <CheckCircle size={20} className={(formData.notificationChannels || []).includes('dashboard') ? 'text-blue-400' : 'text-gray-600'} />
                     <span className="font-bold uppercase tracking-widest text-xs">Dashboard</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleChannelChange('email')}
-                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${formData.notificationChannels.includes('email') ? 'bg-emerald-600/10 border-emerald-500/50 text-emerald-400' : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'}`}
+                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${(formData.notificationChannels || []).includes('email') ? 'bg-emerald-600/10 border-emerald-500/50 text-emerald-400' : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'}`}
                   >
-                    <Mail size={20} className={formData.notificationChannels.includes('email') ? 'text-emerald-400' : 'text-gray-600'} />
+                    <Mail size={20} className={(formData.notificationChannels || []).includes('email') ? 'text-emerald-400' : 'text-gray-600'} />
                     <span className="font-bold uppercase tracking-widest text-xs">Email</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleChannelChange('whatsapp')}
-                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${formData.notificationChannels.includes('whatsapp') ? 'bg-green-600/10 border-green-500/50 text-green-400' : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'}`}
+                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${(formData.notificationChannels || []).includes('whatsapp') ? 'bg-green-600/10 border-green-500/50 text-green-400' : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'}`}
                   >
-                    <MessageCircle size={20} className={formData.notificationChannels.includes('whatsapp') ? 'text-green-400' : 'text-gray-600'} />
+                    <MessageCircle size={20} className={(formData.notificationChannels || []).includes('whatsapp') ? 'text-green-400' : 'text-gray-600'} />
                     <span className="font-bold uppercase tracking-widest text-xs">WhatsApp</span>
                   </button>
                 </div>

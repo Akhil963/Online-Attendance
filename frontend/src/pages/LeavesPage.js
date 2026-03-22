@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { leaveAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import moment from 'moment';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const LeavesPage = () => {
   const [leaves, setLeaves] = useState([]);
@@ -14,18 +15,26 @@ const LeavesPage = () => {
     reason: ''
   });
 
-  useEffect(() => {
-    fetchLeaves();
-  }, []);
-
-  const fetchLeaves = async () => {
+  const fetchLeaves = useCallback(async () => {
     try {
       const response = await leaveAPI.getMyLeaves();
       setLeaves(response.data.leaves);
     } catch (error) {
       console.error('Error fetching leaves:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchLeaves();
+  }, [fetchLeaves]);
+
+  const { isLive, lastSyncAt } = useLiveDataSync({
+    onRefresh: fetchLeaves,
+    events: ['leave:statusChanged', 'leave:updated'],
+    soundEvents: ['leave:statusChanged'],
+    pollMs: 30000,
+    enabled: true
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,7 +97,16 @@ const LeavesPage = () => {
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Leave Applications</h1>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Leave Applications</h1>
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white">
+              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
+              {lastSyncAt && (
+                <span className="text-[10px] text-gray-400 font-semibold">{new Date(lastSyncAt).toLocaleTimeString()}</span>
+              )}
+            </div>
+          </div>
           <button
             onClick={() => setShowForm(!showForm)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-6 py-2 text-sm md:text-base rounded-lg font-medium transition w-full sm:w-auto"

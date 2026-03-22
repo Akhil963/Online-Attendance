@@ -3,6 +3,7 @@ import { leaveAPI, employeeAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { Plus, X, Search, Calendar, User, FileText } from 'lucide-react';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const UnplannedLeaveManagementPage = () => {
   const [leaves, setLeaves] = useState([]);
@@ -48,6 +49,18 @@ const UnplannedLeaveManagementPage = () => {
     fetchEmployees();
     fetchUnplannedLeaves();
   }, [fetchEmployees, fetchUnplannedLeaves]);
+
+  const refreshUnplannedData = useCallback(async () => {
+    await Promise.all([fetchEmployees(), fetchUnplannedLeaves()]);
+  }, [fetchEmployees, fetchUnplannedLeaves]);
+
+  const { isLive, lastSyncAt } = useLiveDataSync({
+    onRefresh: refreshUnplannedData,
+    events: ['leave:updated', 'leave:statusChanged', 'notification:new'],
+    soundEvents: [],
+    pollMs: 30000,
+    enabled: true
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -133,6 +146,13 @@ const UnplannedLeaveManagementPage = () => {
                 Unplanned Leave Management
               </h1>
               <p className="text-gray-600 mt-2">Create and manage unplanned leaves for employees</p>
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white/70">
+                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
+                {lastSyncAt && (
+                  <span className="text-[10px] text-gray-400 font-semibold">{new Date(lastSyncAt).toLocaleTimeString()}</span>
+                )}
+              </div>
             </div>
             <button
               onClick={() => setShowForm(!showForm)}

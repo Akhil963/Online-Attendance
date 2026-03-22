@@ -6,7 +6,7 @@ const { sendNoticeEmail } = require('../utils/emailService');
 // Create notice (Admin only)
 exports.createNotice = async (req, res) => {
   try {
-    const { title, content, category, priority, isUrgent, departments, roles, expiryDate, notificationChannels } = req.body;
+    const { title, content, category, priority, isUrgent, departments, employees, roles, expiryDate, notificationChannels } = req.body;
     const postedBy = req.userId;
     const userRole = req.userRole; // Get user role from auth middleware
 
@@ -21,6 +21,7 @@ exports.createNotice = async (req, res) => {
       priority: priority || 'normal',
       isUrgent: isUrgent || false,
       departments: departments || [],
+      employees: employees || [],
       roles: roles || [],
       postedBy,
       postedByModel: userRole === 'admin' ? 'Admin' : 'Employee',
@@ -35,7 +36,8 @@ exports.createNotice = async (req, res) => {
 
     // Send notifications asynchronously
     try {
-      await sendNotifications(notice);
+      const io = req.app.get('io');
+      await sendNotifications(notice, io);
     } catch (error) {
       console.error('Error sending notifications:', error);
       // Don't fail the API call if notifications fail
@@ -51,28 +53,26 @@ exports.createNotice = async (req, res) => {
 };
 
 // Helper function to send notifications
-const sendNotifications = async (notice) => {
+const sendNotifications = async (notice, io) => {
   try {
-    // Get all employees who should receive this notice
-    let query = {
-      $or: [
-        { department: { $in: notice.departments } },
-      ]
-    };
+    // Build strict recipient targeting from selected departments/employees/roles.
+    const hasDepartments = Array.isArray(notice.departments) && notice.departments.length > 0;
+    const hasEmployees = Array.isArray(notice.employees) && notice.employees.length > 0;
+    const hasRoles = Array.isArray(notice.roles) && notice.roles.length > 0;
 
-    // If no specific departments, notify all employees
-    if (notice.departments.length === 0) {
-      query = {}; // Get all employees
-    }
-
-    // If specific roles, add them to the query
-    if (notice.roles.length > 0) {
-      query = {
-        $or: [
-          { department: { $in: notice.departments } },
-          { role: { $in: notice.roles } }
-        ]
-      };
+    let query = {};
+    if (hasDepartments || hasEmployees || hasRoles) {
+      const orConditions = [];
+      if (hasDepartments) {
+        orConditions.push({ department: { $in: notice.departments } });
+      }
+      if (hasEmployees) {
+        orConditions.push({ _id: { $in: notice.employees } });
+      }
+      if (hasRoles) {
+        orConditions.push({ role: { $in: notice.roles } });
+      }
+      query = { $or: orConditions };
     }
 
     const recipients = await Employee.find(query).select('email phone name');
@@ -84,6 +84,22 @@ const sendNotifications = async (notice) => {
 
     let sentCount = 0;
     const failedRecipients = [];
+
+    // Emit real-time in-app notification for each targeted employee.
+    if (io && recipients.length > 0) {
+      recipients.forEach((recipient) => {
+        io.to(`user-${recipient._id}`).emit('notification:new', {
+          type: 'notice',
+          noticeId: notice._id,
+          title: notice.title,
+          category: notice.category,
+          priority: notice.priority,
+          isUrgent: notice.isUrgent,
+          createdAt: notice.createdAt || new Date(),
+          message: `New notice: ${notice.title}`
+        });
+      });
+    }
 
     // Send Email
     if (notice.notificationChannels.includes('email') && recipients.length > 0) {
@@ -154,14 +170,20 @@ exports.getNotices = async (req, res) => {
     const userId = req.userId;
     const employee = await Employee.findById(userId);
 
-    // Get all active notices that apply to this employee
+    // Get notices targeted to this employee/department/role, or global broadcasts.
     const query = {
       isActive: true,
       $or: [
+        { employees: { $in: [userId] } },
         { departments: { $in: [employee?.department] } },
-        { departments: { $eq: [] } },
         { roles: { $in: [employee?.role] } },
-        { roles: { $eq: [] } }
+        {
+          $and: [
+            { employees: { $size: 0 } },
+            { departments: { $size: 0 } },
+            { roles: { $size: 0 } }
+          ]
+        }
       ]
     };
 
@@ -230,7 +252,7 @@ exports.getAllNotices = async (req, res) => {
 exports.updateNotice = async (req, res) => {
   try {
     const { noticeId } = req.params;
-    const { title, content, category, priority, isUrgent, departments, roles, expiryDate } = req.body;
+    const { title, content, category, priority, isUrgent, departments, employees, roles, expiryDate } = req.body;
 
     if (!title || !content || !category) {
       return res.status(400).json({ error: 'Title, content, and category are required' });
@@ -245,6 +267,7 @@ exports.updateNotice = async (req, res) => {
         priority: priority || 'normal',
         isUrgent: isUrgent || false,
         departments: departments || [],
+        employees: employees || [],
         roles: roles || [],
         expiryDate: expiryDate || null,
         updatedAt: new Date()

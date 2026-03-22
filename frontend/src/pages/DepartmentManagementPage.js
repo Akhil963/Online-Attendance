@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import { Trash2, Edit2, Plus, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const DepartmentManagementPage = () => {
   const [departments, setDepartments] = useState([]);
@@ -18,11 +19,7 @@ const DepartmentManagementPage = () => {
   });
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
-
-  const fetchDepartments = async () => {
+  const fetchDepartments = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/department');
@@ -36,7 +33,19 @@ const DepartmentManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
+
+  const { isLive, lastSyncAt } = useLiveDataSync({
+    onRefresh: fetchDepartments,
+    events: ['notification:new'],
+    soundEvents: [],
+    pollMs: 30000,
+    enabled: true
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -134,6 +143,17 @@ const DepartmentManagementPage = () => {
               Departments
             </h1>
             <p className="text-gray-500 mt-2 text-lg">Manage organizational structure and budgets</p>
+            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white/70">
+              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">
+                {isLive ? 'Live' : 'Syncing'}
+              </span>
+              {lastSyncAt && (
+                <span className="text-[10px] text-gray-400 font-semibold">
+                  {new Date(lastSyncAt).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}

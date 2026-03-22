@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { employeeAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { Edit2, Trash2, Check, X, Eye } from 'lucide-react';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const AdminEmployeeApprovalPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -15,16 +16,7 @@ const AdminEmployeeApprovalPage = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  useEffect(() => {
-    filterEmployees();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [employees, searchTerm, statusFilter]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
       const response = await employeeAPI.getAllEmployees();
@@ -35,7 +27,24 @@ const AdminEmployeeApprovalPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
+
+  useEffect(() => {
+    filterEmployees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employees, searchTerm, statusFilter]);
+
+  useLiveDataSync({
+    onRefresh: fetchEmployees,
+    events: ['employee:statusUpdated', 'notification:new'],
+    soundEvents: ['employee:statusUpdated'],
+    pollMs: 30000,
+    enabled: true
+  });
 
   const filterEmployees = () => {
     let filtered = employees;

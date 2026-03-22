@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { noticeAPI } from '../services/api';
 import moment from 'moment';
 import { AlertCircle } from 'lucide-react';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const NoticesPage = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  useEffect(() => {
-    fetchNotices();
-  }, []);
-
-  const fetchNotices = async () => {
+  const fetchNotices = useCallback(async () => {
     try {
       setLoading(true);
       const response = await noticeAPI.getNotices();
@@ -22,13 +19,25 @@ const NoticesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchNotices();
+  }, [fetchNotices]);
+
+  const { isLive, lastSyncAt } = useLiveDataSync({
+    onRefresh: fetchNotices,
+    events: ['notification:new'],
+    soundEvents: ['notification:new'],
+    pollMs: 30000,
+    enabled: true
+  });
 
   const filteredNotices = selectedCategory === 'all'
     ? notices
     : notices.filter(notice => notice.category === selectedCategory);
 
-  const categories = ['all', 'announcement', 'policy', 'event', 'urgent'];
+  const categories = ['all', 'announcement', 'meeting', 'policy', 'event', 'urgent'];
 
   if (loading) {
     return <div className="text-center py-10">Loading...</div>;
@@ -38,6 +47,13 @@ const NoticesPage = () => {
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Notices Board</h1>
+        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white">
+          <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+          <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
+          {lastSyncAt && (
+            <span className="text-[10px] text-gray-400 font-semibold">{new Date(lastSyncAt).toLocaleTimeString()}</span>
+          )}
+        </div>
 
         {/* Category Filter */}
         <div className="flex gap-2 mb-6 flex-wrap">
@@ -77,7 +93,7 @@ const NoticesPage = () => {
                       <h3 className="text-2xl font-bold text-gray-800">{notice.title}</h3>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">
-                      Posted by {notice.postedBy?.name} • {moment(notice.createdAt).format('(dddd) MMMM DD, YYYY')}
+                      Posted by {notice.postedBy?.name} • {moment(notice.createdAt).format('(dddd) MMMM DD, YYYY hh:mm A')}
                     </p>
                   </div>
                   <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium capitalize flex-shrink-0">

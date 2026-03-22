@@ -1,14 +1,138 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Menu, X, LogOut, AlertCircle, Bell, Heart, User, LayoutDashboard, Globe } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { leaveAPI, noticeAPI } from '../services/api';
+import realtimeService from '../services/realtimeService';
 
 const ClientHeader = () => {
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [noticeCount, setNoticeCount] = useState(0);
+  const [leaveCount, setLeaveCount] = useState(0);
+  const [pulseNotice, setPulseNotice] = useState(false);
+  const [pulseLeave, setPulseLeave] = useState(false);
   const navigate = useNavigate();
+
+  const userKey = useMemo(() => {
+    if (!user) return 'guest';
+    return String(user._id || user.id || user.employeeId || user.email || 'guest');
+  }, [user]);
+
+  const noticeSeenKey = `notice_seen_at_${userKey}`;
+  const leaveSeenKey = `leave_seen_at_${userKey}`;
+
+  const getSeenTimestamp = (key) => {
+    const raw = localStorage.getItem(key);
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const refreshNoticeCount = useCallback(async () => {
+    if (!user) {
+      setNoticeCount(0);
+      return;
+    }
+
+    try {
+      const response = await noticeAPI.getNotices();
+      const notices = response?.data?.notices || [];
+      const seenAt = getSeenTimestamp(noticeSeenKey);
+
+      const unread = notices.filter((notice) => {
+        const createdAt = new Date(notice.createdAt).getTime();
+        return Number.isFinite(createdAt) && createdAt > seenAt;
+      }).length;
+
+      setNoticeCount(unread);
+    } catch (error) {
+      console.error('Failed to refresh notice badge count:', error);
+    }
+  }, [user, noticeSeenKey]);
+
+  const refreshLeaveCount = useCallback(async () => {
+    if (!user) {
+      setLeaveCount(0);
+      return;
+    }
+
+    try {
+      const response = await leaveAPI.getMyLeaves();
+      const leaves = response?.data?.leaves || [];
+      const seenAt = getSeenTimestamp(leaveSeenKey);
+
+      const unreadLeaves = leaves.filter((leave) => {
+        const status = String(leave.status || '').toLowerCase();
+        const hasTrackableStatus = ['approved', 'rejected', 'pending'].includes(status);
+        if (!hasTrackableStatus) return false;
+
+        const changedAt = new Date(leave.updatedAt || leave.createdAt).getTime();
+        return Number.isFinite(changedAt) && changedAt > seenAt;
+      }).length;
+
+      setLeaveCount(unreadLeaves);
+    } catch (error) {
+      console.error('Failed to refresh leave badge count:', error);
+    }
+  }, [user, leaveSeenKey]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    refreshNoticeCount();
+    refreshLeaveCount();
+
+    const interval = setInterval(() => {
+      refreshNoticeCount();
+      refreshLeaveCount();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user, refreshNoticeCount, refreshLeaveCount]);
+
+  useEffect(() => {
+    if (!user || !token) return;
+
+    if (!realtimeService.isConnected()) {
+      realtimeService.connect(token).catch((error) => {
+        console.error('Realtime connection failed in header:', error);
+      });
+    }
+
+    const handleNewNotification = (payload) => {
+      if (payload?.type === 'notice') {
+        setPulseNotice(true);
+        setTimeout(() => setPulseNotice(false), 2500);
+        refreshNoticeCount();
+      }
+    };
+
+    const handleLeaveStatusChange = () => {
+      setPulseLeave(true);
+      setTimeout(() => setPulseLeave(false), 2500);
+      refreshLeaveCount();
+    };
+
+    realtimeService.subscribeToNotifications(handleNewNotification);
+    realtimeService.subscribeToLeaveStatusChange(handleLeaveStatusChange);
+
+    return () => {
+      realtimeService.off('notification:new', handleNewNotification);
+      realtimeService.off('leave:statusChanged', handleLeaveStatusChange);
+    };
+  }, [user, token, refreshNoticeCount, refreshLeaveCount]);
+
+  const markNoticesSeen = () => {
+    localStorage.setItem(noticeSeenKey, Date.now().toString());
+    setNoticeCount(0);
+  };
+
+  const markLeavesSeen = () => {
+    localStorage.setItem(leaveSeenKey, Date.now().toString());
+    setLeaveCount(0);
+  };
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true);
@@ -52,12 +176,40 @@ const ClientHeader = () => {
                   <Globe size={14} />
                   Departments
                 </Link>
-                <Link to="/notices" className="px-5 py-2.5 rounded-xl font-semibold text-xs transition-all hover:bg-blue-50 text-gray-600 hover:text-blue-600 flex items-center gap-2">
-                  <Bell size={14} />
+                <Link
+                  to="/notices"
+                  onClick={markNoticesSeen}
+                  className="px-5 py-2.5 rounded-xl font-semibold text-xs transition-all hover:bg-blue-50 text-gray-600 hover:text-blue-600 flex items-center gap-2"
+                >
+                  <span className="relative inline-flex">
+                    <Bell size={14} />
+                    {noticeCount > 0 && pulseNotice && (
+                      <span className="absolute inset-0 animate-pulse rounded-full bg-red-600 opacity-75"></span>
+                    )}
+                    {noticeCount > 0 && (
+                      <span className="absolute -top-2 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-red-600 text-white text-[10px] leading-4 text-center font-bold">
+                        {noticeCount > 9 ? '9+' : noticeCount}
+                      </span>
+                    )}
+                  </span>
                   Notices
                 </Link>
-                <Link to="/leaves" className="px-5 py-2.5 rounded-xl font-semibold text-xs transition-all hover:bg-blue-50 text-gray-600 hover:text-blue-600 flex items-center gap-2">
-                  <Heart size={14} />
+                <Link
+                  to="/leaves"
+                  onClick={markLeavesSeen}
+                  className="px-5 py-2.5 rounded-xl font-semibold text-xs transition-all hover:bg-blue-50 text-gray-600 hover:text-blue-600 flex items-center gap-2"
+                >
+                  <span className="relative inline-flex">
+                    <Heart size={14} />
+                    {leaveCount > 0 && pulseLeave && (
+                      <span className="absolute inset-0 animate-pulse rounded-full bg-orange-500 opacity-75"></span>
+                    )}
+                    {leaveCount > 0 && (
+                      <span className="absolute -top-2 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-orange-500 text-white text-[10px] leading-4 text-center font-bold">
+                        {leaveCount > 9 ? '9+' : leaveCount}
+                      </span>
+                    )}
+                  </span>
                   Leaves
                 </Link>
                 <Link to="/profile" className="px-5 py-2.5 rounded-xl font-semibold text-xs transition-all hover:bg-blue-50 text-gray-600 hover:text-blue-600 flex items-center gap-2">
@@ -119,16 +271,38 @@ const ClientHeader = () => {
             <Link
               to="/notices"
               className="block hover:bg-blue-50 px-3 py-2 rounded text-gray-700 font-medium transition-colors"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                markNoticesSeen();
+                setIsOpen(false);
+              }}
             >
-              Notices
+              <span className="inline-flex items-center gap-2">
+                <Bell size={14} />
+                Notices
+                {noticeCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] leading-[18px] text-center font-bold">
+                    {noticeCount > 9 ? '9+' : noticeCount}
+                  </span>
+                )}
+              </span>
             </Link>
             <Link
               to="/leaves"
               className="block hover:bg-blue-50 px-3 py-2 rounded text-gray-700 font-medium transition-colors"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                markLeavesSeen();
+                setIsOpen(false);
+              }}
             >
-              Leaves
+              <span className="inline-flex items-center gap-2">
+                <Heart size={14} />
+                Leaves
+                {leaveCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-orange-500 text-white text-[10px] leading-[18px] text-center font-bold">
+                    {leaveCount > 9 ? '9+' : leaveCount}
+                  </span>
+                )}
+              </span>
             </Link>
             <Link
               to="/profile"

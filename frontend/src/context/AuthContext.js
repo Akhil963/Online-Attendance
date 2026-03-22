@@ -1,6 +1,7 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react';
 import { authAPI } from '../services/api';
 import realtimeService from '../services/realtimeService';
+import { playNotificationSound } from '../utils/notificationSound';
 
 export const AuthContext = createContext();
 
@@ -45,6 +46,44 @@ export const AuthProvider = ({ children }) => {
       realtimeService.off('auth:sessionInvalidated', handleSessionInvalidation);
     };
   }, []);
+
+  // Ensure realtime connection stays active for authenticated users.
+  useEffect(() => {
+    if (!token) {
+      realtimeService.disconnect();
+      return;
+    }
+
+    realtimeService.connect(token)
+      .then(() => {
+        if (user?.role === 'admin') {
+          realtimeService.emit('join:admin', {});
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to initialize realtime connection:', error);
+      });
+  }, [token, user?.role]);
+
+  // Play sound globally for important realtime events.
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    const eventsWithSound = ['notification:new', 'leave:statusChanged', 'employee:statusUpdated'];
+    const handlers = eventsWithSound.map((eventName) => {
+      const handler = () => playNotificationSound();
+      realtimeService.on(eventName, handler);
+      return { eventName, handler };
+    });
+
+    return () => {
+      handlers.forEach(({ eventName, handler }) => {
+        realtimeService.off(eventName, handler);
+      });
+    };
+  }, [token]);
 
   const login = useCallback(async (identifier, password, role = 'employee') => {
     try {

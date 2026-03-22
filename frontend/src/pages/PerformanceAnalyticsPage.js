@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, Calendar, Award } from 'lucide-react';
+import { TrendingUp, Users, Calendar, Award, Info } from 'lucide-react';
 import moment from 'moment';
 
 const PerformanceAnalyticsPage = () => {
@@ -118,10 +118,18 @@ const PerformanceAnalyticsPage = () => {
       moment(l.startDate).format('YYYY-MM') === selectedMonth
     );
 
+    const normalizeLeaveType = (type) => {
+      const value = String(type || '').toLowerCase();
+      if (value === 'planned' || value === 'planned_leave') return 'planned';
+      if (value === 'medical' || value === 'medical_leave') return 'medical';
+      if (value === 'emergency' || value === 'emergency_leave') return 'emergency';
+      return 'other';
+    };
+
     const distribution = {
-      planned: monthLeaves.filter(l => l.leaveType === 'planned_leave').length,
-      medical: monthLeaves.filter(l => l.leaveType === 'medical_leave').length,
-      emergency: monthLeaves.filter(l => l.leaveType === 'emergency_leave').length
+      planned: monthLeaves.filter(l => normalizeLeaveType(l.leaveType) === 'planned').length,
+      medical: monthLeaves.filter(l => normalizeLeaveType(l.leaveType) === 'medical').length,
+      emergency: monthLeaves.filter(l => normalizeLeaveType(l.leaveType) === 'emergency').length
     };
 
     return [
@@ -134,30 +142,37 @@ const PerformanceAnalyticsPage = () => {
   // Get department metrics
   const getDepartmentMetrics = () => {
     const deptMetrics = {};
+    const monthStart = moment(selectedMonth, 'YYYY-MM').startOf('month');
+    const monthEnd = moment(selectedMonth, 'YYYY-MM').endOf('month');
 
     employees.forEach(emp => {
       const deptName = emp.department?.name || 'Unassigned';
       if (!deptMetrics[deptName]) {
-        deptMetrics[deptName] = { total: 0, present: 0 };
+        deptMetrics[deptName] = { total: 0, presentIds: new Set() };
       }
       deptMetrics[deptName].total += 1;
     });
 
-    attendanceData.forEach(att => {
+    attendanceData
+      .filter(att => {
+        const date = moment(att.date);
+        return date.isBetween(monthStart, monthEnd, null, '[]') && att.status === 'present';
+      })
+      .forEach(att => {
       const emp = employees.find(e => e._id === att.employeeId?._id);
       if (emp) {
         const deptName = emp.department?.name || 'Unassigned';
-        if (att.status === 'present') {
-          deptMetrics[deptName].present += 1;
+        if (deptMetrics[deptName]) {
+          deptMetrics[deptName].presentIds.add(emp._id);
         }
       }
-    });
+      });
 
     return Object.entries(deptMetrics).map(([dept, data]) => ({
       dept,
       total: data.total,
-      present: data.present,
-      rate: data.total > 0 ? ((data.present / data.total) * 100).toFixed(1) : 0
+      present: data.presentIds.size,
+      rate: data.total > 0 ? ((data.presentIds.size / data.total) * 100).toFixed(1) : 0
     }));
   };
 
@@ -326,6 +341,12 @@ const PerformanceAnalyticsPage = () => {
           <h2 className="text-2xl font-extrabold text-gray-900 mb-10 tracking-tight flex items-center gap-3">
             <div className="w-1.5 h-8 bg-blue-500 rounded-full"></div>
             Unit Performance Coverage
+            <span className="relative inline-flex items-center group/coverage-help">
+              <Info size={16} className="text-gray-400" />
+              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-xl bg-gray-900 px-3 py-2 text-xs font-semibold text-white opacity-0 shadow-xl transition-opacity duration-200 group-hover/coverage-help:opacity-100">
+                Active means unique employees marked present at least once in the selected month.
+              </span>
+            </span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {deptMetrics.map((dept, idx) => (

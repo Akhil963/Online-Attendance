@@ -12,7 +12,7 @@ const noticeSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['announcement', 'policy', 'event', 'urgent'],
+    enum: ['announcement', 'meeting', 'policy', 'event', 'urgent'],
     default: 'announcement'
   },
   priority: {
@@ -27,6 +27,10 @@ const noticeSchema = new mongoose.Schema({
   departments: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department'
+  }],
+  employees: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee'
   }],
   roles: [{
     type: String,

@@ -3,6 +3,7 @@ import { leaveAPI, attendanceAPI, departmentAPI, employeeAPI } from '../services
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import moment from 'moment';
 import { toast } from 'react-toastify';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const AdminDashboardPage = () => {
   const [statistics, setStatistics] = useState({
@@ -80,6 +81,18 @@ const AdminDashboardPage = () => {
     fetchLeaves();
   }, [fetchDashboardData, fetchLeaves]);
 
+  const refreshAll = useCallback(async () => {
+    await Promise.all([fetchDashboardData(), fetchLeaves()]);
+  }, [fetchDashboardData, fetchLeaves]);
+
+  const { isLive, lastSyncAt } = useLiveDataSync({
+    onRefresh: refreshAll,
+    events: ['attendance:updated', 'stats:updated', 'leave:updated', 'employee:statusUpdated', 'notification:new'],
+    soundEvents: ['leave:updated', 'employee:statusUpdated', 'notification:new'],
+    pollMs: 30000,
+    enabled: true
+  });
+
   const handleApproveLeave = async (leaveId) => {
     try {
       await leaveAPI.approveLeave(leaveId);
@@ -138,6 +151,13 @@ const AdminDashboardPage = () => {
                 Admin Dashboard
               </h1>
               <p className="text-gray-600 mt-2">Welcome back! Here's your system overview</p>
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white">
+                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
+                {lastSyncAt && (
+                  <span className="text-[10px] text-gray-400 font-semibold">{new Date(lastSyncAt).toLocaleTimeString()}</span>
+                )}
+              </div>
             </div>
             <div className="text-left md:text-right text-gray-600">
               <p className="text-sm">{moment().format('dddd')}</p>

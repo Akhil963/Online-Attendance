@@ -29,14 +29,28 @@ class RealtimeService {
     this.socket = null;
     this.listeners = {};
     this.connected = false;
+    this.connectPromise = null;
   }
 
   connect(token) {
-    return new Promise((resolve, reject) => {
+    if (!token) {
+      return Promise.reject(new Error('No token provided'));
+    }
+
+    if (this.socket && this.socket.connected) {
+      this.connected = true;
+      return Promise.resolve();
+    }
+
+    if (this.connectPromise) {
+      return this.connectPromise;
+    }
+
+    this.connectPromise = new Promise((resolve, reject) => {
       try {
-        if (!token) {
-          reject(new Error('No token provided'));
-          return;
+        if (this.socket) {
+          this.socket.disconnect();
+          this.socket = null;
         }
 
         this.socket = io(SOCKET_URL, {
@@ -53,12 +67,14 @@ class RealtimeService {
         this.socket.on('connect', () => {
           this.connected = true;
           console.log('✓ Real-time connection established');
+          this.connectPromise = null;
           resolve();
         });
 
         this.socket.on('connect_error', (error) => {
           this.connected = false;
           console.error('✗ Connection error:', error);
+          this.connectPromise = null;
           reject(error);
         });
 
@@ -69,9 +85,12 @@ class RealtimeService {
       } catch (error) {
         this.connected = false;
         console.error('✗ Failed to initialize socket:', error);
+        this.connectPromise = null;
         reject(error);
       }
     });
+
+    return this.connectPromise;
   }
 
   disconnect() {
@@ -79,6 +98,8 @@ class RealtimeService {
       this.socket.disconnect();
       this.socket = null;
     }
+    this.connected = false;
+    this.connectPromise = null;
   }
 
   on(event, callback) {
