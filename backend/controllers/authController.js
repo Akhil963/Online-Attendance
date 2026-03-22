@@ -122,22 +122,24 @@ exports.register = async (req, res) => {
     await employee.populate('department');
 
     // Send approval request email to all admins
-    try {
-      const admins = await Admin.find({ role: 'admin' }, 'email name');
-      const adminEmails = admins.map(admin => admin.email);
-      
-      if (adminEmails.length > 0) {
-        await sendApprovalRequestToAdmin(employee, adminEmails);
-      }
-    } catch (emailError) {
-      console.error('Failed to send admin approval email:', emailError);
-      // Don't fail registration if email fails
-    }
+    // COMMENTED OUT: Send approval request email (Approval requirement disabled)
+    // try {
+    //   const admins = await Admin.find({ role: 'admin' }, 'email name');
+    //   const adminEmails = admins.map(admin => admin.email);
+    //   
+    //   if (adminEmails.length > 0) {
+    //     await sendApprovalRequestToAdmin(employee, adminEmails);
+    //   }
+    // } catch (emailError) {
+    //   console.error('Failed to send admin approval email:', emailError);
+    //   // Don't fail registration if email fails
+    // }
 
     const token = generateToken(employee._id, employee.role);
 
     res.status(201).json({
-      message: 'Employee registered successfully. Waiting for admin approval.',
+      message: 'Employee registered successfully. You can now login.',
+      // COMMENTED OUT APPROVAL: was 'Waiting for admin approval'
       token,
       employee: {
         id: employee._id,
@@ -146,7 +148,7 @@ exports.register = async (req, res) => {
         email: employee.email,
         role: employee.role,
         department: employee.department,
-        isApproved: false
+          isApproved: true
       }
     });
   } catch (error) {
@@ -211,14 +213,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Check if account is approved
-    if (!employee.isApproved) {
-      return res.status(403).json({ 
-        error: 'Your account is pending admin approval. Please wait for approval before you can login.',
-        isApprovalPending: true,
-        email: employee.email
-      });
-    }
+      // COMMENTED OUT: Check if account is approved (Approval requirement disabled)
+      // if (!employee.isApproved) {
+      //   return res.status(403).json({ 
+      //     error: 'Your account is pending admin approval. Please wait for approval before you can login.',
+      //     isApprovalPending: true,
+      //     email: employee.email
+      //   });
+      // }
 
     const isPasswordValid = await employee.comparePassword(password);
     if (!isPasswordValid) {

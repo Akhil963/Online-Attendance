@@ -77,7 +77,8 @@ const employeeSchema = new mongoose.Schema({
   },
   isApproved: {
     type: Boolean,
-    default: false
+     default: true
+     // COMMENTED OUT APPROVAL: default: false
   },
   approvalDate: {
     type: Date,

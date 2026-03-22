@@ -14,9 +14,10 @@ const ProtectedRoute = ({ children, requiredRoles = [] }) => {
   }
 
   // Check if employee account is approved (for employee role only)
-  if (user.role === 'employee' && !user.isApproved) {
-    return <Navigate to="/pending-approval" />;
-  }
+  // COMMENTED OUT: Check if employee account is approved (Approval requirement disabled)
+  // if (user.role === 'employee' && !user.isApproved) {
+  //   return <Navigate to="/pending-approval" />;
+  // }
 
   if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" />;
