@@ -30,6 +30,7 @@ class RealtimeService {
     this.listeners = {};
     this.connected = false;
     this.connectPromise = null;
+    this.connectionId = 0; // Track connection attempts to prevent stale callbacks
   }
 
   connect(token) {
@@ -37,21 +38,27 @@ class RealtimeService {
       return Promise.reject(new Error('No token provided'));
     }
 
-    if (this.socket && this.socket.connected) {
-      this.connected = true;
+    // If already connected with a valid socket, return resolved promise
+    if (this.socket && this.connected) {
       return Promise.resolve();
     }
 
+    // If a connection is in progress, return the existing promise
     if (this.connectPromise) {
       return this.connectPromise;
     }
 
+    const currentConnectionId = ++this.connectionId;
+
     this.connectPromise = new Promise((resolve, reject) => {
       try {
+        // Clean up any existing socket completely
         if (this.socket) {
+          this.socket.removeAllListeners();
           this.socket.disconnect();
           this.socket = null;
         }
+        this.connected = false;
 
         this.socket = io(SOCKET_URL, {
           auth: {
@@ -61,10 +68,26 @@ class RealtimeService {
           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
           reconnectionAttempts: 5,
-          transports: ['websocket', 'polling']
+          transports: ['websocket', 'polling'],
+          timeout: 20000
         });
 
+        const connectionTimeout = setTimeout(() => {
+          if (!this.connected && currentConnectionId === this.connectionId) {
+            this.socket.disconnect();
+            this.socket = null;
+            this.connected = false;
+            this.connectPromise = null;
+            reject(new Error('Connection timeout'));
+          }
+        }, 20000);
+
         this.socket.on('connect', () => {
+          clearTimeout(connectionTimeout);
+          if (currentConnectionId !== this.connectionId) {
+            // Stale connection attempt, ignore
+            return;
+          }
           this.connected = true;
           console.log('✓ Real-time connection established');
           this.connectPromise = null;
@@ -72,8 +95,13 @@ class RealtimeService {
         });
 
         this.socket.on('connect_error', (error) => {
+          clearTimeout(connectionTimeout);
+          if (currentConnectionId !== this.connectionId) {
+            // Stale connection attempt, ignore
+            return;
+          }
           this.connected = false;
-          console.error('✗ Connection error:', error);
+          console.error('✗ Connection error:', error.message);
           this.connectPromise = null;
           reject(error);
         });
@@ -82,7 +110,13 @@ class RealtimeService {
           this.connected = false;
           console.log('✗ Real-time connection disconnected');
         });
+
+        // Handle errors gracefully
+        this.socket.on('error', (error) => {
+          console.error('✗ Socket error:', error);
+        });
       } catch (error) {
+        clearTimeout(connectionTimeout);
         this.connected = false;
         console.error('✗ Failed to initialize socket:', error);
         this.connectPromise = null;

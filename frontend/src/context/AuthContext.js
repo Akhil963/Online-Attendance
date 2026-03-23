@@ -18,8 +18,12 @@ export const AuthProvider = ({ children }) => {
           const response = await authAPI.getCurrentUser();
           setUser(response.data.user || response.data.employee || response.data.admin);
         } catch (error) {
-          localStorage.removeItem('token');
-          setToken(null);
+          // Only logout if it's an authentication error (401/403), not network issues
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            localStorage.removeItem('token');
+            setToken(null);
+          }
+          // For network errors, keep the token and user state - will retry on next visit
         }
       }
       setLoading(false);

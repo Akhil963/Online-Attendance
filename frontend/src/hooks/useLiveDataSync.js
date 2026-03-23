@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import realtimeService from '../services/realtimeService';
 import { useAuth } from './useAuth';
 import { playNotificationSound } from '../utils/notificationSound';
@@ -15,25 +15,33 @@ export const useLiveDataSync = ({
   const [lastSyncAt, setLastSyncAt] = useState(null);
   const eventsKey = useMemo(() => events.join('|'), [events]);
   const soundEventsKey = useMemo(() => soundEvents.join('|'), [soundEvents]);
+  
+  // Use ref to track if component is still mounted
+  const isMountedRef = useRef(true);
+  const connectionHandledRef = useRef(false);
 
   useEffect(() => {
+    isMountedRef.current = true;
+    connectionHandledRef.current = false;
+    
     if (!enabled || !token || typeof onRefresh !== 'function') {
       setIsLive(false);
       return;
     }
 
     let intervalId;
-    let active = true;
     const activeEvents = eventsKey ? eventsKey.split('|').filter(Boolean) : [];
     const soundEventSet = new Set(soundEventsKey ? soundEventsKey.split('|').filter(Boolean) : []);
 
     const refresh = () => {
-      if (!active) {
+      if (!isMountedRef.current) {
         return;
       }
       Promise.resolve(onRefresh())
         .then(() => {
-          setLastSyncAt(new Date());
+          if (isMountedRef.current) {
+            setLastSyncAt(new Date());
+          }
         })
         .catch(() => {});
     };
@@ -49,21 +57,29 @@ export const useLiveDataSync = ({
       return { eventName, handler };
     });
 
-    realtimeService.connect(token).then(() => {
-      setIsLive(true);
-      if (user?.role === 'admin') {
-        realtimeService.emit('join:admin', {});
-      }
-    }).catch(() => {
-      setIsLive(false);
-    });
+    // Connect to realtime service only once per mount
+    if (!connectionHandledRef.current) {
+      connectionHandledRef.current = true;
+      realtimeService.connect(token).then(() => {
+        if (isMountedRef.current) {
+          setIsLive(true);
+          if (user?.role === 'admin') {
+            realtimeService.emit('join:admin', {});
+          }
+        }
+      }).catch(() => {
+        if (isMountedRef.current) {
+          setIsLive(false);
+        }
+      });
+    }
 
     if (pollMs > 0) {
       intervalId = setInterval(refresh, pollMs);
     }
 
     return () => {
-      active = false;
+      isMountedRef.current = false;
       handlers.forEach(({ eventName, handler }) => {
         realtimeService.off(eventName, handler);
       });
@@ -79,7 +95,9 @@ export const useLiveDataSync = ({
     }
 
     const heartbeat = setInterval(() => {
-      setIsLive(realtimeService.isConnected());
+      if (isMountedRef.current) {
+        setIsLive(realtimeService.isConnected());
+      }
     }, 2000);
 
     return () => clearInterval(heartbeat);

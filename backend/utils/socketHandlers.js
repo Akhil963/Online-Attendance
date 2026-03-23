@@ -216,6 +216,9 @@ const initializeSocketHandlers = (io) => {
 
     // Handle disconnection
     socket.on('disconnect', () => {
+      if (userId) {
+        socket.leave(`user-${userId}`);
+      }
       connectedUsers.delete(socket.id);
       broadcastPresenceUpdate(io);
       console.log(`✗ User disconnected: ${userId}`);
