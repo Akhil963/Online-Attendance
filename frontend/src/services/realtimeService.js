@@ -51,77 +51,80 @@ class RealtimeService {
     const currentConnectionId = ++this.connectionId;
 
     this.connectPromise = new Promise((resolve, reject) => {
-      try {
-        // Clean up any existing socket completely
-        if (this.socket) {
-          this.socket.removeAllListeners();
-          this.socket.disconnect();
-          this.socket = null;
-        }
-        this.connected = false;
-
-        this.socket = io(SOCKET_URL, {
-          auth: {
-            token: token
-          },
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 5,
-          transports: ['websocket', 'polling'],
-          timeout: 20000
-        });
-
-        const connectionTimeout = setTimeout(() => {
-          if (!this.connected && currentConnectionId === this.connectionId) {
+      // Use IIFE to properly scope connectionTimeout
+      (() => {
+        try {
+          // Clean up any existing socket completely
+          if (this.socket) {
+            this.socket.removeAllListeners();
             this.socket.disconnect();
             this.socket = null;
-            this.connected = false;
-            this.connectPromise = null;
-            reject(new Error('Connection timeout'));
-          }
-        }, 20000);
-
-        this.socket.on('connect', () => {
-          clearTimeout(connectionTimeout);
-          if (currentConnectionId !== this.connectionId) {
-            // Stale connection attempt, ignore
-            return;
-          }
-          this.connected = true;
-          console.log('✓ Real-time connection established');
-          this.connectPromise = null;
-          resolve();
-        });
-
-        this.socket.on('connect_error', (error) => {
-          clearTimeout(connectionTimeout);
-          if (currentConnectionId !== this.connectionId) {
-            // Stale connection attempt, ignore
-            return;
           }
           this.connected = false;
-          console.error('✗ Connection error:', error.message);
+
+          this.socket = io(SOCKET_URL, {
+            auth: {
+              token: token
+            },
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: 5,
+            transports: ['websocket', 'polling'],
+            timeout: 20000
+          });
+
+          const connectionTimeout = setTimeout(() => {
+            if (!this.connected && currentConnectionId === this.connectionId) {
+              this.socket.disconnect();
+              this.socket = null;
+              this.connected = false;
+              this.connectPromise = null;
+              reject(new Error('Connection timeout'));
+            }
+          }, 20000);
+
+          this.socket.on('connect', () => {
+            clearTimeout(connectionTimeout);
+            if (currentConnectionId !== this.connectionId) {
+              // Stale connection attempt, ignore
+              return;
+            }
+            this.connected = true;
+            console.log('✓ Real-time connection established');
+            this.connectPromise = null;
+            resolve();
+          });
+
+          this.socket.on('connect_error', (error) => {
+            clearTimeout(connectionTimeout);
+            if (currentConnectionId !== this.connectionId) {
+              // Stale connection attempt, ignore
+              return;
+            }
+            this.connected = false;
+            console.error('✗ Connection error:', error.message);
+            this.connectPromise = null;
+            reject(error);
+          });
+
+          this.socket.on('disconnect', () => {
+            this.connected = false;
+            console.log('✗ Real-time connection disconnected');
+          });
+
+          // Handle errors gracefully
+          this.socket.on('error', (error) => {
+            console.error('✗ Socket error:', error);
+          });
+        } catch (error) {
+          clearTimeout(connectionTimeout);
+          this.connected = false;
+          console.error('✗ Failed to initialize socket:', error);
           this.connectPromise = null;
           reject(error);
-        });
-
-        this.socket.on('disconnect', () => {
-          this.connected = false;
-          console.log('✗ Real-time connection disconnected');
-        });
-
-        // Handle errors gracefully
-        this.socket.on('error', (error) => {
-          console.error('✗ Socket error:', error);
-        });
-      } catch (error) {
-        clearTimeout(connectionTimeout);
-        this.connected = false;
-        console.error('✗ Failed to initialize socket:', error);
-        this.connectPromise = null;
-        reject(error);
-      }
+        }
+      })();
     });
 
     return this.connectPromise;
