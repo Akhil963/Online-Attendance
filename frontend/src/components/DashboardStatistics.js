@@ -39,6 +39,16 @@ const DashboardStatistics = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  // Listen for realtime refresh events
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchDashboardData();
+    };
+
+    window.addEventListener('refresh-dashboard-stats', handleRefresh);
+    return () => window.removeEventListener('refresh-dashboard-stats', handleRefresh);
+  }, [fetchDashboardData]);
+
   if (loading) {
     return (
       <div className="text-center py-24 font-outfit">

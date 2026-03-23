@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { leaveAPI, attendanceAPI, departmentAPI, employeeAPI } from '../services/api';
+import { useSearchParams } from 'react-router-dom';
+import { leaveAPI, attendanceAPI, departmentAPI, employeeAPI, authAPI } from '../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 import useLiveDataSync from '../hooks/useLiveDataSync';
 import LeaveRejectionModal from '../components/LeaveRejectionModal';
+import { X, Eye, EyeOff, UserPlus, CheckCircle } from 'lucide-react';
 
 const AdminDashboardPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [statistics, setStatistics] = useState({
     totalEmployees: 0,
     maleCount: 0,
@@ -22,6 +25,24 @@ const AdminDashboardPage = () => {
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedLeaveForRejection, setSelectedLeaveForRejection] = useState(null);
   const [rejectingLeaveId, setRejectingLeaveId] = useState(null);
+
+  // Employee Registration Modal State
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdEmployee, setCreatedEmployee] = useState(null);
+  const [registrationLoading, setRegistrationLoading] = useState(false);
+  const [registrationData, setRegistrationData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    gender: '',
+    departmentId: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [departments, setDepartments] = useState([]);
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -80,10 +101,42 @@ const AdminDashboardPage = () => {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchDashboardData();
     fetchLeaves();
-  }, [fetchDashboardData, fetchLeaves]);
+    fetchDepartments();
+
+    // Check if should open create employee modal from URL param
+    if (searchParams.get('open') === 'create-employee') {
+      setTimeout(() => {
+        openEmployeeModal();
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle URL param changes
+  useEffect(() => {
+    if (searchParams.get('open') === 'create-employee') {
+      openEmployeeModal();
+      // Clear the URL param without re-triggering this effect
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('open');
+      setSearchParams(newParams, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await departmentAPI.getAllDepartments();
+      setDepartments(response.data.departments || []);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  };
 
   const refreshAll = useCallback(async () => {
     await Promise.all([fetchDashboardData(), fetchLeaves()]);
@@ -125,6 +178,81 @@ const AdminDashboardPage = () => {
       toast.error('Failed to reject leave');
       setRejectingLeaveId(null);
     }
+  };
+
+  // Employee Registration Handlers
+  const handleRegistrationChange = (e) => {
+    const { name, value } = e.target;
+    setRegistrationData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const openEmployeeModal = () => {
+    setRegistrationData({
+      name: '',
+      email: '',
+      phone: '',
+      gender: '',
+      departmentId: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setShowEmployeeModal(true);
+  };
+
+  const handleRegisterEmployee = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (!registrationData.name || !registrationData.email || !registrationData.gender ||
+        !registrationData.departmentId || !registrationData.password || !registrationData.confirmPassword) {
+      toast.error('All fields are required');
+      return;
+    }
+
+    if (registrationData.password !== registrationData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (registrationData.password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    try {
+      setRegistrationLoading(true);
+      const response = await authAPI.register({
+        name: registrationData.name,
+        email: registrationData.email,
+        phone: registrationData.phone || undefined,
+        gender: registrationData.gender,
+        departmentId: registrationData.departmentId,
+        password: registrationData.password,
+        role: 'employee'
+      });
+
+      const newEmployee = response.data.employee;
+      setCreatedEmployee(newEmployee);
+      setShowEmployeeModal(false);
+      setShowSuccessModal(true);
+
+      // Refresh dashboard data
+      fetchDashboardData();
+
+      toast.success('Employee account created successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to create employee account');
+    } finally {
+      setRegistrationLoading(false);
+    }
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+    setCreatedEmployee(null);
   };
 
   if (loading) {
@@ -177,6 +305,13 @@ const AdminDashboardPage = () => {
               <p className="text-sm">{moment().format('dddd')}</p>
               <p className="text-lg font-semibold text-gray-900">{moment().format('MMMM DD, YYYY')}</p>
             </div>
+            <button
+              onClick={openEmployeeModal}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all hover:shadow-lg hover:shadow-blue-200 transform hover:scale-105"
+            >
+              <UserPlus size={20} />
+              <span>Create Employee</span>
+            </button>
           </div>
         </div>
 
@@ -429,6 +564,242 @@ const AdminDashboardPage = () => {
           leave={selectedLeaveForRejection}
           loading={rejectingLeaveId !== null}
         />
+
+        {/* Employee Registration Modal */}
+        {showEmployeeModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-3xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <UserPlus className="text-blue-600" size={20} />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Create Employee Account</h2>
+                </div>
+                <button
+                  onClick={() => setShowEmployeeModal(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <form onSubmit={handleRegisterEmployee} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={registrationData.name}
+                      onChange={handleRegistrationChange}
+                      required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      placeholder="John Doe"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={registrationData.email}
+                      onChange={handleRegistrationChange}
+                      required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      placeholder="john@company.com"
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={registrationData.phone}
+                      onChange={handleRegistrationChange}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      placeholder="+1 234 567 8900"
+                    />
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Gender *</label>
+                    <select
+                      name="gender"
+                      value={registrationData.gender}
+                      onChange={handleRegistrationChange}
+                      required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  {/* Department */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Department *</label>
+                    <select
+                      name="departmentId"
+                      value={registrationData.departmentId}
+                      onChange={handleRegistrationChange}
+                      required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map(dept => (
+                        <option key={dept._id} value={dept._id}>{dept.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={registrationData.password}
+                        onChange={handleRegistrationChange}
+                        required
+                        minLength={8}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-10"
+                        placeholder="Min. 8 characters"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password *</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={registrationData.confirmPassword}
+                        onChange={handleRegistrationChange}
+                        required
+                        minLength={8}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-10"
+                        placeholder="Repeat password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowEmployeeModal(false)}
+                    className="flex-1 px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={registrationLoading}
+                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {registrationLoading ? (
+                      <>
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus size={18} />
+                        Create Account
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Success Modal */}
+        {showSuccessModal && createdEmployee && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md text-center p-8">
+              {/* Success Icon */}
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="text-green-600" size={40} />
+              </div>
+
+              {/* Success Message */}
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Employee Created Successfully!</h2>
+              <p className="text-gray-600 mb-6">The employee account has been created. Please share the login details with the employee.</p>
+
+              {/* Employee Details Card */}
+              <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-left">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 text-sm">Employee ID</span>
+                    <span className="font-bold text-gray-900">{createdEmployee.employeeId || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 text-sm">Name</span>
+                    <span className="font-bold text-gray-900">{createdEmployee.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 text-sm">Email</span>
+                    <span className="font-bold text-gray-900">{createdEmployee.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 text-sm">Password</span>
+                    <span className="font-bold text-blue-600 text-sm">Shared by admin</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    closeSuccessModal();
+                    openEmployeeModal();
+                  }}
+                  className="flex-1 px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Create Another
+                </button>
+                <button
+                  onClick={closeSuccessModal}
+                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

@@ -92,14 +92,6 @@ const AdminHeader = () => {
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Account</p>
                       </div>
                       <Link
-                        to="/signup/employee"
-                        className="flex items-center gap-4 px-4 py-4 hover:bg-blue-50 rounded-2xl transition-all text-sm font-medium text-gray-700"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">👤</div>
-                        Create Profile for Employees
-                      </Link>
-                      <Link
                         to="/profile"
                         className="flex items-center gap-4 px-4 py-4 hover:bg-blue-50 rounded-2xl transition-all text-sm font-medium text-gray-700"
                         onClick={() => setIsUserMenuOpen(false)}

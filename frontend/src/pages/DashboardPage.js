@@ -3,12 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import AttendanceMarker from '../components/AttendanceMarker';
 import DashboardStatistics from '../components/DashboardStatistics';
 import { useAuth } from '../hooks/useAuth';
+import useLiveDataSync from '../hooks/useLiveDataSync';
 
 const DashboardPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [isValidated, setIsValidated] = useState(false);
-  const [validationError, setValidationError] = useState(null);
+  const [validationError, setValidationError] = useState(false);
+
+  const refreshDashboard = () => {
+    // Force DashboardStatistics to refresh
+    window.dispatchEvent(new CustomEvent('refresh-dashboard-stats'));
+  };
+
+  // Realtime sync for employee dashboard
+  useLiveDataSync({
+    onRefresh: refreshDashboard,
+    events: ['leave:statusChanged', 'notification:new', 'profile:updated', 'stats:updated'],
+    soundEvents: ['leave:statusChanged', 'notification:new'],
+    pollMs: 30000,
+    enabled: true
+  });
 
   // Redirect to admin dashboard if user is admin
   useEffect(() => {

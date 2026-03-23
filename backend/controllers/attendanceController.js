@@ -31,7 +31,15 @@ exports.checkIn = async (req, res) => {
     // Emit real-time update
     const io = req.app.get('io');
     if (io) {
-      io.emit('attendance_checked_in', {
+      io.emit('attendance:updated', {
+        type: 'checkIn',
+        employeeId,
+        checkInTime: attendance.checkInTime,
+        date: attendance.date
+      });
+      // Also emit to admin room
+      io.to('admin').emit('attendance:updated', {
+        type: 'checkIn',
         employeeId,
         checkInTime: attendance.checkInTime,
         date: attendance.date
@@ -80,7 +88,16 @@ exports.checkOut = async (req, res) => {
     // Emit real-time update
     const io = req.app.get('io');
     if (io) {
-      io.emit('attendance_checked_out', {
+      io.emit('attendance:updated', {
+        type: 'checkOut',
+        employeeId,
+        checkOutTime: attendance.checkOutTime,
+        workingHours: attendance.workingHours,
+        date: attendance.date
+      });
+      // Also emit to admin room
+      io.to('admin').emit('attendance:updated', {
+        type: 'checkOut',
         employeeId,
         checkOutTime: attendance.checkOutTime,
         workingHours: attendance.workingHours,

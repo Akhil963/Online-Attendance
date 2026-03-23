@@ -38,6 +38,23 @@ exports.createNotice = async (req, res) => {
     try {
       const io = req.app.get('io');
       await sendNotifications(notice, io);
+      
+      // Notify admin about new notice for notice management page refresh
+      if (io) {
+        io.to('admin').emit('notice:created', {
+          notice: notice
+        });
+        io.emit('notification:new', {
+          type: 'notice',
+          noticeId: notice._id,
+          title: notice.title,
+          category: notice.category,
+          priority: notice.priority,
+          isUrgent: notice.isUrgent,
+          createdAt: notice.createdAt || new Date(),
+          message: `New notice: ${notice.title}`
+        });
+      }
     } catch (error) {
       console.error('Error sending notifications:', error);
       // Don't fail the API call if notifications fail

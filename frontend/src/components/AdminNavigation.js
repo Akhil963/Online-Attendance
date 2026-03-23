@@ -35,13 +35,13 @@ const AdminNavigation = () => {
         },
         {
           label: 'Create Employee Profiles',
-          path: "../signup/employee",
+          path: '/admin-dashboard?open=create-employee',
           icon: Users,
           description: 'Create profiles for employees'
         },
         {
           label: 'Create Admin Profiles',
-          path: "../signup/admin",
+          path: '../signup/admin',
           icon: ShieldUser,
           description: 'Create profiles for admins'
         }

@@ -259,12 +259,12 @@ const EmployeeSignupPage = () => {
         </form>
 
         <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col gap-4 text-center relative z-10">
-          <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+          {/* <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">
             Already have an account?{' '}
             <a href="/login/employee" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
               Sign In
             </a>
-          </p>
+          </p> */}
 
           <a href="/" className="text-xs font-medium text-gray-500 hover:text-gray-700 uppercase tracking-wide transition-colors">
             Back Home

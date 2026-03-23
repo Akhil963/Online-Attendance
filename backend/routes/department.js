@@ -114,6 +114,15 @@ router.post('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => 
     const department = new Department({ name, description });
     await department.save();
 
+    // Emit realtime event
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin').emit('department:created', {
+        department: department
+      });
+      io.emit('stats:updated', { type: 'department' });
+    }
+
     res.status(201).json({
       message: 'Department created successfully',
       department
@@ -141,6 +150,15 @@ router.put('/:departmentId', authMiddleware, roleMiddleware(['admin']), async (r
 
     if (!department) {
       return res.status(404).json({ error: 'Department not found' });
+    }
+
+    // Emit realtime event
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin').emit('department:updated', {
+        department: department
+      });
+      io.emit('stats:updated', { type: 'department' });
     }
 
     res.json({

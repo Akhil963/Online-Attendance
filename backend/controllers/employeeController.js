@@ -37,6 +37,14 @@ exports.updateProfile = async (req, res) => {
       { new: true }
     ).populate('department');
 
+    // Emit realtime update for profile changes
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${employeeId}`).emit('profile:updated', {
+        employee: employee
+      });
+    }
+
     res.json({
       message: 'Profile updated successfully',
       employee
@@ -82,6 +90,15 @@ exports.uploadProfilePicture = async (req, res) => {
         { profilePicture: profilePictureUrl, updatedAt: new Date() },
         { new: true }
       ).populate('department');
+    }
+
+    // Emit realtime update for profile picture changes
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${req.userId}`).emit('profile:updated', {
+        employee: updatedUser,
+        imageUrl: profilePictureUrl
+      });
     }
 
     const responseKey = isAdmin ? 'admin' : 'employee';
