@@ -3,6 +3,7 @@ import { employeeAPI } from '../services/api';
 import { exportToExcel, exportToCSV, exportToPDF } from '../utils/exportUtils';
 import { toast } from 'react-toastify';
 import useLiveDataSync from '../hooks/useLiveDataSync';
+import MobileBackButton from '../components/MobileBackButton';
 
 const EmployeeManagementPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -149,6 +150,9 @@ const EmployeeManagementPage = () => {
   return (
     <div className="min-h-screen bg-transparent font-outfit space-y-12">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
+        {/* Mobile Back Button */}
+        <MobileBackButton label="Back" customPath="/admin-dashboard" />
+        
         <div className="mb-14">
           <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-gray-900 tracking-tight uppercase leading-none mb-6">
             Employees

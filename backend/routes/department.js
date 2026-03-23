@@ -105,13 +105,19 @@ router.post('/seed', async (req, res) => {
 // Create department (Admin only)
 router.post('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, head, budget, status } = req.body;
 
     if (!name) {
       return res.status(400).json({ error: 'Department name is required' });
     }
 
-    const department = new Department({ name, description });
+    const department = new Department({
+      name,
+      description: description || '',
+      head: head || '',
+      budget: budget ? Number(budget) : 0,
+      status: status || 'active'
+    });
     await department.save();
 
     // Emit realtime event
@@ -136,15 +142,21 @@ router.post('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => 
 router.put('/:departmentId', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
   try {
     const { departmentId } = req.params;
-    const { name, description } = req.body;
+    const { name, description, head, budget, status } = req.body;
+
+    const updateData = {
+      updatedAt: new Date()
+    };
+
+    if (name) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (head !== undefined) updateData.head = head;
+    if (budget !== undefined) updateData.budget = Number(budget);
+    if (status) updateData.status = status;
 
     const department = await Department.findByIdAndUpdate(
       departmentId,
-      {
-        name: name || undefined,
-        description: description || undefined,
-        updatedAt: new Date()
-      },
+      updateData,
       { new: true }
     );
 
@@ -179,6 +191,16 @@ router.delete('/:departmentId', authMiddleware, roleMiddleware(['admin']), async
 
     if (!department) {
       return res.status(404).json({ error: 'Department not found' });
+    }
+
+    // Emit realtime event
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin').emit('department:deleted', {
+        departmentId: departmentId,
+        department: department
+      });
+      io.emit('stats:updated', { type: 'department' });
     }
 
     res.json({ message: 'Department deleted successfully' });

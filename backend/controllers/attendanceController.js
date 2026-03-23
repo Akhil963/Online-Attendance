@@ -31,19 +31,33 @@ exports.checkIn = async (req, res) => {
     // Emit real-time update
     const io = req.app.get('io');
     if (io) {
+      // Emit specific check-in event
+      io.emit('attendance:checked-in', {
+        employeeId,
+        checkInTime: attendance.checkInTime,
+        date: attendance.date
+      });
+      // Also emit to admin room
+      io.to('admin').emit('attendance:checked-in', {
+        employeeId,
+        checkInTime: attendance.checkInTime,
+        date: attendance.date
+      });
+      // Emit general update event for dashboard refresh
       io.emit('attendance:updated', {
         type: 'checkIn',
         employeeId,
         checkInTime: attendance.checkInTime,
         date: attendance.date
       });
-      // Also emit to admin room
       io.to('admin').emit('attendance:updated', {
         type: 'checkIn',
         employeeId,
         checkInTime: attendance.checkInTime,
         date: attendance.date
       });
+      // Emit stats update for dashboard
+      io.emit('stats:updated', { type: 'attendance' });
     }
 
     res.json({
@@ -88,6 +102,21 @@ exports.checkOut = async (req, res) => {
     // Emit real-time update
     const io = req.app.get('io');
     if (io) {
+      // Emit specific check-out event
+      io.emit('attendance:checked-out', {
+        employeeId,
+        checkOutTime: attendance.checkOutTime,
+        workingHours: attendance.workingHours,
+        date: attendance.date
+      });
+      // Also emit to admin room
+      io.to('admin').emit('attendance:checked-out', {
+        employeeId,
+        checkOutTime: attendance.checkOutTime,
+        workingHours: attendance.workingHours,
+        date: attendance.date
+      });
+      // Emit general update event for dashboard refresh
       io.emit('attendance:updated', {
         type: 'checkOut',
         employeeId,
@@ -95,7 +124,6 @@ exports.checkOut = async (req, res) => {
         workingHours: attendance.workingHours,
         date: attendance.date
       });
-      // Also emit to admin room
       io.to('admin').emit('attendance:updated', {
         type: 'checkOut',
         employeeId,
@@ -103,6 +131,8 @@ exports.checkOut = async (req, res) => {
         workingHours: attendance.workingHours,
         date: attendance.date
       });
+      // Emit stats update for dashboard
+      io.emit('stats:updated', { type: 'attendance' });
     }
 
     res.json({

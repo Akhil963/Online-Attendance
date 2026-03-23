@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   Users,
@@ -10,14 +10,46 @@ import {
   Menu,
   X,
   Clock,
-  ShieldUser
+  ShieldUser,
+  User,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 const AdminNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const handleConfirmLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
+    setIsOpen(false);
+    navigate('/login');
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutConfirm(false);
+  };
 
   const adminMenuItems = [
+    {
+      category: 'Account',
+      items: [
+        {
+          label: 'My Profile',
+          path: '/profile',
+          icon: User,
+          description: 'View & edit admin profile'
+        }
+      ]
+    },
     {
       category: 'Dashboard',
       items: [
@@ -117,10 +149,10 @@ const AdminNavigation = () => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button - positioned at top for better thumb reach */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-40"
+        className="md:hidden fixed top-4 right-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg active:scale-95 transition-transform"
         title="Admin Menu"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -128,12 +160,12 @@ const AdminNavigation = () => {
 
       {/* Admin Navigation Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-all duration-700 z-50 ${
-          isOpen ? 'w-80' : 'w-0 md:w-80'
-        } overflow-hidden flex flex-col font-outfit`}
+        className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-50 flex flex-col font-outfit ${
+          isOpen ? 'w-72 md:w-80' : 'w-0 md:w-80'
+        } overflow-hidden`}
       >
         {/* Header */}
-        <div className="p-4 md:p-8 border-b border-gray-200">
+        <div className="p-4 md:p-6 border-b border-gray-200 pt-safe">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/20">
               <span className="text-white text-lg font-bold">AS</span>
@@ -146,11 +178,11 @@ const AdminNavigation = () => {
         </div>
 
         {/* Menu Items */}
-        <nav className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-8">
+        <nav className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-6 pb-safe-bottom">
           {adminMenuItems.map((category, idx) => (
             <div key={idx} className="mb-2">
               {/* Category Header */}
-              <h3 className="px-6 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
+              <h3 className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                 {category.category}
               </h3>
 
@@ -165,7 +197,7 @@ const AdminNavigation = () => {
                       key={itemIdx}
                       to={item.path}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 group relative ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group relative ${
                         active
                           ? 'bg-blue-50 text-blue-600 border border-blue-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -197,15 +229,28 @@ const AdminNavigation = () => {
           ))}
         </nav>
 
-        {/* Footer Status */}
-        <div className="p-6 bg-gray-50 border-t border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-            <div className="flex-1">
-              <p className="text-xs font-semibold text-gray-700">System Status</p>
-              <p className="text-xs text-gray-500">All systems operational</p>
+        {/* Footer Status & Logout */}
+        <div className="p-4 md:p-5 border-t border-gray-200 pb-safe-bottom space-y-4">
+          {/* System Status */}
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-gray-700">System Status</p>
+                <p className="text-xs text-gray-500">All systems operational</p>
+              </div>
             </div>
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogoutClick}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-all duration-200 group border border-red-200 hover:border-red-300"
+            title="Logout from admin panel"
+          >
+            <LogOut size={18} className="group-hover:rotate-12 transition-transform" />
+            <span className="font-semibold text-sm">Logout</span>
+          </button>
         </div>
       </div>
 
@@ -213,7 +258,7 @@ const AdminNavigation = () => {
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-40"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm md:hidden z-40"
         ></div>
       )}
 
@@ -233,6 +278,42 @@ const AdminNavigation = () => {
           scrollbar-width: none;
         }
       `}</style>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 md:p-8 animate-in fade-in zoom-in">
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <LogOut size={32} className="text-red-600" />
+              </div>
+            </div>
+
+            {/* Title & Message */}
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">Confirm Logout?</h2>
+            <p className="text-gray-600 text-center mb-8">
+              Are you sure you want to logout? You'll need to login again to access the admin panel.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelLogout}
+                className="flex-1 px-4 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmLogout}
+                className="flex-1 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors duration-200 active:scale-95"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

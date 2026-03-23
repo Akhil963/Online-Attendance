@@ -29,12 +29,26 @@ exports.applyLeave = async (req, res) => {
 
     const io = req.app.get('io');
     if (io) {
+      // Emit leave created event
+      io.emit('leave:created', {
+        leaveId: leave._id,
+        employeeId,
+        leaveType: leave.leaveType,
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        numberOfDays: leave.numberOfDays,
+        status: leave.status
+      });
+      
+      // Notify employee
       io.to(`user-${employeeId}`).emit('leave:statusChanged', {
         leaveId: leave._id,
         status: leave.status,
         message: 'Your leave application has been submitted',
         updatedAt: leave.updatedAt || leave.createdAt || new Date()
       });
+      
+      // Notify admin
       io.to('admin').emit('leave:updated', {
         type: 'applied',
         leaveId: leave._id,
@@ -42,6 +56,9 @@ exports.applyLeave = async (req, res) => {
         status: leave.status,
         updatedAt: leave.updatedAt || leave.createdAt || new Date()
       });
+      
+      // Trigger dashboard stats update
+      io.emit('stats:updated', { type: 'leave' });
     }
 
     res.status(201).json({
@@ -131,6 +148,8 @@ exports.approveLeave = async (req, res) => {
         status: leave.status,
         updatedAt: leave.updatedAt || new Date()
       });
+      // Trigger dashboard stats update
+      io.emit('stats:updated', { type: 'leave' });
     }
 
     res.json({
@@ -179,6 +198,8 @@ exports.rejectLeave = async (req, res) => {
         status: leave.status,
         updatedAt: leave.updatedAt || new Date()
       });
+      // Trigger dashboard stats update
+      io.emit('stats:updated', { type: 'leave' });
     }
 
     res.json({
@@ -240,6 +261,8 @@ exports.createUnplannedLeave = async (req, res) => {
         status: leave.status,
         updatedAt: leave.updatedAt || leave.createdAt || new Date()
       });
+      // Trigger dashboard stats update
+      io.emit('stats:updated', { type: 'leave' });
     }
 
     res.status(201).json({

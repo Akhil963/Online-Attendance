@@ -11,6 +11,19 @@ const departmentSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  head: {
+    type: String,
+    default: ''
+  },
+  budget: {
+    type: Number,
+    default: 0
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active'
+  },
   managerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Employee',

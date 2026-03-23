@@ -95,26 +95,26 @@ const EmployeeSignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent py-12 px-6">
-      <div className="bg-white/70 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-12 w-full max-w-2xl relative overflow-hidden group">
+    <div className="min-h-screen flex items-center justify-center bg-transparent py-6 md:py-12 px-4 md:px-6 safe-area-bottom">
+      <div className="bg-white/70 backdrop-blur-3xl rounded-2xl md:rounded-[3.5rem] shadow-2xl border border-white/40 p-6 md:p-12 w-full max-w-2xl relative overflow-hidden group">
         {/* Abstract Background Accents */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl -mr-40 -mt-40 transition-all duration-1000 hover:bg-blue-600/10"></div>
 
-        <div className="text-center mb-12 relative z-10">
-          <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/20 active:scale-95 transition-transform">
-            <span className="text-white text-2xl font-bold tracking-tight">OAS</span>
+        <div className="text-center mb-6 md:mb-12 relative z-10">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-2xl shadow-blue-600/20 active:scale-95 transition-transform">
+            <span className="text-white text-xl md:text-2xl font-bold tracking-tight">OAS</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight mb-3 uppercase">Employee Registration</h1>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3 uppercase">Employee Registration</h1>
           <div className="flex items-center justify-center gap-2">
             <div className="w-1.5 h-4 bg-blue-600 rounded-full"></div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Create your account to get started</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             <div className="group/field">
-              <label className="block text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
+              <label className="block text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2 md:mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
                 Email Address *
               </label>
               <input
@@ -123,13 +123,13 @@ const EmployeeSignupPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
                 placeholder="your@email.com"
               />
             </div>
 
             <div className="group/field">
-              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
+              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2 md:mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
                 Full Name *
               </label>
               <input
@@ -138,15 +138,15 @@ const EmployeeSignupPage = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
                 placeholder="John Doe"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             <div className="group/field">
-              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
+              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2 md:mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
                 Phone Number
               </label>
               <input
@@ -154,26 +154,26 @@ const EmployeeSignupPage = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
                 placeholder="+1 (555) 123-4567"
               />
             </div>
 
             <div className="group/field">
-              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-3 ml-1">Gender *</label>
+              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2 md:mb-3 ml-1">Gender *</label>
               <div className="relative">
                 <select
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
                   required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 appearance-none">
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 appearance-none">
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
-                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <div className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
               </div>
@@ -181,14 +181,14 @@ const EmployeeSignupPage = () => {
           </div>
 
           <div className="group/field">
-            <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-3 ml-1">Department *</label>
+            <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2 md:mb-3 ml-1">Department *</label>
             <div className="relative">
               <select
                 name="departmentId"
                 value={formData.departmentId}
                 onChange={handleChange}
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 appearance-none">
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 appearance-none">
                 <option value="">Select Department</option>
                 {departments.map(dept => (
                   <option key={dept._id} value={dept._id}>
@@ -196,15 +196,15 @@ const EmployeeSignupPage = () => {
                   </option>
                 ))}
               </select>
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <div className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             <div className="group/field">
-              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
+              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2 md:mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
                 Password *
               </label>
               <div className="relative">
@@ -214,20 +214,20 @@ const EmployeeSignupPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700 placeholder:text-slate-300"
                   placeholder="Min. 8 Characters"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors">
+                  className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors">
                   {showPassword ? <EyeOff size={18} strokeWidth={2.5} /> : <Eye size={18} strokeWidth={2.5} />}
                 </button>
               </div>
             </div>
 
             <div className="group/field">
-              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
+              <label className="block text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2 md:mb-3 ml-1 group-focus-within/field:text-blue-600 transition-colors">
                 Confirm Password *
               </label>
               <div className="relative">

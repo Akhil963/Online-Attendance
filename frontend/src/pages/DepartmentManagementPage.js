@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '../services/api';
+import { departmentAPI } from '../services/api';
 import { Trash2, Edit2, Plus, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
 import useLiveDataSync from '../hooks/useLiveDataSync';
+import MobileBackButton from '../components/MobileBackButton';
 
 const DepartmentManagementPage = () => {
   const [departments, setDepartments] = useState([]);
@@ -22,7 +23,7 @@ const DepartmentManagementPage = () => {
   const fetchDepartments = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get('/department');
+      const response = await departmentAPI.getAllDepartments();
       // Handle both array and object responses
       const data = Array.isArray(response.data) ? response.data : response.data.departments || [];
       setDepartments(data);
@@ -41,7 +42,7 @@ const DepartmentManagementPage = () => {
 
   const { isLive, lastSyncAt } = useLiveDataSync({
     onRefresh: fetchDepartments,
-    events: ['notification:new'],
+    events: ['department:created', 'department:updated', 'department:deleted', 'stats:updated'],
     soundEvents: [],
     pollMs: 30000,
     enabled: true
@@ -64,18 +65,26 @@ const DepartmentManagementPage = () => {
     }
 
     try {
+      const submitData = {
+        name: formData.name,
+        description: formData.description,
+        head: formData.head,
+        budget: formData.budget ? Number(formData.budget) : 0,
+        status: formData.status
+      };
+
       if (editingId) {
-        await api.put(`/department/${editingId}`, formData);
+        await departmentAPI.updateDepartment(editingId, submitData);
         toast.success('Department updated successfully');
       } else {
-        await api.post('/department', formData);
+        await departmentAPI.createDepartment(submitData);
         toast.success('Department created successfully');
       }
 
       setFormData({ name: '', description: '', head: '', budget: '', status: 'active' });
       setEditingId(null);
       setShowForm(false);
-      fetchDepartments();
+      await fetchDepartments();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to save department');
       console.error(error);
@@ -100,10 +109,10 @@ const DepartmentManagementPage = () => {
 
   const executeDelete = async () => {
     try {
-      await api.delete(`/department/${confirmDeleteId}`);
+      await departmentAPI.deleteDepartment(confirmDeleteId);
       toast.success('Department deleted successfully');
       setConfirmDeleteId(null);
-      fetchDepartments();
+      await fetchDepartments();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete department');
       console.error(error);
@@ -136,6 +145,9 @@ const DepartmentManagementPage = () => {
   return (
     <div className="min-h-full p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Mobile Back Button */}
+        <MobileBackButton label="Back" customPath="/admin-dashboard" />
+        
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
           <div>
@@ -179,7 +191,7 @@ const DepartmentManagementPage = () => {
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200/60 p-6 border-l-4 border-l-blue-500">
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Annual Budget</p>
             <p className="text-4xl font-bold text-gray-900 mt-2">
-              ₹{departments.reduce((sum, d) => sum + (d.budget || 0), 0).toLocaleString()}
+              ₹{Array.isArray(departments) ? departments.reduce((sum, d) => sum + (Number(d.budget) || 0), 0).toLocaleString() : 0}
             </p>
           </div>
         </div>

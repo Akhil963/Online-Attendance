@@ -19,8 +19,17 @@ const DashboardPage = () => {
   // Realtime sync for employee dashboard
   useLiveDataSync({
     onRefresh: refreshDashboard,
-    events: ['leave:statusChanged', 'notification:new', 'profile:updated', 'stats:updated'],
-    soundEvents: ['leave:statusChanged', 'notification:new'],
+    events: [
+      'attendance:updated',
+      'attendance:checked-in',
+      'attendance:checked-out',
+      'leave:statusChanged',
+      'leave:created',
+      'notification:new',
+      'profile:updated',
+      'stats:updated'
+    ],
+    soundEvents: ['leave:statusChanged', 'notification:new', 'attendance:checked-in'],
     pollMs: 30000,
     enabled: true
   });

@@ -3,6 +3,7 @@ import { employeeAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { Edit2, Trash2, Check, X, Eye } from 'lucide-react';
 import useLiveDataSync from '../hooks/useLiveDataSync';
+import MobileBackButton from '../components/MobileBackButton';
 
 const AdminEmployeeApprovalPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -156,6 +157,9 @@ const AdminEmployeeApprovalPage = () => {
   return (
     <div className="min-h-screen bg-transparent font-outfit space-y-12">
       <div className="max-w-7xl mx-auto">
+        {/* Mobile Back Button */}
+        <MobileBackButton label="Back" customPath="/admin-dashboard" />
+
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight">
