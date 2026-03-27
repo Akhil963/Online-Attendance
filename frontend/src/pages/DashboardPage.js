@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AttendanceMarker from '../components/AttendanceMarker';
 import DashboardStatistics from '../components/DashboardStatistics';
@@ -10,18 +10,27 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [isValidated, setIsValidated] = useState(false);
   const [validationError, setValidationError] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Ref to track last refresh time
+  const lastRefreshRef = useRef(0);
 
-  const refreshDashboard = () => {
-    // Force DashboardStatistics to refresh
-    window.dispatchEvent(new CustomEvent('refresh-dashboard-stats'));
-  };
+  const refreshDashboard = useCallback(() => {
+    // Debounce: minimum 2 seconds between refreshes
+    const now = Date.now();
+    if (now - lastRefreshRef.current < 2000) {
+      return;
+    }
+    lastRefreshRef.current = now;
+    setRefreshKey(k => k + 1);
+  }, []);
 
-  // Realtime sync for employee dashboard
+  // Realtime sync - only responds to socket events, no polling
   useLiveDataSync({
     onRefresh: refreshDashboard,
     events: [
       'attendance:updated',
-      'attendance:checked-in',
+      'attendance:checked-in', 
       'attendance:checked-out',
       'leave:statusChanged',
       'leave:created',
@@ -30,7 +39,7 @@ const DashboardPage = () => {
       'stats:updated'
     ],
     soundEvents: ['leave:statusChanged', 'notification:new', 'attendance:checked-in'],
-    pollMs: 30000,
+    pollMs: 0,  // Disabled - only update on socket events
     enabled: true
   });
 
@@ -154,7 +163,7 @@ const DashboardPage = () => {
             <AttendanceMarker />
           </div>
           <div>
-            <DashboardStatistics />
+            <DashboardStatistics key={refreshKey} />
           </div>
         </div>
       </div>

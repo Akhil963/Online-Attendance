@@ -76,7 +76,7 @@ const AttendanceReportPage = () => {
     onRefresh: refreshAttendanceData,
     events: ['attendance:updated', 'stats:updated', 'leave:updated'],
     soundEvents: [],
-    pollMs: 30000,
+    pollMs: 0,  // Disabled - only update on socket events
     enabled: true
   });
 
@@ -131,15 +131,18 @@ const AttendanceReportPage = () => {
     );
   }
 
+  const dailyChartData = getChartData();
+  const statusPieData = getStatusPieData();
+
   return (
-    <div className="min-h-full p-4 md:p-8">
+    <div className="min-h-full p-3 sm:p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-8 md:mb-12">
           <div>
-            <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
               Attendance Intelligence
             </h1>
-            <p className="text-gray-500 mt-2 text-lg">Detailed history and attendance logs</p>
+            <p className="text-gray-500 mt-2 text-xs sm:text-sm md:text-base">Detailed history and attendance logs</p>
             <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white/70">
               <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
               <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
@@ -150,68 +153,68 @@ const AttendanceReportPage = () => {
           </div>
           <button
             onClick={handleExportAttendance}
-            className="group bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 transition-all active:scale-95 shadow-lg shadow-emerald-200"
+            className="group bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-2xl font-bold flex items-center gap-2 sm:gap-3 transition-all active:scale-95 shadow-lg shadow-emerald-200 text-sm sm:text-base"
           >
-            <span className="text-xl">📊</span>
-            <span>Export Analytics</span>
+            <span className="text-lg sm:text-xl">📊</span>
+            <span className="hidden sm:inline">Export Analytics</span><span className="sm:hidden">Export</span>
           </button>
         </div>
 
         {/* Summary Cards - Premium accent style */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 border-b-4 border-b-gray-400">
-            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Audit Logs</p>
-            <p className="text-4xl font-extrabold text-gray-900">{summary.total}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-8 md:mb-12">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 border-b-4 border-b-gray-400">
+            <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2">Audit Logs</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900">{summary.total}</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 border-b-4 border-b-emerald-500">
-            <p className="text-emerald-600 text-xs font-bold uppercase tracking-widest mb-1">Present</p>
-            <p className="text-4xl font-extrabold text-gray-900">{summary.present}</p>
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 border-b-4 border-b-emerald-500">
+            <p className="text-emerald-600 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2">Present</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900">{summary.present}</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 border-b-4 border-b-red-500">
-            <p className="text-red-600 text-xs font-bold uppercase tracking-widest mb-1">Absent</p>
-            <p className="text-4xl font-extrabold text-gray-900">{summary.absent}</p>
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 border-b-4 border-b-red-500">
+            <p className="text-red-600 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2">Absent</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900">{summary.absent}</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 border-b-4 border-b-amber-500">
-            <p className="text-amber-600 text-xs font-bold uppercase tracking-widest mb-1">Leave</p>
-            <p className="text-4xl font-extrabold text-gray-900">{summary.on_leave}</p>
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 border-b-4 border-b-amber-500">
+            <p className="text-amber-600 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2">Leave</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900">{summary.on_leave}</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 border-b-4 border-b-blue-500">
-            <p className="text-blue-600 text-xs font-bold uppercase tracking-widest mb-1">Off</p>
-            <p className="text-4xl font-extrabold text-gray-900">{summary.weekly_off}</p>
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 border-b-4 border-b-blue-500">
+            <p className="text-blue-600 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2">Off</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900">{summary.weekly_off}</p>
           </div>
         </div>
 
         {/* Filters - Premium Glass */}
-        <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-xl border border-white p-4 md:p-8 mb-12">
-          <h2 className="text-lg font-bold text-gray-900 mb-6 uppercase tracking-widest flex items-center gap-2">
+        <div className="bg-white/80 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-xl border border-white p-4 sm:p-6 md:p-8 mb-8 md:mb-12">
+          <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-4 md:mb-6 uppercase tracking-widest flex items-center gap-2">
             <div className="w-1.5 h-4 bg-blue-500 rounded-full"></div>
-            Filter Parameters
+            <span className="hidden sm:inline">Filter Parameters</span><span className="sm:hidden">Filters</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Range Start</label>
+              <label className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Range Start</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 shadow-sm"
+                className="w-full px-3 sm:px-5 py-2 sm:py-3.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm text-gray-700 shadow-sm"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Range End</label>
+              <label className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Range End</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 shadow-sm"
+                className="w-full px-3 sm:px-5 py-2 sm:py-3.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm text-gray-700 shadow-sm"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Daily Status</label>
+              <label className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Daily Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 shadow-sm"
+                className="w-full px-3 sm:px-5 py-2 sm:py-3.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm text-gray-700 shadow-sm"
               >
                 <option value="all">All Status</option>
                 <option value="present">Present</option>
@@ -221,11 +224,11 @@ const AttendanceReportPage = () => {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Select Talent</label>
+              <label className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Select Talent</label>
               <select
                 value={employeeFilter}
                 onChange={(e) => setEmployeeFilter(e.target.value)}
-                className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 shadow-sm"
+                className="w-full px-3 sm:px-5 py-2 sm:py-3.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm text-gray-700 shadow-sm"
               >
                 <option value="all">Entire Team</option>
                 {employees.map(emp => (
@@ -237,17 +240,19 @@ const AttendanceReportPage = () => {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 md:mb-12">
           {/* Daily Attendance Chart */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-8">
-            <h2 className="text-xl font-extrabold text-gray-900 mb-8 tracking-tight flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8">
+            <h2 className="text-base sm:text-lg lg:text-xl font-extrabold text-gray-900 mb-4 md:mb-8 tracking-tight flex items-center gap-3">
+              <div className="w-1.5 h-4 md:h-6 bg-emerald-500 rounded-full"></div>
               Daily Timeline
             </h2>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={getChartData()}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 700 }} />
+            {dailyChartData.length > 0 ? (
+              <div style={{ width: '100%', height: 'clamp(200px, 50vw, 350px)' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dailyChartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                  <XAxis dataKey="date" angle={window.innerWidth < 640 ? -90 : -45} textAnchor={window.innerWidth < 640 ? 'end' : 'end'} height={window.innerWidth < 640 ? 60 : 80} axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 700 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 700 }} />
                 <Tooltip
                   cursor={{ fill: '#F1F5F9' }}
@@ -257,42 +262,56 @@ const AttendanceReportPage = () => {
                 <Bar dataKey="present" fill="#10b981" radius={[4, 4, 0, 0]} name="Present" />
                 <Bar dataKey="absent" fill="#ef4444" radius={[4, 4, 0, 0]} name="Absent" />
                 <Bar dataKey="on_leave" fill="#f59e0b" radius={[4, 4, 0, 0]} name="On Leave" />
-              </BarChart>
-            </ResponsiveContainer>
+                </BarChart>
+              </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-40 flex items-center justify-center text-gray-400 text-xs sm:text-sm font-semibold">
+                No chart data for the selected filters.
+              </div>
+            )}
           </div>
 
           {/* Status Distribution */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-8">
-            <h2 className="text-xl font-extrabold text-gray-900 mb-8 tracking-tight flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8">
+            <h2 className="text-base sm:text-lg lg:text-xl font-extrabold text-gray-900 mb-4 md:mb-8 tracking-tight flex items-center gap-3">
+              <div className="w-1.5 h-4 md:h-6 bg-blue-500 rounded-full"></div>
               Audit Distribution
             </h2>
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart>
-                <Pie
-                  data={getStatusPieData()}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {getStatusPieData().map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '15px' }}
-                />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
+            {statusPieData.length > 0 ? (
+              <div style={{ width: '100%', height: 'clamp(200px, 50vw, 320px)' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusPieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {statusPieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '15px' }}
+                    />
+                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-40 flex items-center justify-center text-gray-400 text-xs sm:text-sm font-semibold">
+                No distribution data for the selected filters.
+              </div>
+            )}
           </div>
         </div>
 
         {/* Attendance Table - Premium Style */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-8 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
             <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Data Audit Logs</h2>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{filteredAttendance.length} Entries Generated</span>

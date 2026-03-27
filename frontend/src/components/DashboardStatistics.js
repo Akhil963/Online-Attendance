@@ -1,17 +1,40 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import moment from 'moment';
 import { dashboardAPI } from '../services/api';
-import realtimeService from '../services/realtimeService';
-import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const DashboardStatistics = () => {
+const DashboardStatistics = ({ refreshKey = 0 }) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [month, setMonth] = useState(moment().format('MM'));
   const [year, setYear] = useState(moment().format('YYYY'));
   const [loading, setLoading] = useState(true);
+  // Show syncing indicator when refreshKey changes
+  const [isSyncing, setIsSyncing] = useState(false);
+  // Track connection status for display
   const [isLive, setIsLive] = useState(false);
+  
+  useEffect(() => {
+    if (refreshKey > 0) {
+      setIsSyncing(true);
+      setIsLive(true);
+      const timeout = setTimeout(() => {
+        setIsSyncing(false);
+        setIsLive(false);
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [refreshKey]);
+  
+  const lastRefreshRef = useRef(0);
 
   const fetchDashboardData = useCallback(async () => {
+    // Debounce: minimum 1 second between refreshes
+    const now = Date.now();
+    if (now - lastRefreshRef.current < 1000) {
+      return;
+    }
+    lastRefreshRef.current = now;
+    
     try {
       setLoading(true);
       const response = await dashboardAPI.getEmployeeDashboard(month, year);
@@ -24,7 +47,6 @@ const DashboardStatistics = () => {
       });
     } catch (error) {
       console.error('Error fetching dashboard:', error);
-      // Set default empty data on error
       setDashboardData({
         present: 0,
         weeklyOff: 0,
@@ -41,53 +63,15 @@ const DashboardStatistics = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Listen for realtime refresh events
+  // Refresh data when refreshKey changes (triggered by parent via socket events)
   useEffect(() => {
-    const handleRefresh = () => {
+    if (refreshKey === 0) return;
+    // Small delay to let the UI update first
+    const timeout = setTimeout(() => {
       fetchDashboardData();
-    };
-
-    window.addEventListener('refresh-dashboard-stats', handleRefresh);
-    return () => window.removeEventListener('refresh-dashboard-stats', handleRefresh);
-  }, [fetchDashboardData]);
-
-  // Real-time socket.io listeners for instant updates
-  useEffect(() => {
-    setIsLive(true);
-
-    const handleAttendanceUpdated = () => {
-      console.log('📊 Attendance update received, refreshing dashboard...');
-      fetchDashboardData();
-    };
-
-    const handleLeaveUpdated = () => {
-      console.log('📊 Leave update received, refreshing dashboard...');
-      fetchDashboardData();
-    };
-
-    const handleStatsUpdated = () => {
-      console.log('📊 Stats update received, refreshing dashboard...');
-      fetchDashboardData();
-    };
-
-    // Subscribe to realtime events
-    realtimeService.on('attendance:updated', handleAttendanceUpdated);
-    realtimeService.on('attendance:checked-in', handleAttendanceUpdated);
-    realtimeService.on('attendance:checked-out', handleAttendanceUpdated);
-    realtimeService.on('leave:statusChanged', handleLeaveUpdated);
-    realtimeService.on('leave:created', handleLeaveUpdated);
-    realtimeService.on('stats:updated', handleStatsUpdated);
-
-    return () => {
-      realtimeService.off('attendance:updated', handleAttendanceUpdated);
-      realtimeService.off('attendance:checked-in', handleAttendanceUpdated);
-      realtimeService.off('attendance:checked-out', handleAttendanceUpdated);
-      realtimeService.off('leave:statusChanged', handleLeaveUpdated);
-      realtimeService.off('leave:created', handleLeaveUpdated);
-      realtimeService.off('stats:updated', handleStatsUpdated);
-      setIsLive(false);
-    };
-  }, [fetchDashboardData]);
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [refreshKey, fetchDashboardData]);
 
   if (loading) {
     return (
@@ -97,9 +81,9 @@ const DashboardStatistics = () => {
           <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
         </div>
         <div className="flex items-center justify-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+          <span className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
           <p className="text-gray-400 font-semibold uppercase tracking-widest text-xs animate-pulse">
-            {isLive ? 'Live Syncing...' : 'Syncing Yield Analytics'}
+            {isSyncing ? 'Live Syncing...' : 'Syncing Yield Analytics'}
           </p>
         </div>
       </div>
@@ -227,27 +211,29 @@ const DashboardStatistics = () => {
             <div className="w-1 h-5 sm:h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
             <span className="truncate">Status Mix</span>
           </h3>
-          <ResponsiveContainer width="100%" height={200} minHeight={200}>
-            <PieChart>
-              <Pie
-                data={attendanceData}
-                cx="50%"
-                cy="50%"
-                innerRadius={45}
-                outerRadius={65}
-                paddingAngle={10}
-                dataKey="value"
-              >
-                {attendanceData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ borderRadius: '1.5rem', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)', padding: '20px' }}
-              />
-              <Legend verticalAlign="bottom" height={30} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: '600', paddingTop: '12px' }} />
-            </PieChart>
-          </ResponsiveContainer>
+          <div style={{ width: '100%', height: 'clamp(180px, 45vw, 240px)' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={attendanceData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={45}
+                  outerRadius={65}
+                  paddingAngle={10}
+                  dataKey="value"
+                >
+                  {attendanceData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ borderRadius: '1.5rem', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)', padding: '20px' }}
+                />
+                <Legend verticalAlign="bottom" height={30} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: '600', paddingTop: '12px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Detailed Statistics - Premium Summary */}
@@ -327,83 +313,167 @@ const DashboardStatistics = () => {
         </div>
       </div>
 
-      {/* Attendance Trend Graph - Premium Enhanced Container */}
-      <div className="bg-gradient-to-br from-white/60 via-white/40 to-emerald-50/30 backdrop-blur-3xl rounded-[3rem] shadow-sm border border-gray-200/70 p-6 md:p-12 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all group overflow-hidden relative">
+      {/* Attendance Progress - Beautiful Progress Bars */}
+      <div className="bg-gradient-to-br from-white/60 via-white/40 to-emerald-50/30 backdrop-blur-3xl rounded-[2rem] sm:rounded-[3rem] shadow-sm border border-gray-200/70 p-5 sm:p-8 md:p-12 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all group overflow-hidden relative">
         {/* Animated accent */}
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-emerald-400/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
-        <div className="relative z-10 flex flex-col gap-3 mb-12">
-          <div className="flex items-center gap-5">
+
+        {/* Header */}
+        <div className="relative z-10 flex flex-col gap-2 mb-8 sm:mb-10">
+          <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)]"></div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">Attendance Progress</h3>
+              <div className="w-2 h-7 sm:h-8 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)]"></div>
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">Attendance Progress</h3>
             </div>
-            <div className="hidden sm:flex items-center gap-2 ml-auto px-4 py-2 bg-emerald-50/50 rounded-full border border-emerald-200/50">
+            <div className="flex items-center gap-2 ml-auto px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-50/50 rounded-full border border-emerald-200/50">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-xs font-bold text-emerald-700">Live Tracking</span>
             </div>
           </div>
-          <div className="flex items-start gap-2 ml-6">
-            <span className="text-emerald-500 font-bold text-lg leading-none mt-0.5">📈</span>
-            <p className="text-sm text-gray-600 font-semibold">Daily performance trend • Track your presence and approved leaves throughout the month</p>
+          <div className="flex items-start gap-2 ml-5 sm:ml-6">
+            <span className="text-emerald-500 font-bold text-base sm:text-lg leading-none mt-0.5">📊</span>
+            <p className="text-xs sm:text-sm text-gray-500 font-semibold">Monthly breakdown • Visual progress of your attendance this period</p>
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={graphData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-            <XAxis
-              dataKey="dateDisplay"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 600 }}
-              height={60}
-              interval={0}
-            />
-            <YAxis 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
-              label={{ value: 'Days', angle: -90, position: 'insideLeft', style: { fill: '#64748B', fontWeight: 600, fontSize: 11 } }}
-            />
-            <Tooltip
-              contentStyle={{ borderRadius: '1.5rem', border: '2px solid #F3F4F6', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', padding: '20px', backgroundColor: '#FFFFFF' }}
-              cursor={{ stroke: '#10B981', strokeWidth: 2, strokeDasharray: '5 5' }}
-              formatter={(value) => [value > 0 ? value : '0', '']}
-              labelFormatter={(label) => `📅 ${label}`}
-            />
-            <Legend 
-              verticalAlign="top" 
-              height={36} 
-              iconType="circle" 
-              wrapperStyle={{ fontSize: '12px', fontWeight: '700', paddingBottom: '24px' }}
-              formatter={(value) => (
-                <span style={{ color: '#1F2937', fontSize: '12px', fontWeight: '600' }}>
-                  {value}
-                </span>
-              )}
-            />
-            <Line
-              type="monotone"
-              dataKey="present"
-              stroke="#10B981"
-              name="✓ Present Days"
-              strokeWidth={3.5}
-              dot={{ fill: '#fff', stroke: '#10B981', strokeWidth: 3, r: 5 }}
-              activeDot={{ r: 9, strokeWidth: 2, fill: '#10B981' }}
-              isAnimationActive={true}
-            />
-            <Line
-              type="monotone"
-              dataKey="plannedLeave"
-              stroke="#F59E0B"
-              name="📅 Approved Leave"
-              strokeWidth={3.5}
-              dot={{ fill: '#fff', stroke: '#F59E0B', strokeWidth: 3, r: 5 }}
-              activeDot={{ r: 9, strokeWidth: 2, fill: '#F59E0B' }}
-              isAnimationActive={true}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+
+        {/* Overall Attendance Rate Bar */}
+        <div className="relative z-10 mb-8 sm:mb-10 p-4 sm:p-6 bg-white/50 backdrop-blur-xl rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-base sm:text-lg">🎯</span>
+              <span className="text-sm sm:text-base font-bold text-gray-800">Overall Attendance Rate</span>
+            </div>
+            <span className="text-xl sm:text-2xl font-bold text-emerald-600">{total > 0 ? (present / total * 100).toFixed(1) : 0}%</span>
+          </div>
+          <div className="w-full h-4 sm:h-5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 shadow-md transition-all duration-1000 ease-out"
+              style={{ width: `${total > 0 ? (present / total * 100) : 0}%` }}
+            ></div>
+          </div>
+          <div className="flex justify-between mt-2">
+            <span className="text-xs text-gray-400 font-semibold">{present} days present</span>
+            <span className="text-xs text-gray-400 font-semibold">{total} total working days</span>
+          </div>
+        </div>
+
+        {/* Individual Progress Bars */}
+        <div className="relative z-10 space-y-4 sm:space-y-5">
+
+          {/* Present */}
+          <div className="p-4 sm:p-5 bg-white/50 backdrop-blur-xl rounded-2xl border border-emerald-100/60 shadow-sm hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-emerald-600 text-base sm:text-lg font-black">✓</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Operational</p>
+                  <p className="text-sm sm:text-base font-bold text-gray-800">Days Present</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xl sm:text-2xl font-bold text-emerald-600">{present}</p>
+                <p className="text-xs font-bold text-emerald-500">{total > 0 ? (present / total * 100).toFixed(1) : 0}%</p>
+              </div>
+            </div>
+            <div className="w-full h-3 sm:h-3.5 bg-emerald-50 rounded-full overflow-hidden shadow-inner">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-1000 ease-out"
+                style={{ width: `${total > 0 ? (present / total * 100) : 0}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Planned Leave */}
+          <div className="p-4 sm:p-5 bg-white/50 backdrop-blur-xl rounded-2xl border border-amber-100/60 shadow-sm hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-amber-600 text-base sm:text-lg font-black">L</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Approved</p>
+                  <p className="text-sm sm:text-base font-bold text-gray-800">Planned Leave</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xl sm:text-2xl font-bold text-amber-500">{plannedLeave}</p>
+                <p className="text-xs font-bold text-amber-400">{total > 0 ? (plannedLeave / total * 100).toFixed(1) : 0}%</p>
+              </div>
+            </div>
+            <div className="w-full h-3 sm:h-3.5 bg-amber-50 rounded-full overflow-hidden shadow-inner">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-1000 ease-out"
+                style={{ width: `${total > 0 ? (plannedLeave / total * 100) : 0}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Unplanned Leave */}
+          <div className="p-4 sm:p-5 bg-white/50 backdrop-blur-xl rounded-2xl border border-red-100/60 shadow-sm hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-red-600 text-base sm:text-lg font-black">U</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Unscheduled</p>
+                  <p className="text-sm sm:text-base font-bold text-gray-800">Unplanned Leave</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xl sm:text-2xl font-bold text-red-500">{unplannedLeave}</p>
+                <p className="text-xs font-bold text-red-400">{total > 0 ? (unplannedLeave / total * 100).toFixed(1) : 0}%</p>
+              </div>
+            </div>
+            <div className="w-full h-3 sm:h-3.5 bg-red-50 rounded-full overflow-hidden shadow-inner">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-red-300 to-red-500 transition-all duration-1000 ease-out"
+                style={{ width: `${total > 0 ? (unplannedLeave / total * 100) : 0}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Stacked Combined Bar */}
+          <div className="p-4 sm:p-5 bg-white/50 backdrop-blur-xl rounded-2xl border border-gray-100 shadow-sm">
+            <p className="text-xs sm:text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
+              <span>📋</span> Monthly Breakdown (Combined)
+            </p>
+            <div className="w-full h-5 sm:h-6 bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-1000"
+                style={{ width: `${total > 0 ? (present / total * 100) : 0}%` }}
+                title={`Present: ${present} days`}
+              ></div>
+              <div
+                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-1000"
+                style={{ width: `${total > 0 ? (plannedLeave / total * 100) : 0}%` }}
+                title={`Planned Leave: ${plannedLeave} days`}
+              ></div>
+              <div
+                className="h-full bg-gradient-to-r from-red-400 to-red-500 transition-all duration-1000"
+                style={{ width: `${total > 0 ? (unplannedLeave / total * 100) : 0}%` }}
+                title={`Unplanned Leave: ${unplannedLeave} days`}
+              ></div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-3">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span className="text-xs text-gray-500 font-semibold">Present ({present}d)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-amber-500 flex-shrink-0"></span>
+                <span className="text-xs text-gray-500 font-semibold">Planned ({plannedLeave}d)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0"></span>
+                <span className="text-xs text-gray-500 font-semibold">Unplanned ({unplannedLeave}d)</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );

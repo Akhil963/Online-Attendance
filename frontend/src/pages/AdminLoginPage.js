@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { toast } from 'react-toastify';
@@ -13,14 +13,45 @@ const AdminLoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Pre-fill remembered admin email if available
+    const remembered = localStorage.getItem('rememberedAdminEmail');
+    const rememberMeState = localStorage.getItem('rememberMeAdmin');
+    if (remembered) {
+      setEmail(remembered);
+    }
+    if (rememberMeState === 'true') {
+      setRememberMe(true);
+    }
+  }, []);
+
+  const handleRememberMeChange = (checked) => {
+    setRememberMe(checked);
+    if (checked) {
+      // Save email and checkbox state when checked
+      localStorage.setItem('rememberedAdminEmail', email);
+      localStorage.setItem('rememberMeAdmin', 'true');
+    } else {
+      // Clear all stored data when unchecked
+      localStorage.removeItem('rememberedAdminEmail');
+      localStorage.removeItem('rememberMeAdmin');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       await login(email, password, 'admin');
+      // Save credentials if remember me is checked
       if (rememberMe) {
-        localStorage.setItem('rememberedAdmin', email);
+        localStorage.setItem('rememberedAdminEmail', email);
+        localStorage.setItem('rememberMeAdmin', 'true');
+      } else {
+        // Clear if not checked
+        localStorage.removeItem('rememberedAdminEmail');
+        localStorage.removeItem('rememberMeAdmin');
       }
       navigate('/admin-dashboard');
       toast.success('Admin login successful!');
@@ -86,13 +117,18 @@ const AdminLoginPage = () => {
           </div>
 
           <div className="flex items-center">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 border border-gray-300 rounded accent-blue-600"
-              />
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <div className="relative w-5 h-5">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => handleRememberMeChange(e.target.checked)}
+                  className="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded accent-blue-600 cursor-pointer checked:bg-blue-600 checked:border-blue-600 transition-all"
+                />
+                <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white hidden peer-checked:block pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
               <span className="text-sm font-medium text-gray-600">Remember me</span>
             </label>
           </div>

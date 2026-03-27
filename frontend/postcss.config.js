@@ -2,7 +2,7 @@ module.exports = {
   plugins: {
     tailwindcss: {},
     'postcss-preset-env': {
-      stage: 3,
+      stage: 4,
       features: {
         'nesting-rules': true,
         'custom-properties': false,

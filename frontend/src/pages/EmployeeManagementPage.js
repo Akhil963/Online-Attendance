@@ -84,7 +84,7 @@ const EmployeeManagementPage = () => {
     onRefresh: refreshEmployeesData,
     events: ['employee:statusUpdated', 'notification:new'],
     soundEvents: [],
-    pollMs: 30000,
+    pollMs: 0,  // Disabled - only update on socket events
     enabled: true
   });
 
@@ -153,8 +153,8 @@ const EmployeeManagementPage = () => {
         {/* Mobile Back Button */}
         <MobileBackButton label="Back" customPath="/admin-dashboard" />
         
-        <div className="mb-14">
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-gray-900 tracking-tight uppercase leading-none mb-6">
+        <div className="mb-12 md:mb-14">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight uppercase leading-none mb-6">
             Employees
           </h1>
           <div className="flex items-center gap-4">
@@ -171,49 +171,49 @@ const EmployeeManagementPage = () => {
         </div>
 
         {/* Summary Cards - Elite Dashboard Style */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Total Workforce</p>
-            <p className="text-6xl font-bold text-gray-900 tracking-tight relative z-10 leading-none">{employees.length}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-12 md:mb-16">
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-6 sm:p-8 md:p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-24 sm:w-28 md:w-32 h-24 sm:h-28 md:h-32 bg-blue-500/5 rounded-full -mr-12 sm:-mr-14 md:-mr-16 -mt-12 sm:-mt-14 md:-mt-16 blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 sm:mb-4 relative z-10">Total Workforce</p>
+            <p className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 tracking-tight relative z-10 leading-none">{employees.length}</p>
           </div>
 
-          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Active Search</p>
-            <p className="text-6xl font-bold text-emerald-600 tracking-tight relative z-10 leading-none">{filteredEmployees.length}</p>
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-6 sm:p-8 md:p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-24 sm:w-28 md:w-32 h-24 sm:h-28 md:h-32 bg-emerald-500/5 rounded-full -mr-12 sm:-mr-14 md:-mr-16 -mt-12 sm:-mt-14 md:-mt-16 blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 sm:mb-4 relative z-10">Active Search</p>
+            <p className="text-4xl sm:text-5xl md:text-6xl font-bold text-emerald-600 tracking-tight relative z-10 leading-none">{filteredEmployees.length}</p>
           </div>
 
-          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Male Employees</p>
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-6 sm:p-8 md:p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-24 sm:w-28 md:w-32 h-24 sm:h-28 md:h-32 bg-blue-500/5 rounded-full -mr-12 sm:-mr-14 md:-mr-16 -mt-12 sm:-mt-14 md:-mt-16 blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 sm:mb-4 relative z-10">Male Employees</p>
             <div className="flex items-baseline gap-3 relative z-10">
-              <p className="text-6xl font-bold text-blue-500 tracking-tight leading-none">
+              <p className="text-4xl sm:text-5xl md:text-6xl font-bold text-blue-500 tracking-tight leading-none">
                 {employees.filter(e => e.gender === 'Male').length}
               </p>
-              <span className="text-xs font-bold text-gray-300 tracking-widest">UNITS</span>
+              <span className="text-[10px] sm:text-xs font-bold text-gray-300 tracking-widest">UNITS</span>
             </div>
           </div>
 
-          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-10 hover:shadow-lg transition-all group overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-red-500/10 transition-colors"></div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 relative z-10">Female Employees</p>
+          <div className="bg-white/40 backdrop-blur-3xl rounded-2xl shadow-sm border border-gray-200/60 p-6 sm:p-8 md:p-10 hover:shadow-lg transition-all group overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-24 sm:w-28 md:w-32 h-24 sm:h-28 md:h-32 bg-red-500/5 rounded-full -mr-12 sm:-mr-14 md:-mr-16 -mt-12 sm:-mt-14 md:-mt-16 blur-2xl group-hover:bg-red-500/10 transition-colors"></div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 sm:mb-4 relative z-10">Female Employees</p>
             <div className="flex items-baseline gap-3 relative z-10">
-              <p className="text-6xl font-bold text-red-500 tracking-tight leading-none">
+              <p className="text-4xl sm:text-5xl md:text-6xl font-bold text-red-500 tracking-tight leading-none">
                 {employees.filter(e => e.gender === 'Female').length}
               </p>
-              <span className="text-xs font-bold text-gray-300 tracking-widest">UNITS</span>
+              <span className="text-[10px] sm:text-xs font-bold text-gray-300 tracking-widest">UNITS</span>
             </div>
           </div>
         </div>
 
         {/* Filters - High Precision Console */}
-        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-6 md:p-12 mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight flex items-center gap-5 uppercase">
-            <div className="w-1 h-6 bg-blue-600 rounded-full shadow-lg"></div>
-            Filter Console
+        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-4 sm:p-6 md:p-12 mb-12">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-6 md:mb-10 tracking-tight flex items-center gap-3 md:gap-5 uppercase">
+            <div className="w-1 h-4 sm:h-6 bg-blue-600 rounded-full shadow-lg"></div>
+            <span className="hidden sm:inline">Filter Console</span><span className="sm:hidden">Filters</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             <div className="group/field">
               <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Search Employees</label>
               <input
@@ -353,21 +353,21 @@ const EmployeeManagementPage = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-gray-900 text-white uppercase text-xs font-bold tracking-widest">
-                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Identity ID</th>
-                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Asset Profile</th>
-                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">Neural Hub</th>
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">Phone</th>
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Department</th>
-                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Asset Title</th>
-                  <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Clearance</th>
+                  <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5">Identity ID</th>
+                  <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5">Asset Profile</th>
+                  <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5 hidden sm:table-cell">Neural Hub</th>
+                  <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5 hidden md:table-cell">Phone</th>
+                  <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5">Department</th>
+                  <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5 hidden lg:table-cell">Asset Title</th>
+                  <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5">Clearance</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredEmployees.length > 0 ? (
                   filteredEmployees.map(emp => (
                     <tr key={emp._id} className="group hover:bg-blue-600/[0.03] transition-all duration-300">
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 font-bold text-blue-600 italic tracking-widest text-sm">{emp.employeeId}</td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5 font-bold text-blue-600 italic tracking-widest text-sm">{emp.employeeId}</td>
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner uppercase">
                             {emp.name?.charAt(0)}
@@ -378,15 +378,15 @@ const EmployeeManagementPage = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-gray-400 font-bold text-xs hidden sm:table-cell lowercase tracking-wider">{emp.email}</td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-gray-400 font-bold text-xs hidden md:table-cell tracking-widest">{emp.phone || 'Not Provided'}</td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5 text-gray-400 font-bold text-xs hidden sm:table-cell lowercase tracking-wider">{emp.email}</td>
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5 text-gray-400 font-bold text-xs hidden md:table-cell tracking-widest">{emp.phone || 'Not Provided'}</td>
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5">
                         <div className="px-5 py-2 bg-blue-600/5 text-blue-600 rounded-full inline-flex items-center text-xs font-bold uppercase tracking-widest border border-blue-600/10 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
                           {emp.department?.name || 'Central Unit'}
                         </div>
                       </td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-gray-500 font-bold text-xs hidden lg:table-cell uppercase tracking-widest">{emp.designation || 'Specialist'}</td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5 text-gray-500 font-bold text-xs hidden lg:table-cell uppercase tracking-widest">{emp.designation || 'Specialist'}</td>
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5">
                         <div className={`px-5 py-2 rounded-full inline-flex items-center text-xs font-bold uppercase tracking-widest shadow-sm ${emp.role === 'admin' ? 'bg-red-500/10 text-red-600 border border-red-500/10' :
                           emp.role === 'manager' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/10' :
                             'bg-emerald-500/10 text-emerald-600 border border-emerald-500/10'

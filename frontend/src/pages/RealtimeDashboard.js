@@ -109,8 +109,9 @@ const RealtimeDashboard = () => {
               <div className="w-2 h-8 bg-emerald-500 rounded-full"></div>
               Live Ingestion Trend
             </h2>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={chartData}>
+            <div style={{ width: '100%', height: 'clamp(220px, 55vw, 340px)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }} />
@@ -121,8 +122,9 @@ const RealtimeDashboard = () => {
                 <Line type="monotone" dataKey="present" stroke="#10b981" strokeWidth={4} dot={false} isAnimationActive={false} />
                 <Line type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={4} dot={false} isAnimationActive={false} />
                 <Line type="monotone" dataKey="onLeave" stroke="#f59e0b" strokeWidth={4} dot={false} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Attendance Distribution */}
@@ -131,28 +133,30 @@ const RealtimeDashboard = () => {
               <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
               Distribution Meta
             </h2>
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart>
-                <Pie
-                  data={attendanceDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={80}
-                  outerRadius={110}
-                  paddingAngle={8}
-                  dataKey="value"
-                  isAnimationActive={true}
-                >
-                  {attendanceDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '20px' }}
-                />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
+            <div style={{ width: '100%', height: 'clamp(220px, 55vw, 340px)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={attendanceDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={110}
+                    paddingAngle={8}
+                    dataKey="value"
+                    isAnimationActive={true}
+                  >
+                    {attendanceDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '20px' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 

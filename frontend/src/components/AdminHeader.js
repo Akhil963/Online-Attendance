@@ -44,7 +44,7 @@ const AdminHeader = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-4">
+          {/* <nav className="hidden md:flex gap-4">
             {user && (
               <>
                 <Link
@@ -64,7 +64,7 @@ const AdminHeader = () => {
                 </Link>
               </>
             )}
-          </nav>
+          </nav> */}
 
           {/* Right Section - User Menu */}
           <div className="flex items-center gap-6">

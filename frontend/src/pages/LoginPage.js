@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { toast } from 'react-toastify';
@@ -13,14 +13,44 @@ const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const recalled = localStorage.getItem('rememberedUserIdentifier');
+    const rememberMeState = localStorage.getItem('rememberMeUser');
+    if (recalled) {
+      setIdentifier(recalled);
+    }
+    if (rememberMeState === 'true') {
+      setRememberMe(true);
+    }
+  }, []);
+
+  const handleRememberMeChange = (checked) => {
+    setRememberMe(checked);
+    if (checked) {
+      // Save identifier and checkbox state when checked
+      localStorage.setItem('rememberedUserIdentifier', identifier);
+      localStorage.setItem('rememberMeUser', 'true');
+    } else {
+      // Clear all stored data when unchecked
+      localStorage.removeItem('rememberedUserIdentifier');
+      localStorage.removeItem('rememberMeUser');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       await login(identifier, password);
+      // Save credentials if remember me is checked
       if (rememberMe) {
-        localStorage.setItem('rememberedUser', identifier);
+        localStorage.setItem('rememberedUserIdentifier', identifier);
+        localStorage.setItem('rememberMeUser', 'true');
+      } else {
+        // Clear if not checked
+        localStorage.removeItem('rememberedUserIdentifier');
+        localStorage.removeItem('rememberMeUser');
       }
       navigate('/dashboard');
       toast.success('Login successful!');
@@ -91,11 +121,11 @@ const LoginPage = () => {
                 <input
                   type="checkbox"
                   checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="peer appearance-none w-5 h-5 border-2 border-slate-200 rounded-lg checked:bg-blue-600 checked:border-blue-600 transition-all"
+                  onChange={(e) => handleRememberMeChange(e.target.checked)}
+                  className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded accent-blue-600 cursor-pointer checked:bg-blue-600 checked:border-blue-600 transition-all checked:shadow-md"
                 />
-                <svg className="absolute top-1 left-1 w-3 h-3 text-white hidden peer-checked:block pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
-                  <path d="M5 13l4 4L19 7" />
+                <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white hidden peer-checked:block pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">Remember Me</span>

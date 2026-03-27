@@ -29,7 +29,7 @@ const NoticesPage = () => {
     onRefresh: fetchNotices,
     events: ['notification:new'],
     soundEvents: ['notification:new'],
-    pollMs: 30000,
+    pollMs: 0,  // Disabled - only update on socket events
     enabled: true
   });
 

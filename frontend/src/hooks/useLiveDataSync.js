@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import realtimeService from '../services/realtimeService';
 import { useAuth } from './useAuth';
 import { playNotificationSound } from '../utils/notificationSound';
@@ -7,7 +7,7 @@ export const useLiveDataSync = ({
   onRefresh,
   events = [],
   soundEvents = [],
-  pollMs = 30000,
+  pollMs = 0,  // Disabled by default - only rely on socket events
   enabled = true
 }) => {
   const { token, user } = useAuth();
@@ -16,9 +16,27 @@ export const useLiveDataSync = ({
   const eventsKey = useMemo(() => events.join('|'), [events]);
   const soundEventsKey = useMemo(() => soundEvents.join('|'), [soundEvents]);
   
-  // Use ref to track if component is still mounted
+  // Use refs to track state across renders
   const isMountedRef = useRef(true);
   const connectionHandledRef = useRef(false);
+  const onRefreshRef = useRef(onRefresh);
+  const lastRefreshTimeRef = useRef(0);
+
+  // Keep onRefresh ref updated
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
+
+  // Debounce helper - prevents rapid-fire refreshes
+  const canRefresh = useCallback(() => {
+    const now = Date.now();
+    const DEBOUNCE_MS = 2000; // Minimum 2 seconds between refreshes
+    if (now - lastRefreshTimeRef.current < DEBOUNCE_MS) {
+      return false;
+    }
+    lastRefreshTimeRef.current = now;
+    return true;
+  }, []);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -29,15 +47,15 @@ export const useLiveDataSync = ({
       return;
     }
 
-    let intervalId;
     const activeEvents = eventsKey ? eventsKey.split('|').filter(Boolean) : [];
     const soundEventSet = new Set(soundEventsKey ? soundEventsKey.split('|').filter(Boolean) : []);
 
-    const refresh = () => {
-      if (!isMountedRef.current) {
-        return;
-      }
-      Promise.resolve(onRefresh())
+    // Handle refresh with debouncing
+    const handleRefresh = () => {
+      if (!isMountedRef.current) return;
+      if (!canRefresh()) return;
+      
+      Promise.resolve(onRefreshRef.current())
         .then(() => {
           if (isMountedRef.current) {
             setLastSyncAt(new Date());
@@ -46,18 +64,19 @@ export const useLiveDataSync = ({
         .catch(() => {});
     };
 
+    // Set up socket event handlers
     const handlers = activeEvents.map((eventName) => {
       const handler = () => {
         if (soundEventSet.has(eventName)) {
           playNotificationSound();
         }
-        refresh();
+        handleRefresh();
       };
       realtimeService.on(eventName, handler);
       return { eventName, handler };
     });
 
-    // Connect to realtime service only once per mount
+    // Connect to realtime service
     if (!connectionHandledRef.current) {
       connectionHandledRef.current = true;
       realtimeService.connect(token).then(() => {
@@ -74,8 +93,14 @@ export const useLiveDataSync = ({
       });
     }
 
+    // Polling disabled by default - only use if pollMs > 0
+    let intervalId;
     if (pollMs > 0) {
-      intervalId = setInterval(refresh, pollMs);
+      intervalId = setInterval(() => {
+        if (isMountedRef.current && canRefresh()) {
+          handleRefresh();
+        }
+      }, pollMs);
     }
 
     return () => {
@@ -87,8 +112,10 @@ export const useLiveDataSync = ({
         clearInterval(intervalId);
       }
     };
-  }, [enabled, token, user?.role, onRefresh, pollMs, eventsKey, soundEventsKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, token, user?.role, pollMs, eventsKey, soundEventsKey, canRefresh]);
 
+  // Heartbeat to update connection status
   useEffect(() => {
     if (!enabled || !token) {
       return;
@@ -98,7 +125,7 @@ export const useLiveDataSync = ({
       if (isMountedRef.current) {
         setIsLive(realtimeService.isConnected());
       }
-    }, 2000);
+    }, 5000); // Check every 5 seconds instead of 2
 
     return () => clearInterval(heartbeat);
   }, [enabled, token]);

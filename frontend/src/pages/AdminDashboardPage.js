@@ -146,7 +146,7 @@ const AdminDashboardPage = () => {
     onRefresh: refreshAll,
     events: ['attendance:updated', 'stats:updated', 'leave:updated', 'employee:statusUpdated', 'notification:new'],
     soundEvents: ['leave:updated', 'employee:statusUpdated', 'notification:new'],
-    pollMs: 30000,
+    pollMs: 0,  // Disabled - only update on socket events
     enabled: true
   });
 
@@ -286,13 +286,13 @@ const AdminDashboardPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
 
         {/* Header Section */}
-        <div className="mb-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+        <div className="mb-8 md:mb-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 gap-3 md:gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                 Admin Dashboard
               </h1>
-              <p className="text-gray-600 mt-2">Welcome back! Here's your system overview</p>
+              <p className="text-gray-600 text-sm md:text-base mt-2">Welcome back! Here's your system overview</p>
               <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-200 bg-white">
                 <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
                 <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{isLive ? 'Live' : 'Syncing'}</span>
@@ -301,97 +301,97 @@ const AdminDashboardPage = () => {
                 )}
               </div>
             </div>
-            <div className="text-left md:text-right text-gray-600">
-              <p className="text-sm">{moment().format('dddd')}</p>
-              <p className="text-lg font-semibold text-gray-900">{moment().format('MMMM DD, YYYY')}</p>
+            <div className="text-left md:text-right text-gray-600 text-sm">
+              <p className="text-xs md:text-sm">{moment().format('dddd')}</p>
+              <p className="text-base md:text-lg font-semibold text-gray-900">{moment().format('MMMM DD, YYYY')}</p>
             </div>
             <button
               onClick={openEmployeeModal}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all hover:shadow-lg hover:shadow-blue-200 transform hover:scale-105"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all hover:shadow-lg hover:shadow-blue-200 transform hover:scale-105"
             >
-              <UserPlus size={20} />
+              <UserPlus size={18} className="sm:w-5 sm:h-5" />
               <span>Create Employee</span>
             </button>
           </div>
         </div>
 
         {/* Key Metrics - Professional Color Scheme */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 md:mb-8">
           {/* Total Employees - Primary Blue */}
-          <div className="bg-white rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all hover:shadow-blue-100">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all hover:shadow-blue-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Total Employees</p>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{statistics.totalEmployees || 0}</p>
-                <p className="text-xs text-gray-500 mt-2">👥 Active staff</p>
+                <p className="text-gray-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Total Employees</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">{statistics.totalEmployees || 0}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-2">👥 Active staff</p>
               </div>
-              <div className="text-4xl opacity-20 text-blue-600">👤</div>
+              <div className="text-3xl sm:text-4xl opacity-20 text-blue-600">👤</div>
             </div>
           </div>
 
           {/* Present Today - Green */}
-          <div className="bg-white rounded-xl p-6 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all hover:shadow-emerald-100">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all hover:shadow-emerald-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Present Today</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{statistics.presentCount || 0}</p>
-                <p className="text-xs text-gray-500 mt-2">✓ {statistics.totalEmployees > 0 ? Math.round((statistics.presentCount / statistics.totalEmployees) * 100) : 0}% attendance</p>
+                <p className="text-gray-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Present Today</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">{statistics.presentCount || 0}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-2">✓ {statistics.totalEmployees > 0 ? Math.round((statistics.presentCount / statistics.totalEmployees) * 100) : 0}% attendance</p>
               </div>
-              <div className="text-4xl opacity-20 text-emerald-600">✓</div>
+              <div className="text-3xl sm:text-4xl opacity-20 text-emerald-600">✓</div>
             </div>
           </div>
 
           {/* Absent Today - Red */}
-          <div className="bg-white rounded-xl p-6 border-2 border-red-200 hover:border-red-400 hover:shadow-lg transition-all hover:shadow-red-100">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-red-200 hover:border-red-400 hover:shadow-lg transition-all hover:shadow-red-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Absent Today</p>
-                <p className="text-3xl font-bold text-red-600 mt-2">{statistics.absentCount || 0}</p>
-                <p className="text-xs text-gray-500 mt-2">✕ Not marked</p>
+                <p className="text-gray-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Absent Today</p>
+                <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-2">{statistics.absentCount || 0}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-2">✕ Not marked</p>
               </div>
-              <div className="text-4xl opacity-20 text-red-600">✕</div>
+              <div className="text-3xl sm:text-4xl opacity-20 text-red-600">✕</div>
             </div>
           </div>
 
           {/* On Leave - Amber */}
-          <div className="bg-white rounded-xl p-6 border-2 border-amber-200 hover:border-amber-400 hover:shadow-lg transition-all hover:shadow-amber-100">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-amber-200 hover:border-amber-400 hover:shadow-lg transition-all hover:shadow-amber-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">On Leave</p>
-                <p className="text-3xl font-bold text-amber-600 mt-2">{statistics.onLeaveCount || 0}</p>
-                <p className="text-xs text-gray-500 mt-2">📅 Approved</p>
+                <p className="text-gray-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">On Leave</p>
+                <p className="text-2xl sm:text-3xl font-bold text-amber-600 mt-2">{statistics.onLeaveCount || 0}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-2">📅 Approved</p>
               </div>
-              <div className="text-4xl opacity-20 text-amber-600">📅</div>
+              <div className="text-3xl sm:text-4xl opacity-20 text-amber-600">📅</div>
             </div>
           </div>
 
           {/* Departments - Cyan */}
-          <div className="bg-white rounded-xl p-6 border-2 border-cyan-200 hover:border-cyan-400 hover:shadow-lg transition-all hover:shadow-cyan-100">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-cyan-200 hover:border-cyan-400 hover:shadow-lg transition-all hover:shadow-cyan-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Departments</p>
-                <p className="text-3xl font-bold text-purple-600 mt-2">{statistics.totalDepartments || 0}</p>
-                <p className="text-xs text-gray-500 mt-2">🏢 Active</p>
+                <p className="text-gray-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Departments</p>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600 mt-2">{statistics.totalDepartments || 0}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-2">🏢 Active</p>
               </div>
-              <div className="text-4xl opacity-20 text-cyan-600">🏢</div>
+              <div className="text-3xl sm:text-4xl opacity-20 text-cyan-600">🏢</div>
             </div>
           </div>
 
           {/* Pending Leaves - Indigo */}
-          <div className="bg-white rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all hover:shadow-blue-100">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all hover:shadow-blue-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs font-semibold uppercase tracking-wide">Pending Leaves</p>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{leaves.length || 0}</p>
-                <p className="text-xs text-slate-500 mt-2">⏳ Awaiting</p>
+                <p className="text-gray-600 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Pending Leaves</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">{leaves.length || 0}</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 mt-2">⏳ Awaiting</p>
               </div>
-              <div className="text-4xl opacity-20 text-indigo-600">⏳</div>
+              <div className="text-3xl sm:text-4xl opacity-20 text-indigo-600">⏳</div>
             </div>
           </div>
         </div>
 
         {/* Attendance Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6 md:mb-8">
           {attendanceData.map((item, idx) => {
             const colorClasses = {
               '#10b981': { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-600', hover: 'hover:border-emerald-400 hover:shadow-emerald-100' },
@@ -403,20 +403,20 @@ const AdminDashboardPage = () => {
             return (
               <div
                 key={idx}
-                className={`${colors.bg} rounded-xl p-6 border-2 ${colors.border} ${colors.hover} transition-all hover:shadow-lg group cursor-pointer`}
+                className={`${colors.bg} rounded-xl p-4 sm:p-6 border-2 ${colors.border} ${colors.hover} transition-all hover:shadow-lg group cursor-pointer`}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className={`${colors.text} text-sm font-semibold uppercase`}>{item.name}</p>
-                    <p className={`${colors.text} text-3xl md:text-5xl font-bold mt-3`}>
+                    <p className={`${colors.text} text-xs sm:text-sm font-semibold uppercase`}>{item.name}</p>
+                    <p className={`${colors.text} text-2xl sm:text-3xl md:text-5xl font-bold mt-3`}>
                       {item.value}
                     </p>
-                    <p className="text-xs text-slate-500 mt-2">
+                    <p className="text-[10px] sm:text-xs text-slate-500 mt-2">
                       {item.value > 0 ? '✓ Recorded' : '○ None'}
                     </p>
                   </div>
                   <div
-                    className={`text-6xl opacity-15 group-hover:opacity-25 transition-opacity ${colors.text}`}
+                    className={`text-4xl sm:text-6xl opacity-15 group-hover:opacity-25 transition-opacity ${colors.text}`}
                   >
                     {item.name === 'Present' ? '✓' : item.name === 'Absent' ? '✕' : '📅'}
                   </div>
@@ -427,115 +427,117 @@ const AdminDashboardPage = () => {
         </div>
 
         {/* Gender Distribution */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-slate-400 text-center hover:shadow-lg transition-all hover:shadow-slate-100">
-            <p className="text-slate-600 text-sm font-semibold uppercase">Total Staff</p>
-            <p className="text-4xl font-bold text-slate-900 mt-3">{totalEmployees}</p>
-            <p className="text-xs text-slate-500 mt-2">👥 Employees</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 md:mb-8">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-400 text-center hover:shadow-lg transition-all hover:shadow-slate-100">
+            <p className="text-slate-600 text-xs sm:text-sm font-semibold uppercase">Total Staff</p>
+            <p className="text-3xl sm:text-4xl font-bold text-slate-900 mt-3">{totalEmployees}</p>
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-2">👥 Employees</p>
           </div>
 
-          <div className="bg-blue-50 rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 text-center hover:shadow-lg transition-all hover:shadow-blue-100">
-            <p className="text-blue-600 text-sm font-semibold uppercase">Male</p>
-            <p className="text-4xl font-bold text-blue-600 mt-3">{maleCount}</p>
-            <p className="text-xs text-blue-500 mt-2">{totalEmployees > 0 ? Math.round((maleCount / totalEmployees) * 100) : 0}%</p>
+          <div className="bg-blue-50 rounded-xl p-4 sm:p-6 border-2 border-blue-200 hover:border-blue-400 text-center hover:shadow-lg transition-all hover:shadow-blue-100">
+            <p className="text-blue-600 text-xs sm:text-sm font-semibold uppercase">Male</p>
+            <p className="text-3xl sm:text-4xl font-bold text-blue-600 mt-3">{maleCount}</p>
+            <p className="text-[10px] sm:text-xs text-blue-500 mt-2">{totalEmployees > 0 ? Math.round((maleCount / totalEmployees) * 100) : 0}%</p>
           </div>
 
-          <div className="bg-pink-50 rounded-xl p-6 border-2 border-pink-200 hover:border-pink-400 text-center hover:shadow-lg transition-all hover:shadow-pink-100">
-            <p className="text-pink-600 text-sm font-semibold uppercase">Female</p>
-            <p className="text-4xl font-bold text-pink-600 mt-3">{femaleCount}</p>
-            <p className="text-xs text-pink-500 mt-2">{totalEmployees > 0 ? Math.round((femaleCount / totalEmployees) * 100) : 0}%</p>
+          <div className="bg-pink-50 rounded-xl p-4 sm:p-6 border-2 border-pink-200 hover:border-pink-400 text-center hover:shadow-lg transition-all hover:shadow-pink-100">
+            <p className="text-pink-600 text-xs sm:text-sm font-semibold uppercase">Female</p>
+            <p className="text-3xl sm:text-4xl font-bold text-pink-600 mt-3">{femaleCount}</p>
+            <p className="text-[10px] sm:text-xs text-pink-500 mt-2">{totalEmployees > 0 ? Math.round((femaleCount / totalEmployees) * 100) : 0}%</p>
           </div>
 
-          <div className="bg-purple-50 rounded-xl p-6 border-2 border-purple-200 hover:border-purple-400 text-center hover:shadow-lg transition-all hover:shadow-purple-100">
-            <p className="text-purple-600 text-sm font-semibold uppercase">Other</p>
-            <p className="text-4xl font-bold text-purple-600 mt-3">{otherCount}</p>
-            <p className="text-xs text-purple-500 mt-2">{totalEmployees > 0 ? Math.round((otherCount / totalEmployees) * 100) : 0}%</p>
+          <div className="bg-purple-50 rounded-xl p-4 sm:p-6 border-2 border-purple-200 hover:border-purple-400 text-center hover:shadow-lg transition-all hover:shadow-purple-100">
+            <p className="text-purple-600 text-xs sm:text-sm font-semibold uppercase">Other</p>
+            <p className="text-3xl sm:text-4xl font-bold text-purple-600 mt-3">{otherCount}</p>
+            <p className="text-[10px] sm:text-xs text-purple-500 mt-2">{totalEmployees > 0 ? Math.round((otherCount / totalEmployees) * 100) : 0}%</p>
           </div>
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 md:mb-8">
           {/* Department Chart */}
-          <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-blue-400 transition-all hover:shadow-lg hover:shadow-blue-100">
-            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span className="text-2xl">📊</span> Employees by Department
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-slate-200 hover:border-blue-400 transition-all hover:shadow-lg hover:shadow-blue-100">
+            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="text-xl sm:text-2xl">📊</span> <span className="hidden sm:inline">Employees by Department</span><span className="sm:hidden">Dept.</span>
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData.length > 0 ? chartData : [{ name: 'No Data', count: 0 }]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} stroke="rgba(100, 116, 139, 0.8)" />
-                <YAxis stroke="rgba(100, 116, 139, 0.8)" />
-                <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '2px solid #3b82f6', borderRadius: '8px', color: '#1e293b' }} />
-                <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div style={{ width: '100%', height: 'clamp(200px, 50vw, 350px)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData.length > 0 ? chartData : [{ name: 'No Data', count: 0 }]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
+                  <XAxis dataKey="name" angle={window.innerWidth < 640 ? -90 : -45} textAnchor={window.innerWidth < 640 ? 'end' : 'end'} height={window.innerWidth < 640 ? 60 : 80} stroke="rgba(100, 116, 139, 0.8)" />
+                  <YAxis stroke="rgba(100, 116, 139, 0.8)" />
+                  <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '2px solid #3b82f6', borderRadius: '8px', color: '#1e293b' }} />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Gender Chart */}
-          <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-cyan-400 transition-all hover:shadow-lg hover:shadow-cyan-100">
-            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span className="text-2xl">👥</span> Gender Distribution
+          <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-slate-200 hover:border-cyan-400 transition-all hover:shadow-lg hover:shadow-cyan-100">
+            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="text-xl sm:text-2xl">👥</span> <span className="hidden sm:inline">Gender Distribution</span><span className="sm:hidden">Gender</span>
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={genderData.length > 0 ? genderData : [{ name: 'No Data', value: 1, fill: '#e5e7eb' }]}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${isNaN(value) ? 0 : value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {(genderData.length > 0 ? genderData : [{ name: 'No Data', value: 1, fill: '#e5e7eb' }]).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '2px solid #3b82f6', borderRadius: '8px', color: '#1e293b' }} />
-              </PieChart>
-            </ResponsiveContainer>
+            <div style={{ width: '100%', height: 'clamp(200px, 50vw, 350px)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={genderData.length > 0 ? genderData : [{ name: 'No Data', value: 1, fill: '#e5e7eb' }]}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${isNaN(value) ? 0 : value}`}
+                    outerRadius={window.innerWidth < 640 ? 50 : 80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {(genderData.length > 0 ? genderData : [{ name: 'No Data', value: 1, fill: '#e5e7eb' }]).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '2px solid #3b82f6', borderRadius: '8px', color: '#1e293b' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
         {/* Pending Leave Approvals */}
-        <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-indigo-400 transition-all hover:shadow-lg hover:shadow-indigo-100">
-          <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <span className="text-2xl">⏳</span> Pending Leave Approvals
+        <div className="bg-white rounded-xl p-4 sm:p-6 border-2 border-slate-200 hover:border-indigo-400 transition-all hover:shadow-lg hover:shadow-indigo-100">
+          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mb-4 sm:mb-6 flex items-center gap-2">
+            <span className="text-xl sm:text-2xl">⏳</span> <span className="hidden sm:inline">Pending Leave Approvals</span><span className="sm:hidden">Leaves</span>
           </h2>
           {leaves.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b-2 border-slate-200">
-                    <th className="px-4 py-3 text-slate-700 font-semibold uppercase text-xs">Employee</th>
-                    <th className="px-4 py-3 text-slate-700 font-semibold uppercase text-xs">Type</th>
-                    <th className="px-4 py-3 text-slate-700 font-semibold uppercase text-xs">From - To</th>
-                    <th className="px-4 py-3 text-slate-700 font-semibold uppercase text-xs">Days</th>
-                    <th className="px-4 py-3 text-slate-700 font-semibold uppercase text-xs">Reason</th>
-                    <th className="px-4 py-3 text-slate-700 font-semibold uppercase text-xs">Action</th>
+                    <th className="px-3 sm:px-4 py-2 sm:py-3 text-slate-700 font-semibold uppercase">Employee</th>
+                    <th className="px-3 sm:px-4 py-2 sm:py-3 text-slate-700 font-semibold uppercase hidden sm:table-cell">Type</th>
+                    <th className="px-3 sm:px-4 py-2 sm:py-3 text-slate-700 font-semibold uppercase">Dates</th>
+                    <th className="px-3 sm:px-4 py-2 sm:py-3 text-slate-700 font-semibold uppercase hidden md:table-cell">Reason</th>
+                    <th className="px-3 sm:px-4 py-2 sm:py-3 text-slate-700 font-semibold uppercase">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {leaves.map(leave => (
                     <tr key={leave._id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-slate-900">{leave.employeeId?.name}</td>
-                      <td className="px-4 py-3 capitalize text-slate-700">{leave.leaveType}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-slate-900">{leave.employeeId?.name}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 capitalize text-slate-700 hidden sm:table-cell text-xs">{leave.leaveType}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-slate-600">
                         {moment(leave.startDate).format('MMM DD')} - {moment(leave.endDate).format('MMM DD')}
                       </td>
-                      <td className="px-4 py-3 text-slate-700 font-semibold">{leave.numberOfDays}</td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{leave.reason.substring(0, 25)}...</td>
-                      <td className="px-4 py-3 flex gap-2">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-slate-600 hidden md:table-cell">{leave.reason.substring(0, 25)}...</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 flex gap-1 sm:gap-2 flex-wrap">
                         <button
                           onClick={() => handleApproveLeave(leave._id)}
-                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:shadow-lg hover:shadow-emerald-200 transform hover:scale-105"
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all hover:shadow-lg hover:shadow-emerald-200 transform hover:scale-105 whitespace-nowrap"
                         >
                           ✓ Approve
                         </button>
                         <button
                           onClick={() => handleRejectLeave(leave)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:shadow-lg hover:shadow-red-200 transform hover:scale-105"
+                          className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all hover:shadow-lg hover:shadow-red-200 transform hover:scale-105 whitespace-nowrap"
                         >
                           ✕ Reject
                         </button>
@@ -546,9 +548,9 @@ const AdminDashboardPage = () => {
               </table>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-slate-600 text-lg">✓ No pending leaves</p>
-              <p className="text-slate-500 text-sm mt-1">All leave requests have been processed</p>
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-slate-600 text-sm sm:text-lg">✓ No pending leaves</p>
+              <p className="text-slate-500 text-xs sm:text-sm mt-1">All leave requests have been processed</p>
             </div>
           )}
         </div>
@@ -567,27 +569,27 @@ const AdminDashboardPage = () => {
 
         {/* Employee Registration Modal */}
         {showEmployeeModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-full sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-3xl">
+              <div className="sticky top-0 bg-white border-b border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-3xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <UserPlus className="text-blue-600" size={20} />
+                  <div className="w-8 sm:w-10 h-8 sm:h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <UserPlus className="text-blue-600" size={18} />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900">Create Employee Account</h2>
+                  <h2 className="text-base sm:text-xl font-bold text-gray-900">Create Employee Account</h2>
                 </div>
                 <button
                   onClick={() => setShowEmployeeModal(false)}
-                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors flex-shrink-0"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               {/* Modal Body */}
-              <form onSubmit={handleRegisterEmployee} className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleRegisterEmployee} className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Name */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>

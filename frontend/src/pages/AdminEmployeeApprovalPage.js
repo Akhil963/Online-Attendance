@@ -43,7 +43,7 @@ const AdminEmployeeApprovalPage = () => {
     onRefresh: fetchEmployees,
     events: ['employee:statusUpdated', 'notification:new'],
     soundEvents: ['employee:statusUpdated'],
-    pollMs: 30000,
+    pollMs: 0,  // Disabled - only update on socket events
     enabled: true
   });
 
@@ -155,26 +155,26 @@ const AdminEmployeeApprovalPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent font-outfit space-y-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent font-outfit space-y-8 md:space-y-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Mobile Back Button */}
         <MobileBackButton label="Back" customPath="/admin-dashboard" />
 
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight">
+        <div className="mb-6 md:mb-10">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
             Employee Accounts
           </h1>
-          <p className="text-gray-500 mt-3 text-lg">Approve, edit, or manage employee access and profiles</p>
+          <p className="text-gray-500 mt-2 sm:mt-3 text-xs sm:text-sm md:text-base">Approve, edit, or manage employee access and profiles</p>
         </div>
 
         {/* Filters - High Precision Console */}
-        <div className="bg-white/40 backdrop-blur-3xl rounded-3xl shadow-sm border border-gray-200/60 p-6 md:p-12 mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight flex items-center gap-5">
-            <div className="w-1 h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
-            Audit Console
+        <div className="bg-white/40 backdrop-blur-3xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200/60 p-4 sm:p-6 md:p-8 lg:p-12 mb-8 md:mb-12">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-10 tracking-tight flex items-center gap-2 md:gap-5">
+            <div className="w-1 h-4 md:h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
+            <span>Audit Console</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 md:gap-8">
             <div className="group/field">
               <label className="block text-xs font-bold text-gray-400 uppercase mb-2.5 ml-1">Search Employees</label>
               <input
@@ -230,18 +230,18 @@ const AdminEmployeeApprovalPage = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-gray-900 text-white uppercase text-xs font-bold">
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Asset Profile</th>
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">Neural Hub</th>
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">Comms</th>
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Operation</th>
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6">Security</th>
-                    <th className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-center">Actions</th>
+                    <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5">Asset Profile</th>
+                    <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5 hidden sm:table-cell">Neural Hub</th>
+                    <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5 hidden md:table-cell">Comms</th>
+                    <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5 hidden lg:table-cell">Operation</th>
+                    <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5">Security</th>
+                    <th className="px-3 md:px-4 lg:px-6 py-3 md:py-5 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {filteredEmployees.map((emp) => (
                     <tr key={emp._id} className="group hover:bg-blue-600/[0.03] transition-all duration-300">
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner font-bold text-lg uppercase">
                             {emp.name.charAt(0)}
@@ -252,13 +252,13 @@ const AdminEmployeeApprovalPage = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-xs text-gray-400 font-bold hidden sm:table-cell break-all max-w-xs">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5 text-xs text-gray-400 font-bold hidden sm:table-cell break-all max-w-xs">
                         {emp.email || 'Not Provided'}
                       </td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-xs text-gray-400 font-bold hidden md:table-cell">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5 text-xs text-gray-400 font-bold hidden md:table-cell">
                         {emp.phone || 'DATA_VACUUM'}
                       </td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6 text-xs text-gray-400 font-bold hidden lg:table-cell uppercase">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5 text-xs text-gray-400 font-bold hidden lg:table-cell uppercase">
                         {emp.designation || 'Specialist'}
                       </td>
                       <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
@@ -277,8 +277,8 @@ const AdminEmployeeApprovalPage = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 md:px-6 lg:px-10 py-4 md:py-6">
-                        <div className="flex items-center justify-center gap-3">
+                      <td className="px-3 md:px-4 lg:px-6 py-3 md:py-5">
+                        <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
                           <button
                             onClick={() => handleViewDetails(emp)}
                             className="p-3 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all active:scale-95 group/btn"

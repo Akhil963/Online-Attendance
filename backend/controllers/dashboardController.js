@@ -1,6 +1,7 @@
 const Department = require('../models/Department');
 const Employee = require('../models/Employee');
 const Attendance = require('../models/Attendance');
+const Leave = require('../models/Leave');
 const moment = require('moment');
 const ExcelJS = require('exceljs');
 const { sendDailyAttendanceReport } = require('../utils/emailService');
@@ -37,8 +38,51 @@ exports.getDashboardData = async (req, res) => {
 
     const present = attendance.filter(a => a.status === 'present').length;
     const weeklyOff = attendance.filter(a => a.status === 'weekly_off').length;
-    const plannedLeave = attendance.filter(a => a.status === 'planned_leave').length;
-    const unplannedLeave = attendance.filter(a => a.status === 'unplanned_leave').length;
+    const plannedLeaveFromAttendance = attendance.filter(a => a.status === 'planned_leave').length;
+    const unplannedLeaveFromAttendance = attendance.filter(a => a.status === 'unplanned_leave').length;
+
+    // Include approved "unplanned" Leave entries for this employee in the current month.
+    // This makes the Unplanned Leave metric work even when unplanned leaves are tracked
+    // only in the Leave collection and not as attendance status records.
+    const unplannedLeaves = await Leave.find({
+      employeeId,
+      leaveType: 'unplanned',
+      status: 'approved',
+      startDate: { $lte: endDate },
+      endDate: { $gte: startDate }
+    }).select('startDate endDate numberOfDays');
+
+    let unplannedLeaveFromLeaves = 0;
+    unplannedLeaves.forEach(leave => {
+      const leaveStart = moment.max(moment(leave.startDate).startOf('day'), moment(startDate).startOf('day'));
+      const leaveEnd = moment.min(moment(leave.endDate).startOf('day'), moment(endDate).startOf('day'));
+      const days = Math.max(0, leaveEnd.diff(leaveStart, 'days') + 1);
+      unplannedLeaveFromLeaves += days;
+    });
+
+    // Avoid double counting for unplanned leaves: prefer whichever source has data
+    const unplannedLeave = Math.max(unplannedLeaveFromAttendance, unplannedLeaveFromLeaves);
+
+    // Include approved "planned" Leave entries for this employee in the current month
+    // so the Leave Usage metric reflects actual planned leave days.
+    const plannedLeaves = await Leave.find({
+      employeeId,
+      leaveType: 'planned',
+      status: 'approved',
+      startDate: { $lte: endDate },
+      endDate: { $gte: startDate }
+    }).select('startDate endDate numberOfDays');
+
+    let plannedLeaveFromLeaves = 0;
+    plannedLeaves.forEach(leave => {
+      const leaveStart = moment.max(moment(leave.startDate).startOf('day'), moment(startDate).startOf('day'));
+      const leaveEnd = moment.min(moment(leave.endDate).startOf('day'), moment(endDate).startOf('day'));
+      const days = Math.max(0, leaveEnd.diff(leaveStart, 'days') + 1);
+      plannedLeaveFromLeaves += days;
+    });
+
+    // Avoid double counting for planned leaves as well
+    const plannedLeave = Math.max(plannedLeaveFromAttendance, plannedLeaveFromLeaves);
 
     const dashboardData = {
       present,

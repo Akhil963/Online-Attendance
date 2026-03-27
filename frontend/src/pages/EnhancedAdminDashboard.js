@@ -273,8 +273,9 @@ const EnhancedAdminDashboard = () => {
               <div className="w-1 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
               Performance Velocity
             </h2>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={attendanceChart}>
+            <div style={{ width: '100%', height: 'clamp(220px, 55vw, 340px)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={attendanceChart}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }} />
@@ -285,8 +286,9 @@ const EnhancedAdminDashboard = () => {
                 <Line type="monotone" dataKey="present" stroke="#10B981" strokeWidth={4} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 8 }} />
                 <Line type="monotone" dataKey="absent" stroke="#EF4444" strokeWidth={4} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 8 }} />
                 <Line type="monotone" dataKey="leave" stroke="#F59E0B" strokeWidth={4} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 8 }} />
-              </LineChart>
-            </ResponsiveContainer>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Attendance Distribution */}
@@ -295,27 +297,29 @@ const EnhancedAdminDashboard = () => {
               <div className="w-1 h-8 bg-violet-600 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.5)]"></div>
               Distribution Audit
             </h2>
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart>
-                <Pie
-                  data={statusDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={80}
-                  outerRadius={110}
-                  paddingAngle={8}
-                  dataKey="value"
-                >
-                  {statusDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '20px' }}
-                />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
+            <div style={{ width: '100%', height: 'clamp(220px, 55vw, 340px)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statusDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={110}
+                    paddingAngle={8}
+                    dataKey="value"
+                  >
+                    {statusDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ borderRadius: '1.25rem', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '20px' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
@@ -334,8 +338,9 @@ const EnhancedAdminDashboard = () => {
             </div>
 
             {deptStats.length > 0 ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={deptStats}>
+              <div style={{ width: '100%', height: 'clamp(220px, 55vw, 340px)' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={deptStats}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                   <XAxis
                     dataKey="name"
@@ -351,21 +356,22 @@ const EnhancedAdminDashboard = () => {
                     cursor={{ fill: '#F8FAFC' }}
                     contentStyle={{ borderRadius: '1.5rem', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)', padding: '24px' }}
                   />
-                  <Bar
-                    dataKey="employees"
-                    fill="url(#colorDept)"
-                    radius={[12, 12, 4, 4]}
-                    name="Employees"
-                    barSize={44}
-                  />
-                  <defs>
-                    <linearGradient id="colorDept" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366F1" stopOpacity={1} />
-                      <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.8} />
-                    </linearGradient>
-                  </defs>
-                </BarChart>
-              </ResponsiveContainer>
+                    <Bar
+                      dataKey="employees"
+                      fill="url(#colorDept)"
+                      radius={[12, 12, 4, 4]}
+                      name="Employees"
+                      barSize={44}
+                    />
+                    <defs>
+                      <linearGradient id="colorDept" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366F1" stopOpacity={1} />
+                        <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.8} />
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <div className="h-80 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-3xl">
                 <p className="text-slate-300 font-extrabold uppercase tracking-widest text-[10px]">Registry Empty</p>

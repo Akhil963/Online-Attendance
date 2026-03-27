@@ -67,10 +67,10 @@ class RealtimeService {
           },
           reconnection: true,
           reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 5,
+          reconnectionDelayMax: 10000,
+          reconnectionAttempts: Infinity,
           transports: ['websocket', 'polling'],
-          timeout: 20000
+          timeout: 30000
         });
 
         connectionTimeout = setTimeout(() => {
@@ -83,13 +83,15 @@ class RealtimeService {
           }
         }, 20000);
 
+        let lastTransport = 'polling';
+        
         this.socket.on('connect', () => {
           clearTimeout(connectionTimeout);
           if (currentConnectionId !== this.connectionId) {
             return;
           }
           this.connected = true;
-          console.log('✓ Real-time connection established');
+          console.log(`✓ Real-time connection established (${lastTransport})`);
           this.connectPromise = null;
           resolve();
         });
@@ -99,10 +101,9 @@ class RealtimeService {
           if (currentConnectionId !== this.connectionId) {
             return;
           }
+          // Don't reject immediately - Socket.IO will try next transport (websocket → polling)
+          // Only reject if we're out of transports
           this.connected = false;
-          console.error('✗ Connection error:', error.message);
-          this.connectPromise = null;
-          reject(error);
         });
 
         this.socket.on('disconnect', () => {
@@ -112,6 +113,11 @@ class RealtimeService {
 
         this.socket.on('error', (error) => {
           console.error('✗ Socket error:', error);
+        });
+        
+        // Track which transport is being tried
+        this.socket.on('transport', (transport) => {
+          lastTransport = transport;
         });
       } catch (error) {
         clearTimeout(connectionTimeout);

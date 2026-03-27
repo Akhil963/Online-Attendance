@@ -52,7 +52,11 @@ const io = socketIo(server, {
     methods: ['GET', 'POST']
   },
   transports: ['websocket', 'polling'],
-  maxHttpBufferSize: 1e6
+  maxHttpBufferSize: 1e6,
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  allowUpgrades: true,
+  perMessageDeflate: false
 });
 
 // Socket.io Authentication Middleware

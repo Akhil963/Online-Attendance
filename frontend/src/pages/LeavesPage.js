@@ -32,7 +32,7 @@ const LeavesPage = () => {
     onRefresh: fetchLeaves,
     events: ['leave:statusChanged', 'leave:updated'],
     soundEvents: ['leave:statusChanged'],
-    pollMs: 30000,
+    pollMs: 0,  // Disabled - only update on socket events
     enabled: true
   });
 
