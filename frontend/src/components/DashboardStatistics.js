@@ -155,8 +155,6 @@ const DashboardStatistics = ({ refreshKey = 0 }) => {
     });
   }
 
-  const graphData = Object.values(dateWiseData).slice(-20);
-
   return (
     <div className="space-y-8 sm:space-y-10 md:space-y-12 font-outfit px-2 sm:px-4">
       {/* Month/Year Selector - Premium Style */}
