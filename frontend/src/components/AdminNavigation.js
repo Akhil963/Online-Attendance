@@ -117,6 +117,12 @@ const AdminNavigation = () => {
           path: '/admin/unplanned-leave',
           icon: Clock,
           description: 'Manage unplanned employee leaves'
+        },
+        {
+          label: 'Check-In/Out Timings',
+          path: '/admin/timings',
+          icon: Clock,
+          description: 'View daily employee timings'
         }
       ]
     },

@@ -118,7 +118,7 @@ const sendDailyAttendanceReport = async () => {
     // Get today's attendance
     const attendance = await Attendance.find({
       date: { $gte: today, $lt: tomorrow }
-    }).populate('employeeId', 'name email department phone');
+    }).populate('employeeId', 'employeeId name email department phone');
 
     if (attendance.length === 0) {
       console.log('No attendance records for today');
@@ -150,7 +150,7 @@ const sendDailyAttendanceReport = async () => {
     // Add data
     attendance.forEach(record => {
       worksheet.addRow({
-        employeeId: record.employeeId._id,
+        employeeId: record.employeeId.employeeId || record.employeeId._id,
         name: record.employeeId.name,
         status: record.status,
         checkInTime: record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '-',

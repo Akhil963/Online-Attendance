@@ -42,7 +42,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(identifier, password);
+      await login(identifier, password, 'employee', rememberMe);
       // Save credentials if remember me is checked
       if (rememberMe) {
         localStorage.setItem('rememberedUserIdentifier', identifier);
@@ -116,19 +116,34 @@ const LoginPage = () => {
           </div>
 
           <div className="flex items-center justify-between px-1">
-            <label className="flex items-center gap-3 cursor-pointer group/check">
-              <div className="relative w-5 h-5">
+            <label className="inline-flex items-center gap-2.5 cursor-pointer group/check">
+              <span
+                className="relative flex items-center justify-center flex-shrink-0"
+                style={{ width: 20, height: 20, minWidth: 20, minHeight: 20 }}
+              >
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => handleRememberMeChange(e.target.checked)}
-                  className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded accent-blue-600 cursor-pointer checked:bg-blue-600 checked:border-blue-600 transition-all checked:shadow-md"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  style={{ width: '100%', height: '100%', margin: 0 }}
                 />
-                <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white hidden peer-checked:block pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">Remember Me</span>
+                <span
+                  className={`flex items-center justify-center rounded border-2 transition-all ${
+                    rememberMe
+                      ? 'bg-blue-600 border-blue-600 shadow-md'
+                      : 'bg-white border-slate-300'
+                  }`}
+                  style={{ width: 20, height: 20, minWidth: 20, minHeight: 20 }}
+                >
+                  {rememberMe && (
+                    <svg width="12" height="12" viewBox="0 0 20 20" fill="white">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </span>
+              </span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover/check:text-slate-600 transition-colors leading-none">Remember Me</span>
             </label>
           </div>
 

@@ -137,7 +137,7 @@ const HolidayManagementPage = () => {
         {/* Header - Elite Aesthetic */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-12">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-4">Holidays</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-4">Holidays</h1>
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Manage Company Holidays</p>
@@ -145,7 +145,7 @@ const HolidayManagementPage = () => {
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="h-14 bg-gray-900 hover:bg-gray-800 text-white px-8 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95 flex items-center gap-3 border-none"
+            className="h-11 sm:h-14 bg-gray-900 hover:bg-gray-800 text-white px-5 sm:px-8 rounded-xl sm:rounded-2xl font-bold uppercase tracking-widest text-[10px] sm:text-xs transition-all shadow-lg active:scale-95 flex items-center gap-2 sm:gap-3 border-none"
           >
             <Plus size={18} strokeWidth={2} />
             Add Holiday
@@ -293,7 +293,7 @@ const HolidayManagementPage = () => {
           </div>
         </div>
 
-        {/* Holidays List - Elite Data Grid */}
+        {/* Holidays List */}
         {filteredHolidays.length === 0 ? (
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-8 md:p-24 text-center">
             <div className="w-24 h-24 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-8">
@@ -304,73 +304,124 @@ const HolidayManagementPage = () => {
             </p>
           </div>
         ) : (
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-gray-900 text-white uppercase text-xs font-bold">
-                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">Timeline</th>
-                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden sm:table-cell">Name</th>
-                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">Type</th>
-                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">Description</th>
-                    <th className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredHolidays.map((holiday, index) => (
-                    <tr key={holiday._id || index} className="group hover:bg-blue-50/50 transition-all duration-300">
-                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-gray-900 tracking-tight text-lg italic uppercase">
-                            {holiday.date ? moment(holiday.date).format('MMM DD') : 'N/A'}
-                          </span>
-                          <span className="text-xs font-bold text-gray-400 uppercase">Date</span>
-                        </div>
-                      </td>
-                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6">
-                        <span className="font-bold text-gray-900 tracking-tight block group-hover:text-blue-600 transition-colors uppercase text-sm">
-                          {holiday.name || 'Undefined'}
+          <>
+            {/* Mobile Card Layout */}
+            <div className="md:hidden space-y-3">
+              {filteredHolidays.map((holiday, index) => (
+                <div key={holiday._id || index} className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200 p-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex-shrink-0 w-14 h-14 bg-blue-50 rounded-xl flex flex-col items-center justify-center border border-blue-100">
+                        <span className="text-base font-extrabold text-blue-600 leading-none">
+                          {holiday.date ? moment(holiday.date).format('DD') : '--'}
                         </span>
-                      </td>
-                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden md:table-cell">
-                        <div className={`px-4 py-1.5 rounded-full inline-flex items-center text-xs font-bold uppercase border ${
+                        <span className="text-[10px] font-bold text-blue-400 uppercase">
+                          {holiday.date ? moment(holiday.date).format('MMM') : ''}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-gray-900 text-sm truncate">{holiday.name || 'Undefined'}</p>
+                        <div className={`mt-1 px-2.5 py-0.5 rounded-full inline-flex items-center text-[10px] font-bold uppercase border ${
                           (holiday.type || 'other') === 'national' ? 'bg-red-50 text-red-600 border-red-100' :
                             (holiday.type || 'other') === 'state' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                               (holiday.type || 'other') === 'company' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                                 'bg-amber-50 text-amber-600 border-amber-100'
-                          }`}>
+                        }`}>
                           {holiday.type || 'Standard'}
                         </div>
-                      </td>
-                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 hidden lg:table-cell">
-                        <span className="text-gray-500 font-bold text-xs line-clamp-2 max-w-xs leading-relaxed">
-                          {holiday.description || '--'}
-                        </span>
-                      </td>
-                      <td className="px-4 sm:px-6 lg:px-10 py-4 md:py-6 text-center">
-                        <div className="flex items-center justify-center gap-4">
-                          <button
-                            onClick={() => handleEdit(holiday)}
-                            className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-lg transition-all active:scale-90"
-                            title="Edit"
-                          >
-                            <Edit2 size={16} strokeWidth={3} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(holiday._id)}
-                            className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-600 hover:border-red-200 hover:shadow-lg transition-all active:scale-90"
-                            title="Delete"
-                          >
-                            <Trash2 size={16} strokeWidth={3} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleEdit(holiday)}
+                        className="w-9 h-9 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 active:scale-90"
+                      >
+                        <Edit2 size={14} strokeWidth={2.5} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(holiday._id)}
+                        className="w-9 h-9 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-600 active:scale-90"
+                      >
+                        <Trash2 size={14} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </div>
+                  {holiday.description && (
+                    <p className="text-xs text-gray-400 font-medium line-clamp-2 pl-[4.25rem]">{holiday.description}</p>
+                  )}
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* Desktop Table Layout */}
+            <div className="hidden md:block bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-gray-900 text-white uppercase text-xs font-bold">
+                      <th className="px-6 lg:px-10 py-6">Timeline</th>
+                      <th className="px-6 lg:px-10 py-6">Name</th>
+                      <th className="px-6 lg:px-10 py-6">Type</th>
+                      <th className="px-6 lg:px-10 py-6 hidden lg:table-cell">Description</th>
+                      <th className="px-6 lg:px-10 py-6 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredHolidays.map((holiday, index) => (
+                      <tr key={holiday._id || index} className="group hover:bg-blue-50/50 transition-all duration-300">
+                        <td className="px-6 lg:px-10 py-6">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-gray-900 tracking-tight text-lg italic uppercase">
+                              {holiday.date ? moment(holiday.date).format('MMM DD') : 'N/A'}
+                            </span>
+                            <span className="text-xs font-bold text-gray-400 uppercase">Date</span>
+                          </div>
+                        </td>
+                        <td className="px-6 lg:px-10 py-6">
+                          <span className="font-bold text-gray-900 tracking-tight block group-hover:text-blue-600 transition-colors uppercase text-sm">
+                            {holiday.name || 'Undefined'}
+                          </span>
+                        </td>
+                        <td className="px-6 lg:px-10 py-6">
+                          <div className={`px-4 py-1.5 rounded-full inline-flex items-center text-xs font-bold uppercase border ${
+                            (holiday.type || 'other') === 'national' ? 'bg-red-50 text-red-600 border-red-100' :
+                              (holiday.type || 'other') === 'state' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                (holiday.type || 'other') === 'company' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                  'bg-amber-50 text-amber-600 border-amber-100'
+                            }`}>
+                            {holiday.type || 'Standard'}
+                          </div>
+                        </td>
+                        <td className="px-6 lg:px-10 py-6 hidden lg:table-cell">
+                          <span className="text-gray-500 font-bold text-xs line-clamp-2 max-w-xs leading-relaxed">
+                            {holiday.description || '--'}
+                          </span>
+                        </td>
+                        <td className="px-6 lg:px-10 py-6 text-center">
+                          <div className="flex items-center justify-center gap-4">
+                            <button
+                              onClick={() => handleEdit(holiday)}
+                              className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-lg transition-all active:scale-90"
+                              title="Edit"
+                            >
+                              <Edit2 size={16} strokeWidth={3} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(holiday._id)}
+                              className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-600 hover:border-red-200 hover:shadow-lg transition-all active:scale-90"
+                              title="Delete"
+                            >
+                              <Trash2 size={16} strokeWidth={3} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>

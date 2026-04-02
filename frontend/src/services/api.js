@@ -24,6 +24,15 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+export const getMediaUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('data:') || path.startsWith('http')) return path;
+  
+  // Remove /api from the end of the API base URL to get the server root
+  const serverUrl = API_BASE_URL.replace(/\/api$/, '');
+  return `${serverUrl.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+};
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -31,9 +40,9 @@ export const api = axios.create({
   }
 });
 
-// Add token to requests
+// Add token to requests (check both localStorage and sessionStorage)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

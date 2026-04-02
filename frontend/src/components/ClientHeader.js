@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Menu, X, LogOut, AlertCircle, Bell, Heart, User, LayoutDashboard, Globe } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { leaveAPI, noticeAPI } from '../services/api';
+import { leaveAPI, noticeAPI, getMediaUrl } from '../services/api';
 import realtimeService from '../services/realtimeService';
 
 const ClientHeader = () => {
@@ -228,8 +228,12 @@ const ClientHeader = () => {
                   <p className="text-sm font-semibold text-gray-900 leading-none">{user.name}</p>
                   <p className="text-xs font-medium text-blue-600 mt-1 capitalize">{user.role}</p>
                 </div>
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center font-semibold text-blue-600 border border-blue-200 shadow-sm">
-                  {user.name?.charAt(0).toUpperCase()}
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center font-semibold text-blue-600 border border-blue-200 shadow-sm overflow-hidden">
+                  {user.profilePicture ? (
+                    <img src={getMediaUrl(user.profilePicture)} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    user.name?.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <button
                   onClick={handleLogoutClick}

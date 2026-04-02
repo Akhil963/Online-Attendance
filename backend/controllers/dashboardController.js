@@ -176,7 +176,7 @@ exports.generateMonthlyReport = async (req, res) => {
 
     const attendance = await Attendance.find({
       date: { $gte: startDate, $lte: endDate }
-    }).populate('employeeId', 'name email department');
+    }).populate('employeeId', 'employeeId name email department');
 
     // Create Excel workbook
     const workbook = new ExcelJS.Workbook();

@@ -8,6 +8,31 @@ import useLiveDataSync from '../hooks/useLiveDataSync';
 const NoticeManagementPage = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Convert URLs in text to clickable links that open in a new tab
+  const linkifyText = (text) => {
+    if (!text) return null;
+    const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+    const parts = text.split(urlPattern);
+    return parts.map((part, i) => {
+      if (/^(https?:\/\/|www\.)/i.test(part)) {
+        const href = part.startsWith('www.') ? `https://${part}` : part;
+        return (
+          <a
+            key={i}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-300 hover:decoration-blue-600 break-all transition-colors font-medium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -365,8 +390,8 @@ const NoticeManagementPage = () => {
                         </div>
                       </div>
                     </div>
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">
-                      {meeting.content}
+                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3 whitespace-pre-wrap">
+                      {linkifyText(meeting.content)}
                     </p>
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                       <div className="text-xs text-gray-400 font-bold">

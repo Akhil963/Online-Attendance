@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Users, Calendar, TrendingUp, AlertCircle, ArrowDownLeft, Building2, Clock, ShieldCheck } from 'lucide-react';
 import moment from 'moment';
 
 const EnhancedAdminDashboard = () => {
+  const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState({
     employees: [],
     attendance: [],
@@ -482,7 +484,7 @@ const EnhancedAdminDashboard = () => {
                         {dept.status === 'active' ? 'Operational' : 'Offline'}
                       </span>
                     </div>
-                    <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:translate-x-1 transition-transform">
+                    <button onClick={() => navigate('/admin/departments')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:translate-x-1 transition-transform">
                       Inspect →
                     </button>
                   </div>
@@ -509,7 +511,7 @@ const EnhancedAdminDashboard = () => {
                   <div>
                     <p className="font-black text-slate-900 text-2xl tracking-tighter leading-none">{absentToday.length} Employees Absent</p>
                     <p className="text-[9px] text-rose-600 font-black uppercase tracking-[0.2em] mt-3">Action Required</p>
-                    <button className="mt-6 text-[9px] font-black text-rose-700 uppercase tracking-[0.3em] flex items-center gap-2 hover:translate-x-2 transition-transform">View List →</button>
+                    <button onClick={() => navigate('/admin/attendance-report')} className="mt-6 text-[9px] font-black text-rose-700 uppercase tracking-[0.3em] flex items-center gap-2 hover:translate-x-2 transition-transform">View List →</button>
                   </div>
                 </div>
               ) : (
@@ -532,7 +534,7 @@ const EnhancedAdminDashboard = () => {
                   <div>
                     <p className="font-black text-slate-900 text-2xl tracking-tighter leading-none">{pendingLeaves} Logic Queries</p>
                     <p className="text-[9px] text-amber-600 font-black uppercase tracking-[0.2em] mt-3">Awaiting Administrative Logic</p>
-                    <button className="mt-6 text-[9px] font-black text-amber-700 uppercase tracking-[0.3em] flex items-center gap-2 hover:translate-x-2 transition-transform">Execute Workflow →</button>
+                    <button onClick={() => navigate('/admin/unplanned-leave')} className="mt-6 text-[9px] font-black text-amber-700 uppercase tracking-[0.3em] flex items-center gap-2 hover:translate-x-2 transition-transform">Execute Workflow →</button>
                   </div>
                 </div>
               ) : (
@@ -554,7 +556,7 @@ const EnhancedAdminDashboard = () => {
                 <div>
                   <p className="font-black text-slate-900 text-2xl tracking-tighter leading-none uppercase">System OK</p>
                   <p className="text-[9px] text-blue-600 font-black uppercase tracking-[0.2em] mt-3">All Systems Normal</p>
-                  <button className="mt-6 text-[9px] font-black text-blue-700 uppercase tracking-[0.3em] flex items-center gap-2 hover:translate-x-2 transition-transform">View Logs →</button>
+                  <button onClick={() => navigate('/admin/timings')} className="mt-6 text-[9px] font-black text-blue-700 uppercase tracking-[0.3em] flex items-center gap-2 hover:translate-x-2 transition-transform">View Logs →</button>
                 </div>
               </div>
             </div>

@@ -5,10 +5,32 @@ import { playNotificationSound } from '../utils/notificationSound';
 
 export const AuthContext = createContext();
 
+// Helper to get token from either localStorage (remember me) or sessionStorage (session-only)
+const getStoredToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
+// Helper to clear token from both storage types
+const clearStoredToken = () => {
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+};
+
+// Helper to store token based on rememberMe preference
+const storeToken = (token, rememberMe) => {
+  // Always clear from both first to avoid duplicates
+  clearStoredToken();
+  if (rememberMe) {
+    localStorage.setItem('token', token);
+  } else {
+    sessionStorage.setItem('token', token);
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(getStoredToken());
 
   // Initialize auth on mount
   useEffect(() => {
@@ -20,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
           // Only logout if it's an authentication error (401/403), not network issues
           if (error.response?.status === 401 || error.response?.status === 403) {
-            localStorage.removeItem('token');
+            clearStoredToken();
             setToken(null);
           }
           // For network errors, keep the token and user state - will retry on next visit
@@ -36,8 +58,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const handleSessionInvalidation = (data) => {
       console.warn('⚠️ Session invalidated:', data.reason, data.message);
-      // Clear session
-      localStorage.removeItem('token');
+      // Clear session from both storage types
+      clearStoredToken();
       setToken(null);
       setUser(null);
       // Redirect to login
@@ -89,12 +111,12 @@ export const AuthProvider = ({ children }) => {
     };
   }, [token]);
 
-  const login = useCallback(async (identifier, password, role = 'employee') => {
+  const login = useCallback(async (identifier, password, role = 'employee', rememberMe = false) => {
     try {
       const response = await authAPI.login({ identifier, password, role });
       const { token: newToken, employee, admin } = response.data;
       const user = employee || admin; // Handle both admin and employee responses
-      localStorage.setItem('token', newToken);
+      storeToken(newToken, rememberMe);
       setToken(newToken);
       setUser(user);
       return user;
@@ -108,7 +130,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(data);
       const { token: newToken, employee, admin } = response.data;
       const user = employee || admin; // Handle both admin and employee responses
-      localStorage.setItem('token', newToken);
+      // Registration defaults to session-only (not remembered)
+      storeToken(newToken, false);
       setToken(newToken);
       setUser(user);
       return user;
@@ -131,7 +154,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
+    clearStoredToken();
     setToken(null);
     setUser(null);
   }, []);

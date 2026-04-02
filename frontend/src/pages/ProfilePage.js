@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ImageCropModal from '../components/ImageCropModal';
 import { useAuth } from '../hooks/useAuth';
-import { authAPI, employeeAPI } from '../services/api';
+import { authAPI, employeeAPI, getMediaUrl } from '../services/api';
 import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
@@ -147,7 +147,7 @@ const ProfilePage = () => {
                 <div className="w-32 h-32 bg-white/10 rounded-2xl flex items-center justify-center overflow-hidden border-4 border-white/10 shadow-2xl backdrop-blur-md">
                   {profilePic ? (
                     <img
-                      src={profilePic}
+                      src={getMediaUrl(profilePic)}
                       alt="Profile"
                       className="w-full h-full object-cover transition-transform group-hover/avatar:scale-110 duration-500"
                     />

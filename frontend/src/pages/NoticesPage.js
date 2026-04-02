@@ -9,6 +9,33 @@ const NoticesPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  // Convert URLs in text to clickable links that open in a new tab
+  const linkifyText = (text) => {
+    if (!text) return null;
+    const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+    const parts = text.split(urlPattern);
+
+    return parts.map((part, i) => {
+      // Use a fresh regex (no g flag) to test each part
+      if (/^(https?:\/\/|www\.)/i.test(part)) {
+        const href = part.startsWith('www.') ? `https://${part}` : part;
+        return (
+          <a
+            key={i}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-300 hover:decoration-blue-600 break-all transition-colors font-medium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   const fetchNotices = useCallback(async () => {
     try {
       setLoading(true);
@@ -101,7 +128,7 @@ const NoticesPage = () => {
                   </span>
                 </div>
 
-                <p className="text-gray-700 mb-4">{notice.content}</p>
+                <p className="text-gray-700 mb-4 whitespace-pre-wrap">{linkifyText(notice.content)}</p>
 
                 {notice.expiryDate && (
                   <p className="text-sm text-red-600">

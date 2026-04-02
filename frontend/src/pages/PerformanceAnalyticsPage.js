@@ -225,51 +225,51 @@ const PerformanceAnalyticsPage = () => {
               <span className="text-xs font-bold text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-lg">Month</span>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Total Logs</p>
-            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.totalRecords}</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-1">{metrics.totalRecords}</p>
           </div>
 
-          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
-                <Award size={24} />
+          <div className="group bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-emerald-50 text-emerald-600 rounded-lg sm:rounded-2xl flex items-center justify-center">
+                <Award size={20} className="sm:w-6 sm:h-6" />
               </div>
               <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg">High</span>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Presences</p>
-            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.presentCount}</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-1">{metrics.presentCount}</p>
           </div>
 
-          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center">
-                <Users size={24} />
+          <div className="group bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-red-50 text-red-600 rounded-lg sm:rounded-2xl flex items-center justify-center">
+                <Users size={20} className="sm:w-6 sm:h-6" />
               </div>
               <span className="text-xs font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-lg">Watch</span>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Absences</p>
-            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.absentCount}</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-1">{metrics.absentCount}</p>
           </div>
 
-          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
-                <Calendar size={24} />
+          <div className="group bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-amber-50 text-amber-600 rounded-lg sm:rounded-2xl flex items-center justify-center">
+                <Calendar size={20} className="sm:w-6 sm:h-6" />
               </div>
               <span className="text-xs font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-lg">Leave</span>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">On Leave</p>
-            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.onLeaveCount}</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-1">{metrics.onLeaveCount}</p>
           </div>
 
-          <div className="group bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-gray-200 p-6 transition-all hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
-                <TrendingUp size={24} />
+          <div className="group bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-50 text-blue-600 rounded-lg sm:rounded-2xl flex items-center justify-center">
+                <TrendingUp size={20} className="sm:w-6 sm:h-6" />
               </div>
               <span className="text-xs font-bold text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-lg">Rate</span>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest px-1">Efficiency</p>
-            <p className="text-4xl font-extrabold text-gray-900 mt-1">{metrics.attendanceRate}%</p>
+            <p className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-1">{metrics.attendanceRate}%</p>
           </div>
         </div>
 
@@ -323,8 +323,8 @@ const PerformanceAnalyticsPage = () => {
                       data={leaveDistribution}
                       cx="50%"
                       cy="50%"
-                      innerRadius={70}
-                      outerRadius={100}
+                      innerRadius={50}
+                      outerRadius={80}
                       paddingAngle={8}
                       dataKey="value"
                     >
@@ -348,18 +348,18 @@ const PerformanceAnalyticsPage = () => {
         </div>
 
         {/* Department Performance - Progress Style */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8 md:p-10 mb-8 md:mb-12">
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-10 tracking-tight flex items-center gap-3">
-            <div className="w-1.5 h-8 bg-blue-500 rounded-full"></div>
-            Unit Performance Coverage
+        <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-4 sm:p-6 md:p-10 mb-8 md:mb-12">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-gray-900 mb-6 sm:mb-8 md:mb-10 tracking-tight flex items-center gap-3">
+            <div className="w-1.5 h-5 sm:h-6 md:h-8 bg-blue-500 rounded-full"></div>
+            Unit Performance
             <span className="relative inline-flex items-center group/coverage-help">
               <Info size={16} className="text-gray-400" />
-              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-xl bg-gray-900 px-3 py-2 text-xs font-semibold text-white opacity-0 shadow-xl transition-opacity duration-200 group-hover/coverage-help:opacity-100">
+              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-56 sm:w-72 -translate-x-1/2 rounded-xl bg-gray-900 px-3 py-2 text-xs font-semibold text-white opacity-0 shadow-xl transition-opacity duration-200 group-hover/coverage-help:opacity-100">
                 Active means unique employees marked present at least once in the selected month.
               </span>
             </span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
             {deptMetrics.map((dept, idx) => (
               <div key={idx} className="group transition-all hover:translate-x-1">
                 <div className="flex justify-between items-end mb-3">

@@ -112,12 +112,13 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
       connectSrc: ["'self'", ...allowedOrigins, "ws:"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],

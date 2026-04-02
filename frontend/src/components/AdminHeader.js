@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { LogOut, Menu, X, ArrowLeft, Settings, ChevronDown, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { getMediaUrl } from '../services/api';
 
 const AdminHeader = () => {
   const { user, logout } = useAuth();
@@ -75,8 +76,12 @@ const AdminHeader = () => {
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className="flex items-center gap-4 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all border border-gray-200 shadow-sm group"
                   >
-                    <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                      {user.name?.charAt(0).toUpperCase()}
+                    <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-md overflow-hidden">
+                      {user.profilePicture ? (
+                        <img src={getMediaUrl(user.profilePicture)} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        user.name?.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div className="text-left hidden lg:block">
                       <p className="text-sm font-semibold text-gray-900 leading-none">{user.name}</p>

@@ -42,6 +42,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminEmployeeApprovalPage from './pages/AdminEmployeeApprovalPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
+import CheckInOutTimingsPage from './pages/CheckInOutTimingsPage';
 import { api } from './services/api';
 
 function App() {
@@ -254,6 +255,16 @@ function App() {
               <ProtectedRoute requiredRoles={['admin', 'director']}>
                 <LayoutWrapper>
                   <UnplannedLeaveManagementPage />
+                </LayoutWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/timings"
+            element={
+              <ProtectedRoute requiredRoles={['admin', 'director']}>
+                <LayoutWrapper>
+                  <CheckInOutTimingsPage />
                 </LayoutWrapper>
               </ProtectedRoute>
             }
