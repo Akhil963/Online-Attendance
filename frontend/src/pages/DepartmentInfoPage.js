@@ -40,16 +40,18 @@ const DepartmentInfoPage = () => {
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-2xl font-bold mb-4">Employees by Department</h2>
           {departments.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#3b82f6" name="Number of Employees" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div style={{ width: '100%', height: 'clamp(200px, 50vw, 400px)' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip contentStyle={{ backgroundColor: '#f8fafc', border: '2px solid #3b82f6', borderRadius: '8px', color: '#1e293b' }} />
+                  <Legend />
+                  <Bar dataKey="count" fill="#3b82f6" name="Number of Employees" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
             <p className="text-gray-600">No departments found</p>
           )}
