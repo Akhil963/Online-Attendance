@@ -176,6 +176,10 @@ exports.login = async (req, res) => {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
+      if (admin.isActive === false) {
+        return res.status(403).json({ error: 'Admin account is inactive' });
+      }
+
       const isPasswordValid = await admin.comparePassword(password);
       if (!isPasswordValid) {
         return res.status(401).json({ error: 'Invalid credentials' });
@@ -211,6 +215,10 @@ exports.login = async (req, res) => {
 
     if (!employee) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (employee.isActive === false || employee.status === 'inactive') {
+      return res.status(403).json({ error: 'Employee account is inactive' });
     }
 
       // COMMENTED OUT: Check if account is approved (Approval requirement disabled)

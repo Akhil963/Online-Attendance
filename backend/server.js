@@ -21,6 +21,8 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
+const Admin = require('./models/Admin');
+const Employee = require('./models/Employee');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -69,9 +71,33 @@ io.use((socket, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    socket.handshake.auth.userId = decoded.id;
-    socket.handshake.auth.userRole = decoded.role;
-    next();
+
+    if (!decoded?.id || !decoded?.role) {
+      return next(new Error('Invalid token payload'));
+    }
+
+    const Model = decoded.role === 'admin' || decoded.role === 'superadmin' ? Admin : Employee;
+
+    Model.findById(decoded.id)
+      .select('_id isActive status')
+      .then((user) => {
+        if (!user) {
+          return next(new Error('Account no longer exists'));
+        }
+
+        if (user.isActive === false) {
+          return next(new Error('Account is inactive'));
+        }
+
+        if (decoded.role !== 'admin' && decoded.role !== 'superadmin' && user.status === 'inactive') {
+          return next(new Error('Employee account is inactive'));
+        }
+
+        socket.handshake.auth.userId = decoded.id;
+        socket.handshake.auth.userRole = decoded.role;
+        next();
+      })
+      .catch(() => next(new Error('Invalid token')));
   } catch (error) {
     next(new Error('Invalid token'));
   }

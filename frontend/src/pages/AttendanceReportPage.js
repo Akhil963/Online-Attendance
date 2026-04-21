@@ -16,6 +16,35 @@ const AttendanceReportPage = () => {
   const [employeeFilter, setEmployeeFilter] = useState('all');
   const [employees, setEmployees] = useState([]);
   const [summary, setSummary] = useState({});
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
+
+  const formatLocation = (location) => {
+    if (location?.latitude == null || location?.longitude == null) {
+      return '-';
+    }
+
+    return `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`;
+  };
+
+  const formatLocationLabel = (location) => {
+    if (!location) {
+      return '-';
+    }
+
+    const place = [location.village, location.city, location.state, location.country]
+      .filter(Boolean)
+      .join(', ');
+
+    return place || location.displayName || '-';
+  };
+
+  const getMapUrl = (location) => {
+    if (location?.latitude == null || location?.longitude == null) {
+      return null;
+    }
+
+    return `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
+  };
 
   const filterAttendance = useCallback(() => {
     let filtered = attendance.filter(record => {
@@ -68,6 +97,17 @@ const AttendanceReportPage = () => {
     fetchEmployees();
   }, [fetchAttendance, fetchEmployees]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const refreshAttendanceData = useCallback(async () => {
     await Promise.all([fetchAttendance(), fetchEmployees()]);
   }, [fetchAttendance, fetchEmployees]);
@@ -113,7 +153,11 @@ const AttendanceReportPage = () => {
       'Date': moment(record.date).format('MMMM DD YYYY'),
       'Status': record.status,
       'Check In': record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '-',
+      'Check In Location': formatLocation(record.checkInLocation),
+      'Check In Place': formatLocationLabel(record.checkInLocation),
       'Check Out': record.checkOutTime ? moment(record.checkOutTime).format('hh:mm:ss A') : '-',
+      'Check Out Location': formatLocation(record.checkOutLocation),
+      'Check Out Place': formatLocationLabel(record.checkOutLocation),
       'Working Hours': record.workingHours?.toFixed(2) || '-'
     }));
     exportToExcel(data, 'attendance_report', 'Attendance');
@@ -279,15 +323,15 @@ const AttendanceReportPage = () => {
               Audit Distribution
             </h2>
             {statusPieData.length > 0 ? (
-              <div style={{ width: '100%', height: 'clamp(200px, 50vw, 320px)' }}>
+                <div className="w-full" style={{ height: isMobile ? 220 : 320 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={statusPieData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={70}
-                      outerRadius={100}
+                        innerRadius={isMobile ? 42 : 70}
+                        outerRadius={isMobile ? 62 : 100}
                       paddingAngle={5}
                       dataKey="value"
                     >
@@ -341,6 +385,40 @@ const AttendanceReportPage = () => {
                             <p className="text-xs text-blue-500 font-bold uppercase tracking-tight">{record.employeeId?.employeeId}</p>
                           </div>
                         </div>
+                        <div className="mt-3 space-y-2 md:hidden">
+                          <div className="rounded-lg bg-gray-50/80 border border-gray-100 p-2">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase">Check In</p>
+                            <p className="text-xs font-bold text-gray-700">{record.checkInTime ? moment(record.checkInTime).format('hh:mm A') : '--:--'}</p>
+                            <p className="text-[10px] text-gray-500 font-semibold truncate">{formatLocation(record.checkInLocation)}</p>
+                            <p className="text-[10px] text-gray-500 font-semibold truncate">{formatLocationLabel(record.checkInLocation)}</p>
+                            {getMapUrl(record.checkInLocation) && (
+                              <a
+                                href={getMapUrl(record.checkInLocation)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                              >
+                                Open map
+                              </a>
+                            )}
+                          </div>
+                          <div className="rounded-lg bg-gray-50/80 border border-gray-100 p-2">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase">Check Out</p>
+                            <p className="text-xs font-bold text-gray-700">{record.checkOutTime ? moment(record.checkOutTime).format('hh:mm A') : '--:--'}</p>
+                            <p className="text-[10px] text-gray-500 font-semibold truncate">{formatLocation(record.checkOutLocation)}</p>
+                            <p className="text-[10px] text-gray-500 font-semibold truncate">{formatLocationLabel(record.checkOutLocation)}</p>
+                            {getMapUrl(record.checkOutLocation) && (
+                              <a
+                                href={getMapUrl(record.checkOutLocation)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                              >
+                                Open map
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-8 py-6 hidden sm:table-cell">
                         <p className="font-bold text-gray-700">{moment(record.date).format('MMM DD')}</p>
@@ -359,10 +437,34 @@ const AttendanceReportPage = () => {
                         <div className="flex items-center gap-3">
                           <div className="space-y-1">
                             <p className="text-xs font-bold text-gray-700">{record.checkInTime ? moment(record.checkInTime).format('hh:mm A') : '--:--'}</p>
+                            <p className="text-[10px] text-gray-400 font-semibold truncate max-w-[180px]">{formatLocation(record.checkInLocation)}</p>
+                            <p className="text-[10px] text-gray-400 font-semibold truncate max-w-[180px]">{formatLocationLabel(record.checkInLocation)}</p>
+                            {getMapUrl(record.checkInLocation) && (
+                              <a
+                                href={getMapUrl(record.checkInLocation)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                              >
+                                Open map
+                              </a>
+                            )}
                             <div className="w-full h-0.5 bg-gray-100 rounded-full overflow-hidden">
                               <div className="w-1/2 h-full bg-blue-400"></div>
                             </div>
                             <p className="text-xs font-bold text-gray-700">{record.checkOutTime ? moment(record.checkOutTime).format('hh:mm A') : '--:--'}</p>
+                            <p className="text-[10px] text-gray-400 font-semibold truncate max-w-[180px]">{formatLocation(record.checkOutLocation)}</p>
+                            <p className="text-[10px] text-gray-400 font-semibold truncate max-w-[180px]">{formatLocationLabel(record.checkOutLocation)}</p>
+                            {getMapUrl(record.checkOutLocation) && (
+                              <a
+                                href={getMapUrl(record.checkOutLocation)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                              >
+                                Open map
+                              </a>
+                            )}
                           </div>
                         </div>
                       </td>

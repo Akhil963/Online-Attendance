@@ -1,42 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
-import { Clock, Search, AlertTriangle, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, Search, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 
 const DEFAULT_CHECKOUT_TIME = { hour: 18, minute: 48 }; // 6:48 PM
 
+const formatLocation = (location) => {
+  if (location?.latitude == null || location?.longitude == null) {
+    return '-';
+  }
+
+  return `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`;
+};
+
+const formatPlace = (location) => {
+  if (!location) {
+    return '-';
+  }
+
+  const place = [location.village, location.city, location.state, location.country]
+    .filter(Boolean)
+    .join(', ');
+
+  return place || location.displayName || '-';
+};
+
+const getMapUrl = (location) => {
+  if (location?.latitude == null || location?.longitude == null) {
+    return null;
+  }
+
+  return `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
+};
+
 const CheckInOutTimingsPage = () => {
   const [attendanceData, setAttendanceData] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
   const [filterStatus, setFilterStatus] = useState('all'); // all, checked-out, missed-checkout
 
-  useEffect(() => {
-    fetchData();
-  }, [selectedDate]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const dateObj = moment(selectedDate, 'YYYY-MM-DD');
       const month = dateObj.format('MM');
       const year = dateObj.format('YYYY');
 
-      const [attendanceRes, employeesRes] = await Promise.all([
-        api.get(`/attendance/all?month=${month}&year=${year}`),
-        api.get('/employee/all')
-      ]);
+      const attendanceRes = await api.get(`/attendance/all?month=${month}&year=${year}`);
 
       setAttendanceData(attendanceRes.data?.attendance || attendanceRes.data || []);
-      setEmployees(employeesRes.data?.employees || employeesRes.data || []);
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedDate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Get attendance records for the selected date
   const getDayRecords = () => {
@@ -76,6 +99,8 @@ const CheckInOutTimingsPage = () => {
           employeeName: emp?.name || 'Unknown',
           checkInTime: record.checkInTime,
           checkOutTime: record.checkOutTime,
+          checkInLocation: record.checkInLocation || null,
+          checkOutLocation: record.checkOutLocation || null,
           effectiveCheckout,
           hasCheckedOut,
           workingHours: Math.max(0, workingHours).toFixed(2),
@@ -286,6 +311,40 @@ const CheckInOutTimingsPage = () => {
                       <p className="text-xs font-bold text-blue-600">{record.workingHours}h</p>
                     </div>
                   </div>
+                  <div className="mt-3 space-y-1">
+                    <p className="text-[10px] text-gray-500 font-semibold">
+                      In: {formatLocation(record.checkInLocation)} | {formatPlace(record.checkInLocation)}
+                      {getMapUrl(record.checkInLocation) && (
+                        <>
+                          {' '}
+                          <a
+                            href={getMapUrl(record.checkInLocation)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            (map)
+                          </a>
+                        </>
+                      )}
+                    </p>
+                    <p className="text-[10px] text-gray-500 font-semibold">
+                      Out: {formatLocation(record.checkOutLocation)} | {formatPlace(record.checkOutLocation)}
+                      {getMapUrl(record.checkOutLocation) && (
+                        <>
+                          {' '}
+                          <a
+                            href={getMapUrl(record.checkOutLocation)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            (map)
+                          </a>
+                        </>
+                      )}
+                    </p>
+                  </div>
                   {!record.hasCheckedOut && (
                     <p className="text-[9px] text-amber-500 font-medium mt-2 italic">* Default checkout time (6:48 PM) applied</p>
                   )}
@@ -303,6 +362,8 @@ const CheckInOutTimingsPage = () => {
                       <th className="px-6 lg:px-8 py-5">ID</th>
                       <th className="px-6 lg:px-8 py-5">Check In</th>
                       <th className="px-6 lg:px-8 py-5">Check Out</th>
+                      <th className="px-6 lg:px-8 py-5">Check-In Location</th>
+                      <th className="px-6 lg:px-8 py-5">Check-Out Location</th>
                       <th className="px-6 lg:px-8 py-5">Working Hours</th>
                       <th className="px-6 lg:px-8 py-5 text-center">Status</th>
                     </tr>
@@ -343,6 +404,34 @@ const CheckInOutTimingsPage = () => {
                               </span>
                               <span className="text-[10px] text-amber-400 font-medium mt-0.5">Default time applied</span>
                             </div>
+                          )}
+                        </td>
+                        <td className="px-6 lg:px-8 py-5">
+                          <p className="text-xs font-bold text-gray-700">{formatLocation(record.checkInLocation)}</p>
+                          <p className="text-[10px] text-gray-400 font-semibold max-w-[180px] truncate">{formatPlace(record.checkInLocation)}</p>
+                          {getMapUrl(record.checkInLocation) && (
+                            <a
+                              href={getMapUrl(record.checkInLocation)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                            >
+                              Open map
+                            </a>
+                          )}
+                        </td>
+                        <td className="px-6 lg:px-8 py-5">
+                          <p className="text-xs font-bold text-gray-700">{formatLocation(record.checkOutLocation)}</p>
+                          <p className="text-[10px] text-gray-400 font-semibold max-w-[180px] truncate">{formatPlace(record.checkOutLocation)}</p>
+                          {getMapUrl(record.checkOutLocation) && (
+                            <a
+                              href={getMapUrl(record.checkOutLocation)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                            >
+                              Open map
+                            </a>
                           )}
                         </td>
                         <td className="px-6 lg:px-8 py-5">

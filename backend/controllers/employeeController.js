@@ -1,6 +1,9 @@
 const Employee = require('../models/Employee');
 const Admin = require('../models/Admin');
 const Department = require('../models/Department');
+const Attendance = require('../models/Attendance');
+const Leave = require('../models/Leave');
+const PasswordReset = require('../models/PasswordReset');
 const { sendApprovalConfirmationToEmployee, sendRejectionEmailToEmployee } = require('../utils/emailService');
 
 // Get employee profile
@@ -192,10 +195,33 @@ exports.deleteEmployee = async (req, res) => {
   try {
     const { employeeId } = req.params;
 
-    const employee = await Employee.findByIdAndDelete(employeeId);
+    const employee = await Employee.findById(employeeId).select('_id');
 
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    await Promise.all([
+      Attendance.deleteMany({ employeeId: employee._id }),
+      Leave.deleteMany({ employeeId: employee._id }),
+      PasswordReset.deleteMany({ userId: employee._id, userType: 'employee' }),
+      Employee.updateMany({ approvedBy: employee._id }, { $set: { approvedBy: null, approvalDate: null, isApproved: false } }),
+      Department.updateMany({ managerId: employee._id }, { $set: { managerId: null } })
+    ]);
+
+    await Employee.findByIdAndDelete(employeeId);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user-${employeeId}`).emit('auth:sessionInvalidated', {
+        reason: 'account_deleted',
+        message: 'Your account has been deleted by admin. Please contact support.'
+      });
+      io.to('admin').emit('employee:statusUpdated', {
+        type: 'deletion',
+        employeeId,
+        timestamp: new Date()
+      });
     }
 
     res.json({ message: 'Employee deleted successfully' });

@@ -66,8 +66,8 @@ export const authAPI = {
 
 // Attendance APIs
 export const attendanceAPI = {
-  checkIn: () => api.post('/attendance/check-in', {}),
-  checkOut: () => api.post('/attendance/check-out', {}),
+  checkIn: (location) => api.post('/attendance/check-in', { location }),
+  checkOut: (location) => api.post('/attendance/check-out', { location }),
   getHistory: (month, year) => api.get(`/attendance/history?month=${month}&year=${year}`),
   getTodayAttendance: () => api.get('/attendance/today'),
   getAllAttendance: (params) => api.get('/attendance/all', { params })

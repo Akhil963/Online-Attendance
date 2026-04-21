@@ -23,6 +23,78 @@ const AttendanceMarker = () => {
     checkTodayWeeklyOff();
   }, []);
 
+  const reverseGeocode = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`
+      );
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      const address = data?.address || {};
+
+      return {
+        displayName: data?.display_name || '',
+        city: address.city || address.town || address.municipality || address.county || '',
+        village: address.village || address.hamlet || address.suburb || '',
+        state: address.state || '',
+        country: address.country || ''
+      };
+    } catch (geocodeError) {
+      return null;
+    }
+  };
+
+  const getCurrentLocation = () => new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Location is not supported on this device or browser.'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const baseLocation = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        };
+
+        const place = await reverseGeocode(baseLocation.latitude, baseLocation.longitude);
+
+        resolve({
+          ...baseLocation,
+          displayName: place?.displayName || '',
+          city: place?.city || '',
+          village: place?.village || '',
+          state: place?.state || '',
+          country: place?.country || ''
+        });
+      },
+      (positionError) => {
+        if (positionError.code === 1) {
+          reject(new Error('Location access is turned off. Please turn on location permission and try again.'));
+          return;
+        }
+
+        if (positionError.code === 2) {
+          reject(new Error('Location cannot be detected right now. Please turn on location services and try again.'));
+          return;
+        }
+
+        if (positionError.code === 3) {
+          reject(new Error('Location request timed out. Please turn on location services and try again.'));
+          return;
+        }
+
+        reject(new Error('Unable to get location. Please turn on location services and try again.'));
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  });
+
   const checkTodayWeeklyOff = async () => {
     try {
       const today = moment().format('YYYY-MM-DD');
@@ -49,11 +121,12 @@ const AttendanceMarker = () => {
   const handleCheckIn = async () => {
     setLoading(true);
     try {
-      await attendanceAPI.checkIn();
+      const location = await getCurrentLocation();
+      await attendanceAPI.checkIn(location);
       toast.success('Check-in successful!');
       fetchTodayAttendance();
     } catch (error) {
-      toast.error('Check-in failed: ' + error.response?.data?.error);
+      toast.error('Check-in failed: ' + (error.response?.data?.error || error.message));
     }
     setLoading(false);
   };
@@ -61,11 +134,12 @@ const AttendanceMarker = () => {
   const handleCheckOut = async () => {
     setLoading(true);
     try {
-      await attendanceAPI.checkOut();
+      const location = await getCurrentLocation();
+      await attendanceAPI.checkOut(location);
       toast.success('Check-out successful!');
       fetchTodayAttendance();
     } catch (error) {
-      toast.error('Check-out failed: ' + error.response?.data?.error);
+      toast.error('Check-out failed: ' + (error.response?.data?.error || error.message));
     }
     setLoading(false);
   };

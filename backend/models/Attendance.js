@@ -1,5 +1,44 @@
 const mongoose = require('mongoose');
 
+const locationSchema = new mongoose.Schema({
+  latitude: {
+    type: Number,
+    required: true
+  },
+  longitude: {
+    type: Number,
+    required: true
+  },
+  accuracy: {
+    type: Number,
+    default: null
+  },
+  displayName: {
+    type: String,
+    default: ''
+  },
+  city: {
+    type: String,
+    default: ''
+  },
+  village: {
+    type: String,
+    default: ''
+  },
+  state: {
+    type: String,
+    default: ''
+  },
+  country: {
+    type: String,
+    default: ''
+  },
+  capturedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, { _id: false });
+
 const attendanceSchema = new mongoose.Schema({
   employeeId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,6 +57,14 @@ const attendanceSchema = new mongoose.Schema({
   },
   checkOutTime: {
     type: Date,
+    default: null
+  },
+  checkInLocation: {
+    type: locationSchema,
+    default: null
+  },
+  checkOutLocation: {
+    type: locationSchema,
     default: null
   },
   status: {

@@ -2,10 +2,43 @@ const Attendance = require('../models/Attendance');
 const Employee = require('../models/Employee');
 const moment = require('moment');
 
+const parseLocation = (location) => {
+  if (!location || typeof location !== 'object') {
+    return null;
+  }
+
+  const latitude = Number(location.latitude);
+  const longitude = Number(location.longitude);
+  const accuracy = location.accuracy == null ? null : Number(location.accuracy);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  const displayName = typeof location.displayName === 'string' ? location.displayName.trim() : '';
+  const city = typeof location.city === 'string' ? location.city.trim() : '';
+  const village = typeof location.village === 'string' ? location.village.trim() : '';
+  const state = typeof location.state === 'string' ? location.state.trim() : '';
+  const country = typeof location.country === 'string' ? location.country.trim() : '';
+
+  return {
+    latitude,
+    longitude,
+    accuracy: Number.isFinite(accuracy) ? accuracy : null,
+    displayName,
+    city,
+    village,
+    state,
+    country,
+    capturedAt: new Date()
+  };
+};
+
 // Mark attendance (Check In)
 exports.checkIn = async (req, res) => {
   try {
     const employeeId = req.userId;
+    const checkInLocation = parseLocation(req.body?.location);
     const today = moment().startOf('day').toDate();
     const tomorrow = moment(today).add(1, 'day').toDate();
 
@@ -19,10 +52,12 @@ exports.checkIn = async (req, res) => {
         employeeId,
         date: today,
         checkInTime: new Date(),
+        checkInLocation,
         status: 'present'
       });
     } else if (!attendance.checkInTime) {
       attendance.checkInTime = new Date();
+      attendance.checkInLocation = checkInLocation;
       attendance.status = 'present';
     }
 
@@ -35,12 +70,14 @@ exports.checkIn = async (req, res) => {
       io.emit('attendance:checked-in', {
         employeeId,
         checkInTime: attendance.checkInTime,
+        checkInLocation: attendance.checkInLocation,
         date: attendance.date
       });
       // Also emit to admin room
       io.to('admin').emit('attendance:checked-in', {
         employeeId,
         checkInTime: attendance.checkInTime,
+        checkInLocation: attendance.checkInLocation,
         date: attendance.date
       });
       // Emit general update event for dashboard refresh
@@ -48,12 +85,14 @@ exports.checkIn = async (req, res) => {
         type: 'checkIn',
         employeeId,
         checkInTime: attendance.checkInTime,
+        checkInLocation: attendance.checkInLocation,
         date: attendance.date
       });
       io.to('admin').emit('attendance:updated', {
         type: 'checkIn',
         employeeId,
         checkInTime: attendance.checkInTime,
+        checkInLocation: attendance.checkInLocation,
         date: attendance.date
       });
       // Emit stats update for dashboard
@@ -64,6 +103,7 @@ exports.checkIn = async (req, res) => {
       message: 'Check in successful',
       attendance: {
         checkInTime: attendance.checkInTime,
+        checkInLocation: attendance.checkInLocation,
         date: attendance.date
       }
     });
@@ -76,6 +116,7 @@ exports.checkIn = async (req, res) => {
 exports.checkOut = async (req, res) => {
   try {
     const employeeId = req.userId;
+    const checkOutLocation = parseLocation(req.body?.location);
     const today = moment().startOf('day').toDate();
     const tomorrow = moment(today).add(1, 'day').toDate();
 
@@ -89,6 +130,7 @@ exports.checkOut = async (req, res) => {
     }
 
     attendance.checkOutTime = new Date();
+    attendance.checkOutLocation = checkOutLocation;
     
     // Calculate working hours
     if (attendance.checkInTime) {
@@ -106,6 +148,7 @@ exports.checkOut = async (req, res) => {
       io.emit('attendance:checked-out', {
         employeeId,
         checkOutTime: attendance.checkOutTime,
+        checkOutLocation: attendance.checkOutLocation,
         workingHours: attendance.workingHours,
         date: attendance.date
       });
@@ -113,6 +156,7 @@ exports.checkOut = async (req, res) => {
       io.to('admin').emit('attendance:checked-out', {
         employeeId,
         checkOutTime: attendance.checkOutTime,
+        checkOutLocation: attendance.checkOutLocation,
         workingHours: attendance.workingHours,
         date: attendance.date
       });
@@ -121,6 +165,7 @@ exports.checkOut = async (req, res) => {
         type: 'checkOut',
         employeeId,
         checkOutTime: attendance.checkOutTime,
+        checkOutLocation: attendance.checkOutLocation,
         workingHours: attendance.workingHours,
         date: attendance.date
       });
@@ -128,6 +173,7 @@ exports.checkOut = async (req, res) => {
         type: 'checkOut',
         employeeId,
         checkOutTime: attendance.checkOutTime,
+        checkOutLocation: attendance.checkOutLocation,
         workingHours: attendance.workingHours,
         date: attendance.date
       });
@@ -139,6 +185,7 @@ exports.checkOut = async (req, res) => {
       message: 'Check out successful',
       attendance: {
         checkOutTime: attendance.checkOutTime,
+        checkOutLocation: attendance.checkOutLocation,
         workingHours: attendance.workingHours,
         date: attendance.date
       }
