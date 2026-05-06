@@ -3,8 +3,6 @@ import api from '../services/api';
 import { Clock, Search, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 
-const DEFAULT_CHECKOUT_TIME = { hour: 18, minute: 48 }; // 6:48 PM
-
 const formatLocation = (location) => {
   if (location?.latitude == null || location?.longitude == null) {
     return '-';
@@ -75,23 +73,8 @@ const CheckInOutTimingsPage = () => {
         const emp = record.employeeId;
         const hasCheckedOut = !!record.checkOutTime;
 
-        // Default checkout time: 6:48 PM on the same day if not checked out
-        let effectiveCheckout = record.checkOutTime;
-        if (!hasCheckedOut && record.checkInTime) {
-          const checkInDate = moment(record.date);
-          effectiveCheckout = checkInDate
-            .clone()
-            .hour(DEFAULT_CHECKOUT_TIME.hour)
-            .minute(DEFAULT_CHECKOUT_TIME.minute)
-            .second(0)
-            .toDate();
-        }
-
-        // Calculate working hours
-        let workingHours = record.workingHours || 0;
-        if (!hasCheckedOut && record.checkInTime && effectiveCheckout) {
-          workingHours = moment(effectiveCheckout).diff(moment(record.checkInTime), 'hours', true);
-        }
+        const effectiveCheckout = record.checkOutTime || null;
+        const workingHours = record.workingHours || 0;
 
         return {
           _id: record._id,
@@ -345,9 +328,6 @@ const CheckInOutTimingsPage = () => {
                       )}
                     </p>
                   </div>
-                  {!record.hasCheckedOut && (
-                    <p className="text-[9px] text-amber-500 font-medium mt-2 italic">* Default checkout time (6:48 PM) applied</p>
-                  )}
                 </div>
               ))}
             </div>
@@ -395,15 +375,7 @@ const CheckInOutTimingsPage = () => {
                               {moment(record.checkOutTime).format('hh:mm:ss A')}
                             </span>
                           ) : (
-                            <div className="flex flex-col">
-                              <span className="font-bold text-amber-500 text-sm italic">
-                                {record.effectiveCheckout
-                                  ? `${moment(record.effectiveCheckout).format('hh:mm A')}*`
-                                  : '--'
-                                }
-                              </span>
-                              <span className="text-[10px] text-amber-400 font-medium mt-0.5">Default time applied</span>
-                            </div>
+                            <span className="font-bold text-amber-500 text-sm italic">--</span>
                           )}
                         </td>
                         <td className="px-6 lg:px-8 py-5">
@@ -458,13 +430,6 @@ const CheckInOutTimingsPage = () => {
               </div>
             </div>
 
-            {/* Legend */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] sm:text-xs text-gray-400 font-medium px-2">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                * Employees who didn&apos;t checkout are auto-assigned 6:48 PM as default
-              </span>
-            </div>
           </>
         )}
       </div>

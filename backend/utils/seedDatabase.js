@@ -157,38 +157,24 @@ const seedAttendanceData = async () => {
       let date = startOfMonth.clone();
 
       while (date.isBefore(endOfMonth) || date.isSame(endOfMonth, 'day')) {
-        const dayOfWeek = date.day();
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday = 0, Saturday = 6
-
-        // Randomly assign status for weekdays
-        if (isWeekend) {
-          // Weekend = weekly off
-          attendanceRecords.push({
-            employeeId: employee._id,
-            date: date.toDate(),
-            status: 'weekly_off'
-          });
+        const random = Math.random();
+        let status;
+        if (random < 0.7) {
+          status = 'present';
+        } else if (random < 0.9) {
+          status = 'planned_leave';
         } else {
-          // Weekday: randomly assign present, planned_leave, or unplanned_leave
-          const random = Math.random();
-          let status;
-          if (random < 0.7) {
-            status = 'present';
-          } else if (random < 0.9) {
-            status = 'planned_leave';
-          } else {
-            status = 'unplanned_leave';
-          }
-
-          attendanceRecords.push({
-            employeeId: employee._id,
-            date: date.toDate(),
-            status: status,
-            checkInTime: status === 'present' ? new Date(date.format('YYYY-MM-DD') + ' 09:30:00') : undefined,
-            checkOutTime: status === 'present' ? new Date(date.format('YYYY-MM-DD') + ' 18:00:00') : undefined,
-            workingHours: status === 'present' ? 8.5 : 0
-          });
+          status = 'unplanned_leave';
         }
+
+        attendanceRecords.push({
+          employeeId: employee._id,
+          date: date.toDate(),
+          status: status,
+          checkInTime: status === 'present' ? new Date(date.format('YYYY-MM-DD') + ' 09:30:00') : undefined,
+          checkOutTime: status === 'present' ? new Date(date.format('YYYY-MM-DD') + ' 18:00:00') : undefined,
+          workingHours: status === 'present' ? 8.5 : 0
+        });
 
         date.add(1, 'day');
       }

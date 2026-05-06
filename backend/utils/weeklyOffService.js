@@ -64,28 +64,13 @@ const GOVERNMENT_HOLIDAYS = [
 
 /**
  * Check if a given date is a weekly off
- * Weekly off includes: Every Sunday, 2nd Saturday of month, Government Holidays
+ * Weekly off includes: Government Holidays
  * @param {Date} date - The date to check
  * @returns {Object} - { isWeeklyOff: boolean, reason: string }
  */
 function isWeeklyOff(date) {
   const momentDate = moment(date);
-  const dayOfWeek = momentDate.day(); // 0 = Sunday, 6 = Saturday
   const dateStr = momentDate.format('YYYY-MM-DD');
-
-  // Check if Sunday
-  if (dayOfWeek === 0) {
-    return { isWeeklyOff: true, reason: 'Sunday' };
-  }
-
-  // Check if 2nd Saturday
-  if (dayOfWeek === 6) { // Saturday
-    const dayOfMonth = momentDate.date();
-    // 2nd Saturday is between 8-14
-    if (dayOfMonth >= 8 && dayOfMonth <= 14) {
-      return { isWeeklyOff: true, reason: 'Second Saturday' };
-    }
-  }
 
   // Check if government holiday
   const holiday = GOVERNMENT_HOLIDAYS.find(h => h.date === dateStr);
