@@ -41,6 +41,10 @@ router.get('/profile', authMiddleware, employeeController.getProfile);
 router.put('/profile', authMiddleware, employeeController.updateProfile);
 router.post('/profile-picture', authMiddleware, upload.single('profilePicture'), employeeController.uploadProfilePicture);
 router.get('/all', authMiddleware, roleMiddleware(['admin', 'manager', 'director']), employeeController.getAllEmployees);
+// Reports and validation (admin only)
+router.get('/report/daily', authMiddleware, roleMiddleware(['admin']), employeeController.downloadDailyReport);
+router.get('/report/monthly', authMiddleware, roleMiddleware(['admin']), employeeController.downloadMonthlyReport);
+router.get('/report/validate-db', authMiddleware, roleMiddleware(['admin']), employeeController.validateDatabase);
 router.get('/:employeeId', authMiddleware, employeeController.getEmployeeById);
 router.put('/:employeeId', authMiddleware, roleMiddleware(['admin']), employeeController.updateEmployee);
 router.delete('/:employeeId', authMiddleware, roleMiddleware(['admin']), employeeController.deleteEmployee);

@@ -132,6 +132,43 @@ const EmployeeManagementPage = () => {
     toast.success('Exported to PDF successfully!');
   };
 
+  const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadDailyReport = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const resp = await employeeAPI.downloadDailyReport(today);
+      downloadBlob(resp.data, `attendance_daily_${today}.xlsx`);
+      toast.success('Downloaded daily attendance report');
+    } catch (err) {
+      console.error('Download daily report failed', err);
+      toast.error('Failed to download daily report');
+    }
+  };
+
+  const handleDownloadMonthlyReport = async () => {
+    try {
+      const now = new Date();
+      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
+      const resp = await employeeAPI.downloadMonthlyReport(month);
+      const label = new Date().toLocaleString('default', { month: 'long', year: 'numeric' }).replace(' ', '_');
+      downloadBlob(resp.data, `attendance_monthly_${label}.xlsx`);
+      toast.success('Downloaded monthly attendance report');
+    } catch (err) {
+      console.error('Download monthly report failed', err);
+      toast.error('Failed to download monthly report');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8 bg-gray-50 font-outfit">
@@ -345,6 +382,24 @@ const EmployeeManagementPage = () => {
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
             <span className="relative z-10 text-lg">📑</span>
             <span className="relative z-10">Intelligence Report</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+          <button
+            onClick={handleDownloadDailyReport}
+            className="group relative overflow-hidden bg-indigo-600 hover:bg-indigo-700 text-white h-14 rounded-2xl font-bold uppercase tracking-wide text-xs transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-4 border-none"
+          >
+            <span className="relative z-10 text-lg">📥</span>
+            <span className="relative z-10">Download Daily Report</span>
+          </button>
+
+          <button
+            onClick={handleDownloadMonthlyReport}
+            className="group relative overflow-hidden bg-violet-600 hover:bg-violet-700 text-white h-14 rounded-2xl font-bold uppercase tracking-wide text-xs transition-all shadow-lg shadow-violet-500/20 active:scale-95 flex items-center justify-center gap-4 border-none"
+          >
+            <span className="relative z-10 text-lg">📥</span>
+            <span className="relative z-10">Download Monthly Report</span>
           </button>
         </div>
 

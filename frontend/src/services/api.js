@@ -120,6 +120,11 @@ export const employeeAPI = {
   deleteEmployee: (employeeId) => api.delete(`/employee/${employeeId}`),
   approveEmployee: (employeeId) => api.post(`/employee/${employeeId}/approve`),
   rejectEmployee: (employeeId) => api.post(`/employee/${employeeId}/reject`)
+  ,
+  // Report APIs
+  downloadDailyReport: (date) => api.get('/employee/report/daily', { params: { date }, responseType: 'blob' }),
+  downloadMonthlyReport: (month) => api.get('/employee/report/monthly', { params: { month }, responseType: 'blob' }),
+  validateDatabase: () => api.get('/employee/report/validate-db')
 };
 
 // Department APIs

@@ -88,50 +88,45 @@ const sendEmailSafe = async (msg) => {
   await sgMail.send(enhancedMsg);
 };
 
-// Schedule daily report at 5:30 PM (weekdays only, excluding holidays)
+// Schedule monthly report on the 1st of every month at 06:00 (server time)
+// This will send a report for the PREVIOUS month (e.g., on Mar 1 it sends Feb report)
 const scheduleEmailReport = () => {
-  // Every day at 5:30 PM (17:30)
-  // Monday to Friday: 1-5 (Sunday is 0, Saturday is 6)
-  schedule.scheduleJob('30 17 * * 1-5', async () => {
+  // Cron: minute hour day-of-month month day-of-week -> At 06:00 on day-of-month 1
+  schedule.scheduleJob('0 6 1 * *', async () => {
     try {
-      console.log('Generating daily attendance report for weekday...');
-      await sendDailyAttendanceReport();
+      console.log('Generating monthly attendance report for previous month...');
+      await sendMonthlyAttendanceReport();
     } catch (error) {
-      console.error('Error sending daily report:', error);
+      console.error('Error sending monthly report:', error);
     }
   });
 };
 
-// Generate and send daily attendance report
-const sendDailyAttendanceReport = async () => {
+// Generate and send monthly attendance report (previous month)
+const sendMonthlyAttendanceReport = async () => {
   try {
-    const today = moment().startOf('day').toDate();
-    const tomorrow = moment(today).add(1, 'day').toDate();
-    
-    // Check if today is a weekday (1-5 = Monday to Friday)
-    const dayOfWeek = moment().day();
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      console.log('Skipping report: Today is a weekend');
-      return;
-    }
+    // Previous month start & end
+    const startOfPrevMonth = moment().subtract(1, 'month').startOf('month').toDate();
+    const endOfPrevMonth = moment().subtract(1, 'month').endOf('month').toDate();
 
-    // Get today's attendance
+    // Get attendance for previous month
     const attendance = await Attendance.find({
-      date: { $gte: today, $lt: tomorrow }
+      date: { $gte: startOfPrevMonth, $lte: endOfPrevMonth }
     }).populate('employeeId', 'employeeId name email department phone');
 
     if (attendance.length === 0) {
-      console.log('No attendance records for today');
+      console.log('No attendance records for previous month');
       return;
     }
 
     // Create Excel file
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Daily Attendance');
+    const worksheet = workbook.addWorksheet('Monthly Attendance');
 
     worksheet.columns = [
-      { header: 'Employee ID', key: 'employeeId', width: 15 },
-      { header: 'Name', key: 'name', width: 20 },
+      { header: 'Date', key: 'date', width: 15 },
+      { header: 'Employee ID', key: 'employeeId', width: 18 },
+      { header: 'Name', key: 'name', width: 24 },
       { header: 'Status', key: 'status', width: 15 },
       { header: 'Check In', key: 'checkInTime', width: 15 },
       { header: 'Check Out', key: 'checkOutTime', width: 15 },
@@ -139,95 +134,73 @@ const sendDailyAttendanceReport = async () => {
     ];
 
     // Style header row
-    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
     worksheet.getRow(1).fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FF4472C4' }
     };
-    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
 
-    // Add data
+    // Add rows
     attendance.forEach(record => {
+      const emp = record.employeeId || {};
       worksheet.addRow({
-        employeeId: record.employeeId.employeeId || record.employeeId._id,
-        name: record.employeeId.name,
-        status: record.status,
+        date: moment(record.date).format('YYYY-MM-DD'),
+        employeeId: emp.employeeId || emp._id || '-',
+        name: emp.name || '-',
+        status: record.status || '-',
         checkInTime: record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '-',
         checkOutTime: record.checkOutTime ? moment(record.checkOutTime).format('hh:mm:ss A') : '-',
-        workingHours: record.workingHours || 0
+        workingHours: typeof record.workingHours === 'number' ? record.workingHours : (record.workingHours || '-')
       });
     });
 
+    // Auto-filter and freeze header
+    worksheet.autoFilter = 'A1:G1';
+    worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+
     // Save file
-    const fileName = `attendance_report_${moment().format('YYYY-MM-DD')}.xlsx`;
+    const monthLabel = moment().subtract(1, 'month').format('MMMM_YYYY');
+    const fileName = `attendance_monthly_${monthLabel}.xlsx`;
     const filePath = `./${fileName}`;
     await workbook.xlsx.writeFile(filePath);
 
-    // Specific email configuration
     const reportEmail = process.env.REPORT_EMAIL || 'admin@company.com';
 
-    // Calculate statistics
+    // Calculate basic stats
     const stats = {
+      totalRecords: attendance.length,
       totalPresent: attendance.filter(a => a.status === 'present').length,
       totalAbsent: attendance.filter(a => a.status === 'absent').length,
-      totalLate: attendance.filter(a => a.status === 'late').length,
-      totalLeave: attendance.filter(a => a.status === 'leave').length
+      totalLeave: attendance.filter(a => a.status && a.status.includes('leave')).length
     };
 
-    // Read file and convert to base64
     const fileContent = fs.readFileSync(filePath);
     const base64Content = Buffer.from(fileContent).toString('base64');
 
-    // Send email with attachment to specific email
+    const subject = `Monthly Attendance Report - ${moment().subtract(1, 'month').format('MMMM YYYY')}`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+          <h2 style="margin: 0;">📊 Monthly Attendance Report</h2>
+        </div>
+        <p><strong>Month:</strong> ${moment().subtract(1, 'month').format('MMMM YYYY')}</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ddd;">
+          <tr style="background: #ecf0f1;"><td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Records</strong></td><td style="padding: 12px; border: 1px solid #bdc3c7; font-weight: bold;">${stats.totalRecords}</td></tr>
+          <tr><td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Present</strong></td><td style="padding: 12px; border: 1px solid #bdc3c7; color: #27ae60; font-weight: bold;">${stats.totalPresent}</td></tr>
+          <tr style="background: #ecf0f1;"><td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Absent</strong></td><td style="padding: 12px; border: 1px solid #bdc3c7; color: #e74c3c; font-weight: bold;">${stats.totalAbsent}</td></tr>
+          <tr><td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Leave</strong></td><td style="padding: 12px; border: 1px solid #bdc3c7; color: #3498db; font-weight: bold;">${stats.totalLeave}</td></tr>
+        </table>
+        <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">Attendance System - Automated Monthly Report</p>
+      </div>
+    `;
+
     const msg = {
       to: reportEmail,
       from: FROM_EMAIL,
       replyTo: ADMIN_REPLY_EMAIL,
-      subject: `Daily Attendance Report - ${moment().format('(dddd) MMMM DD, YYYY')}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-            <h2 style="margin: 0;">📊 Daily Attendance Report</h2>
-          </div>
-          
-          <p><strong>Date:</strong> ${moment().format('dddd, MMMM DD, YYYY')}</p>
-          
-          <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ddd;">
-            <tr style="background: #ecf0f1;">
-              <td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Present</strong></td>
-              <td style="padding: 12px; border: 1px solid #bdc3c7; color: #27ae60; font-weight: bold; font-size: 18px;">${stats.totalPresent}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Absent</strong></td>
-              <td style="padding: 12px; border: 1px solid #bdc3c7; color: #e74c3c; font-weight: bold; font-size: 18px;">${stats.totalAbsent}</td>
-            </tr>
-            <tr style="background: #ecf0f1;">
-              <td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Late</strong></td>
-              <td style="padding: 12px; border: 1px solid #bdc3c7; color: #f39c12; font-weight: bold; font-size: 18px;">${stats.totalLate}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Leave</strong></td>
-              <td style="padding: 12px; border: 1px solid #bdc3c7; color: #3498db; font-weight: bold; font-size: 18px;">${stats.totalLeave}</td>
-            </tr>
-            <tr style="background: #ecf0f1;">
-              <td style="padding: 12px; border: 1px solid #bdc3c7;"><strong>Total Records</strong></td>
-              <td style="padding: 12px; border: 1px solid #bdc3c7; font-weight: bold; font-size: 18px;">${attendance.length}</td>
-            </tr>
-          </table>
-
-          <div style="background: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; border-radius: 4px; margin: 20px 0;">
-            <p style="margin: 0; font-size: 14px; color: #2c3e50;">
-              📎 Detailed attendance report is attached to this email as an Excel file.
-            </p>
-          </div>
-
-          <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
-            Attendance System - Automated Daily Report<br>
-            Sent at: ${moment().format('hh:mm:ss A')} IST
-          </p>
-        </div>
-      `,
+      subject,
+      html,
       attachments: [
         {
           content: base64Content,
@@ -243,12 +216,12 @@ const sendDailyAttendanceReport = async () => {
     };
 
     await sendEmailSafe(msg);
-    console.log(`Daily attendance report sent to ${reportEmail}`);
+    console.log(`Monthly attendance report sent to ${reportEmail}`);
 
-    // Delete file after sending
+    // Delete temporary file
     fs.unlinkSync(filePath);
   } catch (error) {
-    console.error('Error in sendDailyAttendanceReport:', error);
+    console.error('Error in sendMonthlyAttendanceReport:', error);
   }
 };
 
@@ -675,7 +648,7 @@ const sendRejectionEmailToEmployee = async (employee, reason) => {
 
 module.exports = {
   scheduleEmailReport,
-  sendDailyAttendanceReport,
+  sendMonthlyAttendanceReport,
   sendNotificationEmail,
   sendLeaveApprovalEmail,
   sendNoticeEmail,

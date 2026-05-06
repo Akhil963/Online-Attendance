@@ -9,7 +9,7 @@ const { sendApprovalConfirmationToEmployee, sendRejectionEmailToEmployee } = req
 // Get employee profile
 exports.getProfile = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.userId).populate('department');
+    const employee = await Employee.findById(req.userId).populate('department').select('-password');
 
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
@@ -38,7 +38,7 @@ exports.updateProfile = async (req, res) => {
         updatedAt: new Date()
       },
       { new: true }
-    ).populate('department');
+    ).populate('department').select('-password');
 
     // Emit realtime update for profile changes
     const io = req.app.get('io');
@@ -93,6 +93,10 @@ exports.uploadProfilePicture = async (req, res) => {
         { profilePicture: profilePictureUrl, updatedAt: new Date() },
         { new: true }
       ).populate('department');
+      // Ensure password is not included
+      if (updatedUser && updatedUser.password) {
+        updatedUser = await Employee.findById(req.userId).populate('department').select('-password');
+      }
     }
 
     // Emit realtime update for profile picture changes
@@ -145,6 +149,11 @@ exports.getEmployeeById = async (req, res) => {
   try {
     const { employeeId } = req.params;
 
+    // Restrict access: non-admins can only fetch their own profile
+    if (req.userRole !== 'admin' && req.userId !== employeeId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     const employee = await Employee.findById(employeeId)
       .populate('department')
       .select('-password');
@@ -181,9 +190,12 @@ exports.updateEmployee = async (req, res) => {
       { new: true }
     ).populate('department');
 
+    // Ensure password is not returned
+    const safeEmployee = await Employee.findById(employee._id).populate('department').select('-password');
+
     res.json({
       message: 'Employee updated successfully',
-      employee
+      employee: safeEmployee
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -248,6 +260,9 @@ exports.approveEmployee = async (req, res) => {
       { new: true }
     ).populate('department').populate('approvedBy', 'name email adminId');
 
+    // Remove password from returned employee
+    const safeEmployee = await Employee.findById(employee._id).populate('department').populate('approvedBy', 'name email adminId').select('-password');
+
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
     }
@@ -283,7 +298,7 @@ exports.approveEmployee = async (req, res) => {
 
     res.json({
       message: 'Employee account approved successfully',
-      employee
+      employee: safeEmployee
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -307,6 +322,9 @@ exports.rejectEmployee = async (req, res) => {
       },
       { new: true }
     ).populate('department');
+
+    // Remove password from returned employee
+    const safeEmployee = await Employee.findById(employee._id).populate('department').select('-password');
 
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
@@ -343,9 +361,180 @@ exports.rejectEmployee = async (req, res) => {
 
     res.json({
       message: 'Employee account approval revoked',
-      employee
+      employee: safeEmployee
     });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Download daily attendance report as Excel
+exports.downloadDailyReport = async (req, res) => {
+  try {
+    const moment = require('moment');
+    const ExcelJS = require('exceljs');
+
+    const dateParam = req.query.date; // YYYY-MM-DD
+    const targetDate = dateParam ? moment(dateParam, 'YYYY-MM-DD') : moment();
+    const start = targetDate.startOf('day').toDate();
+    const end = targetDate.endOf('day').toDate();
+
+    const attendance = await require('../models/Attendance').find({ date: { $gte: start, $lte: end } })
+      .populate('employeeId', 'employeeId name email department phone');
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Daily Attendance');
+
+    worksheet.columns = [
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Employee ID', key: 'employeeId', width: 18 },
+      { header: 'Name', key: 'name', width: 24 },
+      { header: 'Email', key: 'email', width: 28 },
+      { header: 'Department', key: 'department', width: 20 },
+      { header: 'Status', key: 'status', width: 12 },
+      { header: 'Check In', key: 'checkIn', width: 14 },
+      { header: 'Check Out', key: 'checkOut', width: 14 },
+      { header: 'Working Hours', key: 'workingHours', width: 14 }
+    ];
+
+    worksheet.getRow(1).font = { bold: true };
+
+    attendance.forEach(rec => {
+      const emp = rec.employeeId || {};
+      worksheet.addRow({
+        date: moment(rec.date).format('YYYY-MM-DD'),
+        employeeId: emp.employeeId || emp._id || '-',
+        name: emp.name || '-',
+        email: emp.email || '-',
+        department: emp.department?.name || '-',
+        status: rec.status || '-',
+        checkIn: rec.checkInTime ? moment(rec.checkInTime).format('hh:mm:ss A') : '-',
+        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '-',
+        workingHours: typeof rec.workingHours === 'number' ? rec.workingHours : (rec.workingHours || '-')
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const label = targetDate.format('YYYY-MM-DD');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="attendance_daily_${label}.xlsx"`);
+    return res.send(Buffer.from(buffer));
+  } catch (error) {
+    console.error('downloadDailyReport error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Download monthly attendance report as Excel
+exports.downloadMonthlyReport = async (req, res) => {
+  try {
+    const moment = require('moment');
+    const ExcelJS = require('exceljs');
+
+    const monthParam = req.query.month; // YYYY-MM
+    const target = monthParam ? moment(monthParam, 'YYYY-MM') : moment();
+    const start = target.startOf('month').toDate();
+    const end = target.endOf('month').toDate();
+
+    const attendance = await require('../models/Attendance').find({ date: { $gte: start, $lte: end } })
+      .populate('employeeId', 'employeeId name email department phone');
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Monthly Attendance');
+
+    worksheet.columns = [
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Employee ID', key: 'employeeId', width: 18 },
+      { header: 'Name', key: 'name', width: 24 },
+      { header: 'Email', key: 'email', width: 28 },
+      { header: 'Department', key: 'department', width: 20 },
+      { header: 'Status', key: 'status', width: 12 },
+      { header: 'Check In', key: 'checkIn', width: 14 },
+      { header: 'Check Out', key: 'checkOut', width: 14 },
+      { header: 'Working Hours', key: 'workingHours', width: 14 }
+    ];
+
+    worksheet.getRow(1).font = { bold: true };
+
+    attendance.forEach(rec => {
+      const emp = rec.employeeId || {};
+      worksheet.addRow({
+        date: moment(rec.date).format('YYYY-MM-DD'),
+        employeeId: emp.employeeId || emp._id || '-',
+        name: emp.name || '-',
+        email: emp.email || '-',
+        department: emp.department?.name || '-',
+        status: rec.status || '-',
+        checkIn: rec.checkInTime ? moment(rec.checkInTime).format('hh:mm:ss A') : '-',
+        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '-',
+        workingHours: typeof rec.workingHours === 'number' ? rec.workingHours : (rec.workingHours || '-')
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const label = target.format('MMMM_YYYY');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="attendance_monthly_${label}.xlsx"`);
+    return res.send(Buffer.from(buffer));
+  } catch (error) {
+    console.error('downloadMonthlyReport error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Validate database employee and attendance data
+exports.validateDatabase = async (req, res) => {
+  try {
+    const EmployeeModel = require('../models/Employee');
+    const AttendanceModel = require('../models/Attendance');
+
+    const employees = await EmployeeModel.find({}).populate('department');
+    const attendances = await AttendanceModel.find({}).populate('employeeId');
+
+    const issues = { employees: [], attendance: [], summary: {} };
+
+    // Employee checks
+    const seenEmployeeIds = {};
+    employees.forEach(emp => {
+      const problems = [];
+      if (!emp.employeeId) problems.push('missing_employeeId');
+      if (!emp.name) problems.push('missing_name');
+      if (!emp.email) problems.push('missing_email');
+      if (!emp.department) problems.push('missing_department');
+      // basic email validation
+      if (emp.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emp.email)) problems.push('invalid_email');
+      if (emp.employeeId) {
+        if (seenEmployeeIds[emp.employeeId]) {
+          problems.push('duplicate_employeeId');
+          issues.employees.find(e => e._id === seenEmployeeIds[emp.employeeId])?.problems.push('duplicate_employeeId');
+        } else {
+          seenEmployeeIds[emp.employeeId] = emp._id.toString();
+        }
+      }
+      if (problems.length > 0) {
+        issues.employees.push({ _id: emp._id, employeeId: emp.employeeId || null, name: emp.name || null, problems });
+      }
+    });
+
+    // Attendance checks
+    attendances.forEach(a => {
+      const problems = [];
+      if (!a.employeeId) problems.push('missing_employee_reference');
+      else if (!a.employeeId._id) problems.push('employee_not_found');
+      if (!a.status) problems.push('missing_status');
+      if (problems.length > 0) {
+        issues.attendance.push({ _id: a._id, date: a.date, employeeId: a.employeeId?._id || null, problems });
+      }
+    });
+
+    issues.summary.totalEmployees = employees.length;
+    issues.summary.employeesWithProblems = issues.employees.length;
+    issues.summary.totalAttendanceRecords = attendances.length;
+    issues.summary.attendanceWithProblems = issues.attendance.length;
+
+    res.json({ issues });
+  } catch (error) {
+    console.error('validateDatabase error:', error);
     res.status(500).json({ error: error.message });
   }
 };
