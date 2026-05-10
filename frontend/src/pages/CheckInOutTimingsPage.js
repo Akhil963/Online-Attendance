@@ -36,7 +36,7 @@ const CheckInOutTimingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
-  const [filterStatus, setFilterStatus] = useState('all'); // all, checked-out, missed-checkout
+  const [filterStatus, setFilterStatus] = useState('all'); // all, checked-out, on-duty
 
   const fetchData = useCallback(async () => {
     try {
@@ -98,7 +98,7 @@ const CheckInOutTimingsPage = () => {
 
         // Status filter
         if (filterStatus === 'checked-out') return matchesSearch && record.hasCheckedOut;
-        if (filterStatus === 'missed-checkout') return matchesSearch && !record.hasCheckedOut;
+        if (filterStatus === 'on-duty') return matchesSearch && !record.hasCheckedOut;
         return matchesSearch;
       })
       .sort((a, b) => a.employeeName.localeCompare(b.employeeName));
@@ -107,7 +107,7 @@ const CheckInOutTimingsPage = () => {
   const records = getDayRecords();
   const totalPresent = records.length;
   const checkedOut = records.filter(r => r.hasCheckedOut).length;
-  const missedCheckout = records.filter(r => !r.hasCheckedOut).length;
+  const onDutyCount = records.filter(r => !r.hasCheckedOut).length;
 
   const goToPrevDay = () => {
     setSelectedDate(moment(selectedDate).subtract(1, 'day').format('YYYY-MM-DD'));
@@ -198,9 +198,9 @@ const CheckInOutTimingsPage = () => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-50 text-amber-600 rounded-lg sm:rounded-xl flex items-center justify-center">
                 <AlertTriangle size={16} className="sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">Missed</span>
+              <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">On Duty</span>
             </div>
-            <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-amber-600">{missedCheckout}</p>
+            <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-amber-600">{onDutyCount}</p>
           </div>
         </div>
 
@@ -224,7 +224,7 @@ const CheckInOutTimingsPage = () => {
             >
               <option value="all">All Employees</option>
               <option value="checked-out">Checked Out</option>
-              <option value="missed-checkout">Missed Checkout</option>
+              <option value="on-duty">On Duty (No Check-Out Yet)</option>
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -261,7 +261,7 @@ const CheckInOutTimingsPage = () => {
                     {!record.hasCheckedOut ? (
                       <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 flex items-center gap-1">
                         <AlertTriangle size={10} />
-                        Missed
+                        On Duty
                       </span>
                     ) : (
                       <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
@@ -419,7 +419,7 @@ const CheckInOutTimingsPage = () => {
                           ) : (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 animate-pulse">
                               <AlertTriangle size={12} />
-                              Missed Checkout
+                              On Duty
                             </span>
                           )}
                         </td>

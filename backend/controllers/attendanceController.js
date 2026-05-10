@@ -34,11 +34,48 @@ const parseLocation = (location) => {
   };
 };
 
+const getOpenAttendanceForEmployee = async (employeeId) => {
+  return Attendance.findOne({
+    employeeId,
+    checkInTime: { $ne: null },
+    checkOutTime: null
+  }).sort({ checkInTime: -1 });
+};
+
+const resolveWorkingHours = (attendanceRecord) => {
+  if (!attendanceRecord?.checkInTime) {
+    return 0;
+  }
+
+  if (attendanceRecord.checkOutTime) {
+    return typeof attendanceRecord.workingHours === 'number'
+      ? attendanceRecord.workingHours
+      : moment(attendanceRecord.checkOutTime).diff(moment(attendanceRecord.checkInTime), 'hours', true);
+  }
+
+  return moment().diff(moment(attendanceRecord.checkInTime), 'hours', true);
+};
+
 // Mark attendance (Check In)
 exports.checkIn = async (req, res) => {
   try {
     const employeeId = req.userId;
     const checkInLocation = parseLocation(req.body?.location);
+
+    const openAttendance = await getOpenAttendanceForEmployee(employeeId);
+    if (openAttendance) {
+      return res.status(400).json({
+        error: 'You are already checked in. Please check out before starting a new check-in.',
+        attendance: {
+          _id: openAttendance._id,
+          date: openAttendance.date,
+          checkInTime: openAttendance.checkInTime,
+          checkOutTime: openAttendance.checkOutTime,
+          workingHours: resolveWorkingHours(openAttendance)
+        }
+      });
+    }
+
     const today = moment().startOf('day').toDate();
     const tomorrow = moment(today).add(1, 'day').toDate();
 
@@ -117,16 +154,10 @@ exports.checkOut = async (req, res) => {
   try {
     const employeeId = req.userId;
     const checkOutLocation = parseLocation(req.body?.location);
-    const today = moment().startOf('day').toDate();
-    const tomorrow = moment(today).add(1, 'day').toDate();
-
-    const attendance = await Attendance.findOne({
-      employeeId,
-      date: { $gte: today, $lt: tomorrow }
-    });
+    const attendance = await getOpenAttendanceForEmployee(employeeId);
 
     if (!attendance) {
-      return res.status(400).json({ error: 'No check in record found for today' });
+      return res.status(400).json({ error: 'No active check in record found' });
     }
 
     attendance.checkOutTime = new Date();
@@ -214,7 +245,13 @@ exports.getAttendanceHistory = async (req, res) => {
       date: { $gte: startDate, $lte: endDate }
     }).sort({ date: 1 });
 
-    res.json({ attendance, month, year });
+    const normalizedAttendance = attendance.map((record) => {
+      const entry = record.toObject();
+      entry.workingHours = resolveWorkingHours(record);
+      return entry;
+    });
+
+    res.json({ attendance: normalizedAttendance, month, year });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -227,12 +264,23 @@ exports.getTodayAttendance = async (req, res) => {
     const today = moment().startOf('day').toDate();
     const tomorrow = moment(today).add(1, 'day').toDate();
 
-    const attendance = await Attendance.findOne({
+    let attendance = await Attendance.findOne({
       employeeId,
       date: { $gte: today, $lt: tomorrow }
     });
 
-    res.json({ attendance });
+    if (!attendance) {
+      attendance = await getOpenAttendanceForEmployee(employeeId);
+    }
+
+    const attendanceResponse = attendance
+      ? {
+          ...attendance.toObject(),
+          workingHours: resolveWorkingHours(attendance)
+        }
+      : null;
+
+    res.json({ attendance: attendanceResponse });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -265,7 +313,13 @@ exports.getAllAttendance = async (req, res) => {
       .populate('employeeId', 'name employeeId')
       .sort({ date: 1 });
 
-    res.json({ attendance, month, year });
+    const normalizedAttendance = attendance.map((record) => {
+      const entry = record.toObject();
+      entry.workingHours = resolveWorkingHours(record);
+      return entry;
+    });
+
+    res.json({ attendance: normalizedAttendance, month, year });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
