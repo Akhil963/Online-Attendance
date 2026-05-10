@@ -122,9 +122,14 @@ const AttendanceMarker = () => {
     setLoading(true);
     try {
       const location = await getCurrentLocation();
-      await attendanceAPI.checkIn(location);
+      const response = await attendanceAPI.checkIn(location);
+      if (response?.data?.attendance) {
+        setTodayAttendance((prev) => ({
+          ...prev,
+          ...response.data.attendance
+        }));
+      }
       toast.success('Check-in successful!');
-      fetchTodayAttendance();
     } catch (error) {
       toast.error('Check-in failed: ' + (error.response?.data?.error || error.message));
     }
@@ -135,9 +140,14 @@ const AttendanceMarker = () => {
     setLoading(true);
     try {
       const location = await getCurrentLocation();
-      await attendanceAPI.checkOut(location);
+      const response = await attendanceAPI.checkOut(location);
+      if (response?.data?.attendance) {
+        setTodayAttendance((prev) => ({
+          ...prev,
+          ...response.data.attendance
+        }));
+      }
       toast.success('Check-out successful!');
-      fetchTodayAttendance();
     } catch (error) {
       toast.error('Check-out failed: ' + (error.response?.data?.error || error.message));
     }
