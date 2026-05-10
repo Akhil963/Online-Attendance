@@ -130,6 +130,8 @@ const AttendanceMarker = () => {
         }));
       }
       toast.success('Check-in successful!');
+      // Re-fetch to ensure complete data consistency
+      await fetchTodayAttendance();
     } catch (error) {
       toast.error('Check-in failed: ' + (error.response?.data?.error || error.message));
     }
@@ -142,12 +144,15 @@ const AttendanceMarker = () => {
       const location = await getCurrentLocation();
       const response = await attendanceAPI.checkOut(location);
       if (response?.data?.attendance) {
+        // Fully replace state with server response to ensure checkOutTime is set
         setTodayAttendance((prev) => ({
           ...prev,
           ...response.data.attendance
         }));
       }
       toast.success('Check-out successful!');
+      // Re-fetch to ensure complete data consistency
+      await fetchTodayAttendance();
     } catch (error) {
       toast.error('Check-out failed: ' + (error.response?.data?.error || error.message));
     }
@@ -235,24 +240,40 @@ const AttendanceMarker = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-6">
-                  <button
-                    onClick={handleCheckIn}
-                    disabled={todayAttendance?.checkInTime || loading}
-                    className="flex-1 group relative overflow-hidden bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-50 disabled:text-gray-200 text-white h-20 rounded-[1.5rem] font-bold text-xs transition-all shadow-2xl shadow-emerald-500/20 active:scale-95 flex items-center justify-center border-none shadow-[inset_0_2px_4px_rgba(255,255,255,0.1)]"
-                  >
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                    <span className="relative z-10">{loading ? 'Processing...' : 'Check In'}</span>
-                  </button>
-                  <button
-                    onClick={handleCheckOut}
-                    disabled={!todayAttendance?.checkInTime || todayAttendance?.checkOutTime || loading}
-                    className="flex-1 group relative overflow-hidden bg-red-600 hover:bg-red-700 disabled:bg-gray-50 disabled:text-gray-200 text-white h-20 rounded-[1.5rem] font-bold text-xs transition-all shadow-2xl shadow-red-500/20 active:scale-95 flex items-center justify-center border-none shadow-[inset_0_2px_4px_rgba(255,255,255,0.1)]"
-                  >
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                    <span className="relative z-10">{loading ? 'Processing...' : 'Check Out'}</span>
-                  </button>
-                </div>
+                {/* Show completed state when both check-in and check-out are done */}
+                {todayAttendance?.checkInTime && todayAttendance?.checkOutTime ? (
+                  <div className="bg-emerald-50/50 backdrop-blur-3xl border border-emerald-200/60 rounded-[2rem] p-6 text-center">
+                    <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">✅</span>
+                    </div>
+                    <p className="text-emerald-700 font-bold text-lg">Checked Out Successfully</p>
+                    <p className="text-emerald-500 text-xs font-medium mt-2">Your attendance for today has been recorded</p>
+                    {todayAttendance?.workingHours > 0 && (
+                      <p className="text-gray-500 text-xs font-bold mt-3">
+                        Working Hours: {todayAttendance.workingHours.toFixed(2)} hrs
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex gap-6">
+                    <button
+                      onClick={handleCheckIn}
+                      disabled={!!todayAttendance?.checkInTime || loading}
+                      className="flex-1 group relative overflow-hidden bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-50 disabled:text-gray-200 text-white h-20 rounded-[1.5rem] font-bold text-xs transition-all shadow-2xl shadow-emerald-500/20 active:scale-95 flex items-center justify-center border-none shadow-[inset_0_2px_4px_rgba(255,255,255,0.1)]"
+                    >
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                      <span className="relative z-10">{loading ? 'Processing...' : 'Check In'}</span>
+                    </button>
+                    <button
+                      onClick={handleCheckOut}
+                      disabled={!todayAttendance?.checkInTime || !!todayAttendance?.checkOutTime || loading}
+                      className="flex-1 group relative overflow-hidden bg-red-600 hover:bg-red-700 disabled:bg-gray-50 disabled:text-gray-200 text-white h-20 rounded-[1.5rem] font-bold text-xs transition-all shadow-2xl shadow-red-500/20 active:scale-95 flex items-center justify-center border-none shadow-[inset_0_2px_4px_rgba(255,255,255,0.1)]"
+                    >
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                      <span className="relative z-10">{loading ? 'Processing...' : 'Check Out'}</span>
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>

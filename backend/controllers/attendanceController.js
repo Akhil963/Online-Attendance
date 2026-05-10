@@ -215,9 +215,12 @@ exports.checkOut = async (req, res) => {
     res.json({
       message: 'Check out successful',
       attendance: {
+        checkInTime: attendance.checkInTime,
+        checkInLocation: attendance.checkInLocation,
         checkOutTime: attendance.checkOutTime,
         checkOutLocation: attendance.checkOutLocation,
         workingHours: attendance.workingHours,
+        status: attendance.status,
         date: attendance.date
       }
     });
