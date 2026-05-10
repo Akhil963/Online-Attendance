@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Menu, X, LogOut, AlertCircle, Bell, Heart, User, LayoutDashboard, Globe } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { attendanceAPI, leaveAPI, noticeAPI, getMediaUrl } from '../services/api';
+import { leaveAPI, noticeAPI, getMediaUrl } from '../services/api';
 import realtimeService from '../services/realtimeService';
 
 const ClientHeader = () => {
@@ -138,28 +138,11 @@ const ClientHeader = () => {
     setShowLogoutModal(true);
   };
 
-  const confirmLogout = async () => {
-    try {
-      const isEmployee = user?.role === 'employee';
-
-      if (isEmployee) {
-        const currentAttendance = await attendanceAPI.getTodayAttendance();
-        const attendance = currentAttendance?.data?.attendance;
-
-        if (attendance?.checkInTime && !attendance?.checkOutTime) {
-          await attendanceAPI.checkOut(null);
-          toast.success('Check-out completed before logout');
-        }
-      }
-
-      logout();
-      setShowLogoutModal(false);
-      toast.info('Session terminated successfully');
-      navigate('/');
-    } catch (error) {
-      console.error('Logout checkout failed:', error);
-      toast.error(error.response?.data?.error || 'Unable to check out before logout. Please try again.');
-    }
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutModal(false);
+    toast.info('Session terminated successfully');
+    navigate('/');
   };
 
   const cancelLogout = () => {

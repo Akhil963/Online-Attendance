@@ -401,10 +401,6 @@ exports.downloadDailyReport = async (req, res) => {
 
     attendance.forEach(rec => {
       const emp = rec.employeeId || {};
-      const resolvedWorkingHours = rec.checkInTime
-        ? ((new Date(rec.checkOutTime || new Date()) - new Date(rec.checkInTime)) / (1000 * 60 * 60))
-        : (typeof rec.workingHours === 'number' ? rec.workingHours : 0);
-
       worksheet.addRow({
         date: moment(rec.date).format('YYYY-MM-DD'),
         employeeId: emp.employeeId || emp._id || '-',
@@ -413,8 +409,8 @@ exports.downloadDailyReport = async (req, res) => {
         department: emp.department?.name || '-',
         status: rec.status || '-',
         checkIn: rec.checkInTime ? moment(rec.checkInTime).format('hh:mm:ss A') : '-',
-        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : 'In Progress',
-        workingHours: resolvedWorkingHours.toFixed(2)
+        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '-',
+        workingHours: typeof rec.workingHours === 'number' ? rec.workingHours : (rec.workingHours || '-')
       });
     });
 
@@ -462,10 +458,6 @@ exports.downloadMonthlyReport = async (req, res) => {
 
     attendance.forEach(rec => {
       const emp = rec.employeeId || {};
-      const resolvedWorkingHours = rec.checkInTime
-        ? ((new Date(rec.checkOutTime || new Date()) - new Date(rec.checkInTime)) / (1000 * 60 * 60))
-        : (typeof rec.workingHours === 'number' ? rec.workingHours : 0);
-
       worksheet.addRow({
         date: moment(rec.date).format('YYYY-MM-DD'),
         employeeId: emp.employeeId || emp._id || '-',
@@ -474,8 +466,8 @@ exports.downloadMonthlyReport = async (req, res) => {
         department: emp.department?.name || '-',
         status: rec.status || '-',
         checkIn: rec.checkInTime ? moment(rec.checkInTime).format('hh:mm:ss A') : '-',
-        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : 'In Progress',
-        workingHours: resolvedWorkingHours.toFixed(2)
+        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '-',
+        workingHours: typeof rec.workingHours === 'number' ? rec.workingHours : (rec.workingHours || '-')
       });
     });
 

@@ -36,7 +36,7 @@ const CheckInOutTimingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
-  const [filterStatus, setFilterStatus] = useState('all'); // all, checked-out, on-duty
+  const [filterStatus, setFilterStatus] = useState('all'); // all, checked-out, missed-checkout
 
   const fetchData = useCallback(async () => {
     try {
@@ -98,7 +98,7 @@ const CheckInOutTimingsPage = () => {
 
         // Status filter
         if (filterStatus === 'checked-out') return matchesSearch && record.hasCheckedOut;
-        if (filterStatus === 'on-duty') return matchesSearch && !record.hasCheckedOut;
+        if (filterStatus === 'missed-checkout') return matchesSearch && !record.hasCheckedOut;
         return matchesSearch;
       })
       .sort((a, b) => a.employeeName.localeCompare(b.employeeName));
@@ -107,7 +107,7 @@ const CheckInOutTimingsPage = () => {
   const records = getDayRecords();
   const totalPresent = records.length;
   const checkedOut = records.filter(r => r.hasCheckedOut).length;
-  const onDutyCount = records.filter(r => !r.hasCheckedOut).length;
+  const missedCheckout = records.filter(r => !r.hasCheckedOut).length;
 
   const goToPrevDay = () => {
     setSelectedDate(moment(selectedDate).subtract(1, 'day').format('YYYY-MM-DD'));
@@ -198,9 +198,9 @@ const CheckInOutTimingsPage = () => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-50 text-amber-600 rounded-lg sm:rounded-xl flex items-center justify-center">
                 <AlertTriangle size={16} className="sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">On Duty</span>
+              <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">Missed</span>
             </div>
-            <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-amber-600">{onDutyCount}</p>
+            <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-amber-600">{missedCheckout}</p>
           </div>
         </div>
 
@@ -224,7 +224,7 @@ const CheckInOutTimingsPage = () => {
             >
               <option value="all">All Employees</option>
               <option value="checked-out">Checked Out</option>
-              <option value="on-duty">On Duty (No Check-Out Yet)</option>
+              <option value="missed-checkout">Missed Checkout</option>
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -261,7 +261,7 @@ const CheckInOutTimingsPage = () => {
                     {!record.hasCheckedOut ? (
                       <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 flex items-center gap-1">
                         <AlertTriangle size={10} />
-                        On Duty
+                        Missed
                       </span>
                     ) : (
                       <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
@@ -277,11 +277,6 @@ const CheckInOutTimingsPage = () => {
                       <p className="text-xs font-bold text-emerald-600">
                         {record.checkInTime ? moment(record.checkInTime).format('hh:mm A') : '--'}
                       </p>
-                      {record.checkInTime && (
-                        <p className="text-[9px] font-semibold text-gray-400 mt-0.5">
-                          {moment(record.checkInTime).format('DD/MM/YYYY')}
-                        </p>
-                      )}
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase mb-0.5">Out</p>
@@ -293,14 +288,6 @@ const CheckInOutTimingsPage = () => {
                             : '--'
                         }
                       </p>
-                      {record.hasCheckedOut && record.checkOutTime && (
-                        <p className="text-[9px] font-semibold text-gray-400 mt-0.5">
-                          {moment(record.checkOutTime).format('DD/MM/YYYY')}
-                          {record.checkInTime && !moment(record.checkOutTime).isSame(moment(record.checkInTime), 'day') && (
-                            <span className="ml-1 text-[8px] font-bold text-orange-500 bg-orange-50 px-1 py-0.5 rounded">Next Day</span>
-                          )}
-                        </p>
-                      )}
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase mb-0.5">Hours</p>
@@ -378,34 +365,15 @@ const CheckInOutTimingsPage = () => {
                           </span>
                         </td>
                         <td className="px-6 lg:px-8 py-5">
-                          <div>
-                            <span className="font-bold text-emerald-600 text-sm">
-                              {record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '--'}
-                            </span>
-                            {record.checkInTime && (
-                              <p className="text-[10px] font-semibold text-gray-400 mt-1">
-                                {moment(record.checkInTime).format('DD MMM YYYY')}
-                              </p>
-                            )}
-                          </div>
+                          <span className="font-bold text-emerald-600 text-sm">
+                            {record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '--'}
+                          </span>
                         </td>
                         <td className="px-6 lg:px-8 py-5">
                           {record.hasCheckedOut ? (
-                            <div>
-                              <span className="font-bold text-red-500 text-sm">
-                                {moment(record.checkOutTime).format('hh:mm:ss A')}
-                              </span>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <p className="text-[10px] font-semibold text-gray-400">
-                                  {moment(record.checkOutTime).format('DD MMM YYYY')}
-                                </p>
-                                {record.checkInTime && !moment(record.checkOutTime).isSame(moment(record.checkInTime), 'day') && (
-                                  <span className="text-[9px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-200">
-                                    +{moment(record.checkOutTime).diff(moment(record.checkInTime), 'days')}d
-                                  </span>
-                                )}
-                              </div>
-                            </div>
+                            <span className="font-bold text-red-500 text-sm">
+                              {moment(record.checkOutTime).format('hh:mm:ss A')}
+                            </span>
                           ) : (
                             <span className="font-bold text-amber-500 text-sm italic">--</span>
                           )}
@@ -451,7 +419,7 @@ const CheckInOutTimingsPage = () => {
                           ) : (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 animate-pulse">
                               <AlertTriangle size={12} />
-                              On Duty
+                              Missed Checkout
                             </span>
                           )}
                         </td>

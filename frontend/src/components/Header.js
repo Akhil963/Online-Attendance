@@ -3,29 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { FiMenu, FiX, FiLogOut } from 'react-icons/fi';
 import NotificationBadge from './NotificationBadge';
-import { attendanceAPI } from '../services/api';
 
 const Header = () => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      if (user?.role === 'employee') {
-        const currentAttendance = await attendanceAPI.getTodayAttendance();
-        const attendance = currentAttendance?.data?.attendance;
-
-        if (attendance?.checkInTime && !attendance?.checkOutTime) {
-          await attendanceAPI.checkOut(null);
-        }
-      }
-
-      logout();
-      navigate('/');
-    } catch (error) {
-      console.error('Logout checkout failed:', error);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
