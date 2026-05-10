@@ -277,6 +277,11 @@ const CheckInOutTimingsPage = () => {
                       <p className="text-xs font-bold text-emerald-600">
                         {record.checkInTime ? moment(record.checkInTime).format('hh:mm A') : '--'}
                       </p>
+                      {record.checkInTime && (
+                        <p className="text-[9px] font-semibold text-gray-400 mt-0.5">
+                          {moment(record.checkInTime).format('DD/MM/YYYY')}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase mb-0.5">Out</p>
@@ -288,6 +293,14 @@ const CheckInOutTimingsPage = () => {
                             : '--'
                         }
                       </p>
+                      {record.hasCheckedOut && record.checkOutTime && (
+                        <p className="text-[9px] font-semibold text-gray-400 mt-0.5">
+                          {moment(record.checkOutTime).format('DD/MM/YYYY')}
+                          {record.checkInTime && !moment(record.checkOutTime).isSame(moment(record.checkInTime), 'day') && (
+                            <span className="ml-1 text-[8px] font-bold text-orange-500 bg-orange-50 px-1 py-0.5 rounded">Next Day</span>
+                          )}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase mb-0.5">Hours</p>
@@ -365,15 +378,34 @@ const CheckInOutTimingsPage = () => {
                           </span>
                         </td>
                         <td className="px-6 lg:px-8 py-5">
-                          <span className="font-bold text-emerald-600 text-sm">
-                            {record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '--'}
-                          </span>
+                          <div>
+                            <span className="font-bold text-emerald-600 text-sm">
+                              {record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '--'}
+                            </span>
+                            {record.checkInTime && (
+                              <p className="text-[10px] font-semibold text-gray-400 mt-1">
+                                {moment(record.checkInTime).format('DD MMM YYYY')}
+                              </p>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 lg:px-8 py-5">
                           {record.hasCheckedOut ? (
-                            <span className="font-bold text-red-500 text-sm">
-                              {moment(record.checkOutTime).format('hh:mm:ss A')}
-                            </span>
+                            <div>
+                              <span className="font-bold text-red-500 text-sm">
+                                {moment(record.checkOutTime).format('hh:mm:ss A')}
+                              </span>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <p className="text-[10px] font-semibold text-gray-400">
+                                  {moment(record.checkOutTime).format('DD MMM YYYY')}
+                                </p>
+                                {record.checkInTime && !moment(record.checkOutTime).isSame(moment(record.checkInTime), 'day') && (
+                                  <span className="text-[9px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-200">
+                                    +{moment(record.checkOutTime).diff(moment(record.checkInTime), 'days')}d
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           ) : (
                             <span className="font-bold text-amber-500 text-sm italic">--</span>
                           )}
