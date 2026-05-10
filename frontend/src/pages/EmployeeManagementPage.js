@@ -89,47 +89,125 @@ const EmployeeManagementPage = () => {
   });
 
 
-  const handleExportExcel = () => {
-    const data = filteredEmployees.map(emp => ({
-      'Employee ID': emp.employeeId,
-      'Name': emp.name,
-      'Email': emp.email,
-      'Phone': emp.phone || '-',
-      'Department': emp.department?.name || '-',
-      'Designation': emp.designation || '-',
-      'Gender': emp.gender || '-',
-      'Role': emp.role,
-      'Status': emp.status || 'Active'
-    }));
-    exportToExcel(data, 'employee_list', 'Employees');
-    toast.success('Exported to Excel successfully!');
+  const handleExportExcel = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const attendanceRes = await employeeAPI.getAttendanceByDate(today);
+      const attendanceMap = {};
+      
+      (attendanceRes.data.attendance || []).forEach(record => {
+        const empId = record.employeeId?._id || record.employeeId;
+        attendanceMap[empId] = {
+          checkIn: record.checkInTime,
+          checkOut: record.checkOutTime,
+          status: record.status
+        };
+      });
+
+      const data = filteredEmployees.map(emp => {
+        const att = attendanceMap[emp._id];
+        const checkoutStatus = att 
+          ? (att.checkOut ? 'Checked Out' : 'Missed Checkout (Default: 7:49 PM)')
+          : '-';
+        
+        return {
+          'Employee ID': emp.employeeId,
+          'Name': emp.name,
+          'Email': emp.email,
+          'Phone': emp.phone || '-',
+          'Department': emp.department?.name || '-',
+          'Designation': emp.designation || '-',
+          'Gender': emp.gender || '-',
+          'Role': emp.role,
+          'Status': emp.status || 'Active',
+          'Checkout Status': checkoutStatus
+        };
+      });
+      exportToExcel(data, 'employee_list', 'Employees');
+      toast.success('Exported to Excel successfully!');
+    } catch (err) {
+      console.error('Export failed:', err);
+      toast.error('Failed to export employees');
+    }
   };
 
-  const handleExportCSV = () => {
-    const data = filteredEmployees.map(emp => ({
-      'Employee ID': emp.employeeId,
-      'Name': emp.name,
-      'Email': emp.email,
-      'Phone': emp.phone || '-',
-      'Department': emp.department?.name || '-',
-      'Designation': emp.designation || '-',
-      'Gender': emp.gender || '-',
-      'Role': emp.role
-    }));
-    exportToCSV(data, 'employee_list');
-    toast.success('Exported to CSV successfully!');
+  const handleExportCSV = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const attendanceRes = await employeeAPI.getAttendanceByDate(today);
+      const attendanceMap = {};
+      
+      (attendanceRes.data.attendance || []).forEach(record => {
+        const empId = record.employeeId?._id || record.employeeId;
+        attendanceMap[empId] = {
+          checkIn: record.checkInTime,
+          checkOut: record.checkOutTime,
+          status: record.status
+        };
+      });
+
+      const data = filteredEmployees.map(emp => {
+        const att = attendanceMap[emp._id];
+        const checkoutStatus = att 
+          ? (att.checkOut ? 'Checked Out' : 'Missed Checkout (Default: 7:49 PM)')
+          : '-';
+        
+        return {
+          'Employee ID': emp.employeeId,
+          'Name': emp.name,
+          'Email': emp.email,
+          'Phone': emp.phone || '-',
+          'Department': emp.department?.name || '-',
+          'Designation': emp.designation || '-',
+          'Gender': emp.gender || '-',
+          'Role': emp.role,
+          'Checkout Status': checkoutStatus
+        };
+      });
+      exportToCSV(data, 'employee_list');
+      toast.success('Exported to CSV successfully!');
+    } catch (err) {
+      console.error('Export failed:', err);
+      toast.error('Failed to export employees');
+    }
   };
 
-  const handleExportPDF = () => {
-    const data = filteredEmployees.map(emp => ({
-      'ID': emp.employeeId,
-      'Name': emp.name,
-      'Email': emp.email,
-      'Department': emp.department?.name || '-',
-      'Role': emp.role
-    }));
-    exportToPDF(data, 'employee_list', 'Employee List Report', Object.keys(data[0] || {}));
-    toast.success('Exported to PDF successfully!');
+  const handleExportPDF = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const attendanceRes = await employeeAPI.getAttendanceByDate(today);
+      const attendanceMap = {};
+      
+      (attendanceRes.data.attendance || []).forEach(record => {
+        const empId = record.employeeId?._id || record.employeeId;
+        attendanceMap[empId] = {
+          checkIn: record.checkInTime,
+          checkOut: record.checkOutTime,
+          status: record.status
+        };
+      });
+
+      const data = filteredEmployees.map(emp => {
+        const att = attendanceMap[emp._id];
+        const checkoutStatus = att 
+          ? (att.checkOut ? 'Checked Out' : 'Missed Checkout (Default: 7:49 PM)')
+          : '-';
+        
+        return {
+          'ID': emp.employeeId,
+          'Name': emp.name,
+          'Email': emp.email,
+          'Department': emp.department?.name || '-',
+          'Role': emp.role,
+          'Checkout Status': checkoutStatus
+        };
+      });
+      exportToPDF(data, 'employee_list', 'Employee List Report', Object.keys(data[0] || {}));
+      toast.success('Exported to PDF successfully!');
+    } catch (err) {
+      console.error('Export failed:', err);
+      toast.error('Failed to export employees');
+    }
   };
 
   const downloadBlob = (blob, filename) => {

@@ -130,6 +130,7 @@ const sendMonthlyAttendanceReport = async () => {
       { header: 'Status', key: 'status', width: 15 },
       { header: 'Check In', key: 'checkInTime', width: 15 },
       { header: 'Check Out', key: 'checkOutTime', width: 15 },
+      { header: 'Checkout Status', key: 'checkoutStatus', width: 26 },
       { header: 'Working Hours', key: 'workingHours', width: 15 }
     ];
 
@@ -144,19 +145,23 @@ const sendMonthlyAttendanceReport = async () => {
     // Add rows
     attendance.forEach(record => {
       const emp = record.employeeId || {};
+      const checkoutStatus = record.checkOutTime 
+        ? 'Checked Out' 
+        : 'Missed Checkout (Default: 7:49 PM)';
       worksheet.addRow({
         date: moment(record.date).format('YYYY-MM-DD'),
         employeeId: emp.employeeId || emp._id || '-',
         name: emp.name || '-',
         status: record.status || '-',
         checkInTime: record.checkInTime ? moment(record.checkInTime).format('hh:mm:ss A') : '-',
-        checkOutTime: record.checkOutTime ? moment(record.checkOutTime).format('hh:mm:ss A') : '-',
+        checkOutTime: record.checkOutTime ? moment(record.checkOutTime).format('hh:mm:ss A') : '7:49:00 PM',
+        checkoutStatus,
         workingHours: typeof record.workingHours === 'number' ? record.workingHours : (record.workingHours || '-')
       });
     });
 
     // Auto-filter and freeze header
-    worksheet.autoFilter = 'A1:G1';
+    worksheet.autoFilter = 'A1:H1';
     worksheet.views = [{ state: 'frozen', ySplit: 1 }];
 
     // Save file

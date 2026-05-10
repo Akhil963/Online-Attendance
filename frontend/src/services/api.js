@@ -125,7 +125,8 @@ export const employeeAPI = {
 
   downloadDailyReport: (date) => api.get('/employee/report/daily', { params: { date }, responseType: 'blob' }),
   downloadMonthlyReport: (month) => api.get('/employee/report/monthly', { params: { month }, responseType: 'blob' }),
-  validateDatabase: () => api.get('/employee/report/validate-db')
+  validateDatabase: () => api.get('/employee/report/validate-db'),
+  getAttendanceByDate: (date) => attendanceAPI.getAllAttendance({ date })
 };
 
 // Department APIs

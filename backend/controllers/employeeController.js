@@ -394,6 +394,7 @@ exports.downloadDailyReport = async (req, res) => {
       { header: 'Status', key: 'status', width: 12 },
       { header: 'Check In', key: 'checkIn', width: 14 },
       { header: 'Check Out', key: 'checkOut', width: 14 },
+      { header: 'Checkout Status', key: 'checkoutStatus', width: 24 },
       { header: 'Working Hours', key: 'workingHours', width: 14 }
     ];
 
@@ -401,6 +402,9 @@ exports.downloadDailyReport = async (req, res) => {
 
     attendance.forEach(rec => {
       const emp = rec.employeeId || {};
+      const checkoutStatus = rec.checkOutTime 
+        ? 'Checked Out' 
+        : 'Missed Checkout (Default: 7:49 PM)';
       worksheet.addRow({
         date: moment(rec.date).format('YYYY-MM-DD'),
         employeeId: emp.employeeId || emp._id || '-',
@@ -409,7 +413,8 @@ exports.downloadDailyReport = async (req, res) => {
         department: emp.department?.name || '-',
         status: rec.status || '-',
         checkIn: rec.checkInTime ? moment(rec.checkInTime).format('hh:mm:ss A') : '-',
-        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '-',
+        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '7:49:00 PM',
+        checkoutStatus,
         workingHours: typeof rec.workingHours === 'number' ? rec.workingHours : (rec.workingHours || '-')
       });
     });
@@ -451,6 +456,7 @@ exports.downloadMonthlyReport = async (req, res) => {
       { header: 'Status', key: 'status', width: 12 },
       { header: 'Check In', key: 'checkIn', width: 14 },
       { header: 'Check Out', key: 'checkOut', width: 14 },
+      { header: 'Checkout Status', key: 'checkoutStatus', width: 24 },
       { header: 'Working Hours', key: 'workingHours', width: 14 }
     ];
 
@@ -458,6 +464,9 @@ exports.downloadMonthlyReport = async (req, res) => {
 
     attendance.forEach(rec => {
       const emp = rec.employeeId || {};
+      const checkoutStatus = rec.checkOutTime 
+        ? 'Checked Out' 
+        : 'Missed Checkout (Default: 7:49 PM)';
       worksheet.addRow({
         date: moment(rec.date).format('YYYY-MM-DD'),
         employeeId: emp.employeeId || emp._id || '-',
@@ -466,7 +475,8 @@ exports.downloadMonthlyReport = async (req, res) => {
         department: emp.department?.name || '-',
         status: rec.status || '-',
         checkIn: rec.checkInTime ? moment(rec.checkInTime).format('hh:mm:ss A') : '-',
-        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '-',
+        checkOut: rec.checkOutTime ? moment(rec.checkOutTime).format('hh:mm:ss A') : '7:49:00 PM',
+        checkoutStatus,
         workingHours: typeof rec.workingHours === 'number' ? rec.workingHours : (rec.workingHours || '-')
       });
     });

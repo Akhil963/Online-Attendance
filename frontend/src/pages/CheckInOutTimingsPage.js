@@ -3,6 +3,8 @@ import api from '../services/api';
 import { Clock, Search, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 
+const DEFAULT_CHECKOUT_TIME = '19:49'; // 7:49 PM
+
 const formatLocation = (location) => {
   if (location?.latitude == null || location?.longitude == null) {
     return '-';
@@ -72,8 +74,6 @@ const CheckInOutTimingsPage = () => {
       .map(record => {
         const emp = record.employeeId;
         const hasCheckedOut = !!record.checkOutTime;
-
-        const effectiveCheckout = record.checkOutTime || null;
         const workingHours = record.workingHours || 0;
 
         return {
@@ -84,7 +84,6 @@ const CheckInOutTimingsPage = () => {
           checkOutTime: record.checkOutTime,
           checkInLocation: record.checkInLocation || null,
           checkOutLocation: record.checkOutLocation || null,
-          effectiveCheckout,
           hasCheckedOut,
           workingHours: Math.max(0, workingHours).toFixed(2),
           status: record.status
@@ -280,14 +279,15 @@ const CheckInOutTimingsPage = () => {
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase mb-0.5">Out</p>
-                      <p className={`text-xs font-bold ${record.hasCheckedOut ? 'text-red-500' : 'text-amber-500 italic'}`}>
+                      <p className={`text-xs font-bold ${record.hasCheckedOut ? 'text-red-500' : 'text-amber-600 italic'}`}>
                         {record.hasCheckedOut
                           ? moment(record.checkOutTime).format('hh:mm A')
-                          : record.effectiveCheckout
-                            ? `${moment(record.effectiveCheckout).format('hh:mm A')}*`
-                            : '--'
+                          : `${DEFAULT_CHECKOUT_TIME} *`
                         }
                       </p>
+                      {!record.hasCheckedOut && (
+                        <p className="text-[9px] text-amber-600 font-bold mt-0.5">Missed Checkout</p>
+                      )}
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase mb-0.5">Hours</p>
@@ -375,7 +375,10 @@ const CheckInOutTimingsPage = () => {
                               {moment(record.checkOutTime).format('hh:mm:ss A')}
                             </span>
                           ) : (
-                            <span className="font-bold text-amber-500 text-sm italic">--</span>
+                            <div>
+                              <span className="font-bold text-amber-600 text-sm italic">{DEFAULT_CHECKOUT_TIME}:00</span>
+                              <p className="text-[10px] text-amber-600 font-bold mt-1">Missed Checkout</p>
+                            </div>
                           )}
                         </td>
                         <td className="px-6 lg:px-8 py-5">
