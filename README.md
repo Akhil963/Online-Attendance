@@ -1471,7 +1471,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 | 📧 **General Support** | akhileshbhandakkar@gmail.com | Mon-Fri, 10 AM - 6 PM IST |
 | 👨‍💻 **Developer/Lead** | akhileshbhandakkar@gmail.com | 24-48 hours response |
 | 🚨 **Critical Issues** | akhileshbhandakkar@gmail.com | Immediate |
-| 📱 **Phone Support** | +1 (555) 123-4567 | By appointment |
+| 📱 **Phone Support** | +91 7028041407 | By appointment |
 | 🏢 **Office Hours** | 9:00 AM - 6:00 PM IST | Monday - Friday |
 
 ### Getting Help
@@ -1489,25 +1489,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 | 🐛 GitHub Issues | 24-48 hours | Bug reports |
 | 💬 Discussions | 3-5 days | Feature requests |
 | 📞 Phone | By appointment | Enterprise support |
-
-### Social Media & Links
-
-Follow us for updates, announcements, and community discussions:
-
-| Platform | Link | Purpose |
-|----------|------|---------|
-| 🐦 **Twitter/X** | [@AttendanceSystem](https://twitter.com/attendancesystem) | Updates & announcements |
-| 💼 **LinkedIn** | [Online Attendance System](https://linkedin.com/company/attendance-system) | Company updates & news |
-| 🐙 **GitHub** | [Online-Attendance](https://github.com/yourusername/Online-Attendance) | Source code & issues |
-| 💬 **Discord** | [Join Community Server](https://discord.gg/attendancesystem) | Real-time chat & support |
-| 📺 **YouTube** | [Tutorial Channel](https://youtube.com/@AttendanceSystem) | Video guides & demos |
-
-### Community
-
-- 🤝 Join our [community forum](https://community.attendancesystem.com)
-- 💬 Follow on [social media](#social-media--links)
-- 🌟 Star this repository if helpful
-- 📢 Share your success stories and feedback
 
 ### Feedback & Feature Requests
 
@@ -1744,8 +1725,8 @@ The Online Attendance System is an enterprise-grade web application designed to 
 - 📧 Email: akhileshbhandakkar@gmail.com
 - 💼 LinkedIn: https://linkedin.com/in/akhileshbhandakkar
 - 🐙 GitHub: https://github.com/Akhil963
-- 🌐 Portfolio: https://akhileshbhandakkar.dev
-- 📱 Mobile: +91-XXXX-XXXX-XX (Available by appointment)
+- 🌐 Portfolio: https://akhileshbhandakkar.codes/
+- 📱 Mobile: +91-7028041407 (Available by appointment)
 
 **Skills & Expertise:**
 - Full-stack web development (MERN)
@@ -2006,8 +1987,7 @@ If you find this project helpful, please consider:
 **Made with ❤️ by Akhilesh Bhandakkar**
 
 Last Updated: March 14, 2026  
-Repository: https://github.com/akhileshbhandakkar/Online-Attendance  
-Documentation: https://attendancesystem.com/docs
+Repository: https://github.com/Akhil963/Online-Attendance  
 
 [⬆ back to top](#online-attendance-system-v100)
 
