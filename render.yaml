@@ -41,9 +41,13 @@ services:
       - key: ADMIN_REGISTRATION_CODE
         sync: false  # Must be set in Render UI
       
-      # Frontend URL (update after frontend deployment)
+      # Frontend URL (CRITICAL: must match actual frontend service URL)
+      - key: FRONTEND_URL
+        value: https://online-attendance-frontend-cpmc.onrender.com
+      
+      # Client URL for CORS (must match actual frontend service URL)
       - key: CLIENT_URL
-        value: https://attendance-frontend.onrender.com
+        value: https://online-attendance-frontend-cpmc.onrender.com
       
       # SendGrid Email (must be set in Render dashboard)
       - key: SENDGRID_API_KEY
@@ -106,9 +110,9 @@ services:
     
     envVars:
       - key: REACT_APP_API_URL
-        value: https://attendance-backend.onrender.com/api
+        value: https://online-attendance-backend-dkhc.onrender.com/api
       - key: REACT_APP_SOCKET_URL
-        value: https://attendance-backend.onrender.com
+        value: https://online-attendance-backend-dkhc.onrender.com
       - key: REACT_APP_SENTRY_DSN
         sync: false
       - key: REACT_APP_VERCEL_ANALYTICS_ID
