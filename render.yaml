@@ -53,9 +53,13 @@ services:
       - key: SENDGRID_API_KEY
         sync: false
       - key: SENDGRID_FROM_EMAIL
-        value: noreply@yourdomain.com
+        sync: false
+      - key: SENDGRID_FROM_NAME
+        value: Online Attendance System
+      - key: ADMIN_REPLY_EMAIL
+        sync: false
       - key: REPORT_EMAIL
-        value: admin@yourdomain.com
+        sync: false
       
       # Twilio SMS (optional, must be set in Render dashboard)
       - key: TWILIO_ACCOUNT_SID
@@ -110,9 +114,9 @@ services:
     
     envVars:
       - key: REACT_APP_API_URL
-        value: https://online-attendance-backend-dkhc.onrender.com/api
+        value: https://online-attendance-backend-vc0f.onrender.com/api
       - key: REACT_APP_SOCKET_URL
-        value: https://online-attendance-backend-dkhc.onrender.com
+        value: https://online-attendance-backend-vc0f.onrender.com
       - key: REACT_APP_SENTRY_DSN
         sync: false
       - key: REACT_APP_VERCEL_ANALYTICS_ID
