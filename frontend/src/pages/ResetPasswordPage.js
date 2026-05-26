@@ -44,7 +44,13 @@ const ResetPasswordPage = () => {
 
   useEffect(() => {
     const validateToken = async () => {
+      console.log('[ResetPassword] URL Params:', { 
+        token: token ? token.substring(0, 20) + '...' : null, 
+        type 
+      });
+      
       if (!token || !type) {
+        console.error('[ResetPassword] Missing required params');
         toast.error('Invalid reset link');
         navigate('/');
         return;
@@ -52,11 +58,19 @@ const ResetPasswordPage = () => {
 
       try {
         setLoading(true);
+        console.log('[ResetPassword] Verifying token with backend...');
         const response = await authAPI.verifyResetToken(token);
+        console.log('[ResetPassword] Token verification successful:', response.data);
 
         setEmail(response.data.email);
       } catch (error) {
-        toast.error(error.response?.data?.error || 'Invalid or expired reset link');
+        console.error('[ResetPassword] Token verification failed:', {
+          status: error.response?.status,
+          error: error.response?.data?.error,
+          message: error.message
+        });
+        const errorMsg = error.response?.data?.error || 'Invalid or expired reset link';
+        toast.error(errorMsg);
         navigate(type === 'admin' ? '/login/admin' : '/login/employee');
       } finally {
         setLoading(false);

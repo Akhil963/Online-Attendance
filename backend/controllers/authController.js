@@ -347,6 +347,13 @@ exports.forgotPassword = async (req, res) => {
 
     // Generate reset token
     const { token, tokenHash, expiresAt } = PasswordReset.generateResetToken();
+    console.log('[forgotPassword] Generated reset token:', {
+      email: normalizedEmail,
+      tokenLength: token.length,
+      tokenPreview: token.substring(0, 20) + '...',
+      tokenHashPreview: tokenHash.substring(0, 20) + '...',
+      expiresAt
+    });
 
     // Save reset token to database
     const resetRecord = await PasswordReset.create({
@@ -357,9 +364,16 @@ exports.forgotPassword = async (req, res) => {
       tokenHash,
       expiresAt
     });
+    console.log('[forgotPassword] Token saved to database:', {
+      recordId: resetRecord._id,
+      email: resetRecord.email,
+      used: resetRecord.used,
+      userType: resetRecord.userType
+    });
 
     // Create reset link
     const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}&type=${userType}`;
+    console.log('[forgotPassword] Reset link created:', resetLink);
 
     // Log security event
     logSecurityEvent(
@@ -669,24 +683,53 @@ exports.verifyResetToken = async (req, res) => {
     const { token } = req.query;
     const ipAddress = req.ip || req.connection.remoteAddress || 'UNKNOWN';
 
+    console.log('[verifyResetToken] Request received:', {
+      tokenLength: token ? token.length : 0,
+      tokenPreview: token ? token.substring(0, 20) + '...' : null,
+      ip: ipAddress
+    });
+
     if (!token) {
+      console.error('[verifyResetToken] No token provided in query');
       return res.status(400).json({ error: 'Token is required' });
     }
 
     // Hash the token
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    console.log('[verifyResetToken] Token hash generated:', tokenHash.substring(0, 20) + '...');
+
+    // Check database connection first
+    const now = new Date();
+    console.log('[verifyResetToken] Current time:', now);
 
     // Find reset record
     const resetRecord = await PasswordReset.findOne({
       tokenHash: tokenHash,
       used: false,
-      expiresAt: { $gt: new Date() }
+      expiresAt: { $gt: now }
     });
 
     if (!resetRecord) {
+      console.error('[verifyResetToken] Token not found or invalid');
+      
+      // DEBUG: Check if token exists but is used or expired
+      const anyToken = await PasswordReset.findOne({ tokenHash: tokenHash });
+      if (anyToken) {
+        console.error('[verifyResetToken] Token exists but:', {
+          used: anyToken.used,
+          expiresAt: anyToken.expiresAt,
+          isExpired: anyToken.expiresAt < now,
+          email: anyToken.email
+        });
+      } else {
+        console.error('[verifyResetToken] Token does not exist in database at all');
+      }
+      
       logFailedAttempt('UNKNOWN', 'UNKNOWN', 'VERIFY_TOKEN', ipAddress, 'Invalid or expired token');
       return res.status(400).json({ error: 'Invalid or expired reset link' });
     }
+
+    console.log('[verifyResetToken] Token found and valid for:', resetRecord.email);
 
     // Log token verification
     logSecurityEvent(
@@ -705,7 +748,10 @@ exports.verifyResetToken = async (req, res) => {
       expiresAt: resetRecord.expiresAt
     });
   } catch (error) {
-    console.error('Error in verifyResetToken:', error);
+    console.error('[verifyResetToken] Exception occurred:', {
+      message: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ error: 'An error occurred while verifying token.' });
   }
 };

@@ -8,21 +8,33 @@ const getApiBaseUrl = () => {
   const browserHost = isBrowser ? window.location.hostname : '';
   const isLocalBrowser = ['localhost', '127.0.0.1'].includes(browserHost);
 
+  // DEBUG
+  console.log('[API Config] REACT_APP_API_URL:', configuredApiUrl);
+  console.log('[API Config] Location origin:', window.location.origin);
+  console.log('[API Config] Is local browser:', isLocalBrowser);
+
   if (configuredApiUrl) {
     const shouldIgnoreLocalhostConfig = isBrowser && !isLocalBrowser && isLocalhostUrl(configuredApiUrl);
     if (!shouldIgnoreLocalhostConfig) {
-      return configuredApiUrl.replace(/\/+$/, '');
+      const url = configuredApiUrl.replace(/\/+$/, '');
+      console.log('[API Config] Using configured API URL:', url);
+      return url;
     }
   }
 
   if (isBrowser && !isLocalBrowser) {
-    return `${window.location.origin}/api`;
+    const url = `${window.location.origin}/api`;
+    console.log('[API Config] Using window origin API URL:', url);
+    return url;
   }
 
-  return 'http://localhost:5000/api';
+  const defaultUrl = 'http://localhost:5000/api';
+  console.log('[API Config] Using default localhost API URL:', defaultUrl);
+  return defaultUrl;
 };
 
 const API_BASE_URL = getApiBaseUrl();
+console.log('[API] Final API_BASE_URL:', API_BASE_URL);
 
 export const getMediaUrl = (path) => {
   if (!path) return null;
